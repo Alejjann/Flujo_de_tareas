@@ -1,65 +1,83 @@
-import Image from "next/image";
+import { prisma } from "@/lib/prisma";
+import TaskCard from "@/components/TaskCard";
+import { CheckCircle, Clock, Plus } from "lucide-react";
 
-export default function Home() {
+export default async function Home() {
+  const tasks = await prisma.task.findMany({
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  const completed = tasks.filter((task) => task.completed).length;
+  const pending = tasks.length - completed;
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <main className="min-h-screen bg-slate-950 text-white">
+      <div className="mx-auto max-w-7xl px-8 py-10">
+
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-4xl font-bold">TaskFlow</h1>
+            <p className="mt-2 text-slate-400">
+              Organiza tus tareas de forma sencilla.
+            </p>
+          </div>
+
+          <button className="flex items-center gap-2 rounded-xl bg-cyan-500 px-5 py-3 font-semibold text-slate-950 hover:bg-cyan-400">
+            <Plus size={20} />
+            Nueva tarea
+          </button>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        <div className="mt-10 grid gap-6 md:grid-cols-3">
+
+          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
+            <CheckCircle className="mb-3 text-green-400" size={34} />
+            <h2 className="text-3xl font-bold">{completed}</h2>
+            <p className="text-slate-400">Completadas</p>
+          </div>
+
+          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
+            <Clock className="mb-3 text-yellow-400" size={34} />
+            <h2 className="text-3xl font-bold">{pending}</h2>
+            <p className="text-slate-400">Pendientes</p>
+          </div>
+
+          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
+            <CheckCircle className="mb-3 text-cyan-400" size={34} />
+            <h2 className="text-3xl font-bold">{tasks.length}</h2>
+            <p className="text-slate-400">Total</p>
+          </div>
+
         </div>
-      </main>
-    </div>
+
+        <div className="mt-10 space-y-5">
+
+          {tasks.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-slate-700 p-12 text-center">
+              <h2 className="text-2xl font-bold">
+                No hay tareas
+              </h2>
+
+              <p className="mt-3 text-slate-400">
+                Crea tu primera tarea.
+              </p>
+            </div>
+          ) : (
+            tasks.map((task) => (
+              <TaskCard
+                key={task.id}
+                title={task.title}
+                description={task.description ?? ""}
+                completed={task.completed}
+              />
+            ))
+          )}
+
+        </div>
+
+      </div>
+    </main>
   );
 }
