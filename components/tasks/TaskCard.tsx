@@ -1,11 +1,19 @@
+"use client";
+
 import { Pencil, Trash2, CircleCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { toggleTask } from "@/actions/toggleTasks";
+import { deleteTask } from "@/actions/deleteTasks";
+import { useState } from "react";
+import EditTaskDialog from "./EditTaskDialog";
 
 interface TaskCardProps {
+  id: string;
   title: string;
   description: string;
   completed: boolean;
   priority: "LOW" | "MEDIUM" | "HIGH";
+  dueDate: Date | null;
 }
 
 const priorityColors = {
@@ -15,12 +23,31 @@ const priorityColors = {
 };
 
 export default function TaskCard({
+  id,
   title,
   description,
   completed,
   priority,
+  dueDate
 }: TaskCardProps) {
+
+  const [openEdit, setOpenEdit] = useState(false);
+  async function handleToggle() {
+    await toggleTask(id, completed);
+  }
+
+  async function handleDelete() {
+  const confirmed = window.confirm(
+    "¿Seguro que quieres eliminar esta tarea?"
+  );
+
+  if (!confirmed) return;
+
+  await deleteTask(id);
+}
+
   return (
+    <>
     <div
       className={`rounded-xl border border-slate-800 bg-slate-900 p-5 transition ${
         completed ? "opacity-60" : ""
@@ -39,20 +66,61 @@ export default function TaskCard({
           >
             {title}
           </h3>
+
+          <div className="mt-2 flex items-center gap-4 text-sm">
+          <span
+            className={
+              priority === "HIGH"
+                ? "text-red-400"
+                : priority === "MEDIUM"
+                ? "text-yellow-400"
+                : "text-green-400"
+            }
+          >
+            {priority === "HIGH"
+              ? "🔴 Alta"
+              : priority === "MEDIUM"
+              ? "🟡 Media"
+              : "🟢 Baja"}
+          </span>
+
+          {dueDate && (
+            <span className="text-slate-400">
+              📅 {new Date(dueDate).toLocaleDateString("es-ES")}
+            </span>
+
+            
+          )}
+        </div>
         </div>
 
         <div className="flex gap-2">
-          <Button size="icon" variant="ghost">
-            <CircleCheck size={18} />
+          <Button
+              size="icon"
+              variant="ghost"
+              onClick={handleToggle}
+            >
+            <CircleCheck
+              size={18}
+              className={completed ? "text-green-500" : "text-slate-400"}
+            />
           </Button>
 
-          <Button size="icon" variant="ghost">
-            <Pencil size={18} />
-          </Button>
+          <Button
+          size="icon"
+          variant="ghost"
+          onClick={() => setOpenEdit(true)}
+        >
+          <Pencil size={18} />
+        </Button>
 
-          <Button size="icon" variant="ghost">
-            <Trash2 size={18} />
-          </Button>
+        <Button
+              size="icon"
+              variant="ghost"
+              onClick={handleDelete}
+            >
+              <Trash2 size={18} className="text-red-500" />
+    </Button>
         </div>
       </div>
 
@@ -64,5 +132,16 @@ export default function TaskCard({
         {description}
       </p>
     </div>
-  );
-}
+
+    <EditTaskDialog
+      open={openEdit}
+      onOpenChange={setOpenEdit}
+      id={id}
+      title={title}
+      description={description}
+      priority={priority}
+      dueDate={dueDate}
+    />
+    </>
+      );
+    }

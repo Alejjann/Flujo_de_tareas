@@ -1,8 +1,9 @@
 import { prisma } from "@/lib/prisma";
 import { CheckCircle, Clock, Plus } from "lucide-react";
 import SearchBar from "@/components/SearchBar";
-import AddTaskButton from "@/components/AddTaskButton";
+import AddTaskButton from "@/components/tasks/AddTaskButton";
 import TaskCard from "@/components/tasks/TaskCard";
+
 
 export default async function Home() {
   const tasks = await prisma.task.findMany({
@@ -18,20 +19,15 @@ export default async function Home() {
     <main className="min-h-screen bg-slate-950 text-white">
       <div className="mx-auto max-w-7xl px-8 py-10">
 
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-bold">TaskFlow</h1>
-            <p className="mt-2 text-slate-400">
-              Organiza tus tareas de forma sencilla.
-            </p>
-          </div>
+      <div className="flex items-center justify-between">
+  <div>
+    <h1 className="text-4xl font-bold">TaskFlow</h1>
+    <p className="mt-2 text-slate-400">
+      Organiza tus tareas de forma sencilla.
+    </p>
+  </div>
 
-          <button className="flex items-center gap-2 rounded-xl bg-cyan-500 px-5 py-3 font-semibold text-slate-950 hover:bg-cyan-400">
-            <Plus size={20} />
-            Nueva tarea
-          </button>
-        </div>
-
+</div>
         <div className="mt-10 grid gap-6 md:grid-cols-3">
 
           <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
@@ -74,12 +70,14 @@ export default async function Home() {
           ) : (
             tasks.map((task) => (
               <TaskCard
-                key={task.id}
-                title={task.title}
-                description={task.description ?? ""}
-                completed={task.completed}
-                priority={task.priority}
-              />
+              key={task.id}
+              id={task.id}
+              title={task.title}
+              description={task.description ?? ""}
+              completed={task.completed}
+              priority={task.priority}
+              dueDate={task.dueDate}
+            />
             ))
           )}
 
