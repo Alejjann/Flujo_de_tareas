@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma";
-import TaskCard from "@/components/TaskCard";
 import { CheckCircle, Clock, Plus } from "lucide-react";
+import SearchBar from "@/components/SearchBar";
+import AddTaskButton from "@/components/AddTaskButton";
+import TaskCard from "@/components/tasks/TaskCard";
 
 export default async function Home() {
   const tasks = await prisma.task.findMany({
@@ -52,6 +54,11 @@ export default async function Home() {
 
         </div>
 
+        <div className="mt-10 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <SearchBar />
+        <AddTaskButton />
+       </div>
+
         <div className="mt-10 space-y-5">
 
           {tasks.length === 0 ? (
@@ -71,6 +78,7 @@ export default async function Home() {
                 title={task.title}
                 description={task.description ?? ""}
                 completed={task.completed}
+                priority={task.priority}
               />
             ))
           )}
