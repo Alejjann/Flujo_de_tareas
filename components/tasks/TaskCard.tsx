@@ -45,13 +45,24 @@ export default function TaskCard({
 
   await deleteTask(id);
 }
+    const isOverdue =
+  dueDate &&
+  !completed &&
+  new Date(dueDate) < new Date();
 
   return (
     <>
     <div
-      className={`rounded-xl border border-slate-800 bg-slate-900 p-5 transition ${
-        completed ? "opacity-60" : ""
-      }`}
+      className={`rounded-2xl border p-6 transition-all duration-300
+      hover:border-cyan-500/40
+      hover:shadow-lg
+      hover:shadow-cyan-500/10
+      ${
+            isOverdue
+              ? "border-red-500 bg-red-950/20"
+              : "border-slate-800 bg-slate-900"
+          }
+      ${completed ? "opacity-60" : ""}`}
     >
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
@@ -76,7 +87,7 @@ export default function TaskCard({
                 ? "text-yellow-400"
                 : "text-green-400"
             }
-          >
+            >
             {priority === "HIGH"
               ? "🔴 Alta"
               : priority === "MEDIUM"
@@ -88,9 +99,14 @@ export default function TaskCard({
             <span className="text-slate-400">
               📅 {new Date(dueDate).toLocaleDateString("es-ES")}
             </span>
-
-            
           )}
+
+          {isOverdue && (
+          <span className="text-red-400 text-sm font-medium">
+            ⚠ Vencida
+          </span>
+          )}
+
         </div>
         </div>
 
