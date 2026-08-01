@@ -14,11 +14,9 @@ export async function createTask(formData: FormData) {
       title,
       description,
       priority: "MEDIUM",
-
-      // Temporal hasta tener autenticación
       user: {
         connect: {
-          email: "demo@taskflow.com",
+          email: "demo@taskflow.com", // Debe coincidir con el usuario que has creado
         },
       },
     },

@@ -2,6 +2,7 @@
 
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { createTask } from "@/actions/createTask";
 
 import {
   Dialog,
@@ -31,18 +32,23 @@ export default function AddTaskButton() {
           <DialogTitle>Nueva tarea</DialogTitle>
         </DialogHeader>
 
-        <form className="space-y-4">
-          <Input placeholder="Título" />
+        <form action={createTask} className="space-y-4">
+        <Input
+          name="title"
+          placeholder="Título"
+        />
 
-          <Textarea
-            placeholder="Descripción..."
-            rows={5}
-          />
+        <Textarea
+          name="description"
+          placeholder="Descripción..."
+          rows={5}
+        />
 
-          <Button className="w-full">
-            Crear tarea
-          </Button>
-        </form>
+        <Button type="submit" className="w-full">
+          Crear tarea
+        </Button>
+        
+      </form>
       </DialogContent>
     </Dialog>
   );
