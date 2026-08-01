@@ -8,6 +8,8 @@ import PriorityFilters from "@/components/tasks/PriorityFilter";
 import SortTasks from "@/components/tasks/SortTasks";
 import CalendarView from "@/components/tasks/CalendarView";
 import DashboardCharts from "@/components/dashboard/DashboardCharts";
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
 
 export default async function Home({
   searchParams,
@@ -19,46 +21,52 @@ export default async function Home({
     sort?: string;
   }>;
 }) {
+
+
 const { search, status, priority, sort } = await searchParams;
+  const session = await auth();
+
+if (!session) {
+  redirect("/login");
+}
+
 const tasks = await prisma.task.findMany({
   where: {
-    ...(search
-      ? {
-          OR: [
-            {
-              title: {
-                contains: search,
-                mode: "insensitive",
-              },
+  userId: session.user.id,
+
+  ...(search
+    ? {
+        OR: [
+          {
+            title: {
+              contains: search,
+              mode: "insensitive",
             },
-            {
-              description: {
-                contains: search,
-                mode: "insensitive",
-              },
+          },
+          {
+            description: {
+              contains: search,
+              mode: "insensitive",
             },
-          ],
-        }
-      : {}),
+          },
+        ],
+      }
+    : {}),
 
-    ...(status === "completed"
-      ? {
-          completed: true,
-        }
-      : {}),
+  ...(status === "completed"
+    ? { completed: true }
+    : {}),
 
-    ...(status === "pending"
-      ? {
-          completed: false,
-        }
-      : {}),
+  ...(status === "pending"
+    ? { completed: false }
+    : {}),
 
-      ...(priority
-      ? {
-          priority: priority as "LOW" | "MEDIUM" | "HIGH",
-        }
-      : {}),
-      },
+  ...(priority
+    ? {
+        priority: priority as "LOW" | "MEDIUM" | "HIGH",
+      }
+    : {}),
+},
 
     orderBy:
   sort === "priority"

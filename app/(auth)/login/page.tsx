@@ -2,6 +2,7 @@ import Link from "next/link";
 import AuthCard from "@/components/auth/AuthCard";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { loginUser } from "@/actions/auth";
 
 export default function LoginPage() {
   return (
@@ -10,20 +11,29 @@ export default function LoginPage() {
         title="Iniciar sesión"
         subtitle="Accede a tu espacio de trabajo"
       >
-        <form className="space-y-5">
+        <form action={loginUser} className="space-y-5">
           <Input
-            type="email"
-            placeholder="Correo electrónico"
-          />
+  type="email"
+  name="email"
+  placeholder="Correo electrónico"
+  className="bg-slate-900 border-slate-700 text-white placeholder:text-slate-500"
+/>
 
-          <Input
-            type="password"
-            placeholder="Contraseña"
-          />
+<Input
+  type="password"
+  name="password"
+  placeholder="Contraseña"
+  className="bg-slate-900 border-slate-700 text-white placeholder:text-slate-500"
+/>
 
-          <Button className="w-full">
-            Iniciar sesión
-          </Button>
+      
+
+         <Button
+  type="submit"
+  className="w-full bg-cyan-500 text-slate-950 hover:bg-cyan-400"
+>
+  Iniciar sesión
+</Button>
 
           <p className="text-center text-sm text-slate-400">
             ¿No tienes una cuenta?{" "}
