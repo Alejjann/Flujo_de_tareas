@@ -1,11 +1,13 @@
 "use client";
 
-import { Pencil, Trash2, CircleCheck } from "lucide-react";
+import { Pencil, Trash2, CircleCheck, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toggleTask } from "@/actions/toggleTasks";
 import { deleteTask } from "@/actions/deleteTasks";
 import { useState } from "react";
 import EditTaskDialog from "./EditTaskDialog";
+import { toast } from "sonner";
+import { motion } from "framer-motion";
 
 interface TaskCardProps {
   id: string;
@@ -16,148 +18,176 @@ interface TaskCardProps {
   dueDate: Date | null;
 }
 
-const priorityColors = {
-  LOW: "bg-green-500",
-  MEDIUM: "bg-yellow-500",
-  HIGH: "bg-red-500",
-};
-
 export default function TaskCard({
   id,
   title,
   description,
   completed,
   priority,
-  dueDate
+  dueDate,
 }: TaskCardProps) {
-
   const [openEdit, setOpenEdit] = useState(false);
+
   async function handleToggle() {
     await toggleTask(id, completed);
+
+    toast.success(
+      completed
+        ? "Tarea marcada como pendiente"
+        : "Tarea completada"
+    );
   }
 
   async function handleDelete() {
-  const confirmed = window.confirm(
-    "¿Seguro que quieres eliminar esta tarea?"
-  );
+    const confirmed = window.confirm(
+      "¿Seguro que quieres eliminar esta tarea?"
+    );
 
-  if (!confirmed) return;
+    if (!confirmed) return;
 
-  await deleteTask(id);
-}
-    const isOverdue =
-  dueDate &&
-  !completed &&
-  new Date(dueDate) < new Date();
+    await deleteTask(id);
+
+    toast.success("Tarea eliminada correctamente");
+  }
+
+  const isOverdue =
+    dueDate &&
+    !completed &&
+    new Date(dueDate) < new Date();
 
   return (
     <>
-    <div
-      className={`rounded-2xl border p-6 transition-all duration-300
-      hover:border-cyan-500/40
-      hover:shadow-lg
-      hover:shadow-cyan-500/10
-      ${
-            isOverdue
-              ? "border-red-500 bg-red-950/20"
-              : "border-slate-800 bg-slate-900"
-          }
-      ${completed ? "opacity-60" : ""}`}
-    >
-      <div className="flex items-start justify-between">
-        <div className="flex items-center gap-3">
-          <div
-            className={`h-3 w-3 rounded-full ${priorityColors[priority]}`}
-          />
-
-          <h3
-            className={`text-lg font-semibold ${
-              completed ? "line-through text-slate-500" : "text-white"
-            }`}
-          >
-            {title}
-          </h3>
-
-          <div className="mt-2 flex items-center gap-4 text-sm">
-          <span
-            className={
-              priority === "HIGH"
-                ? "text-red-400"
-                : priority === "MEDIUM"
-                ? "text-yellow-400"
-                : "text-green-400"
-            }
-            >
-            {priority === "HIGH"
-              ? "🔴 Alta"
-              : priority === "MEDIUM"
-              ? "🟡 Media"
-              : "🟢 Baja"}
-          </span>
-
-          {dueDate && (
-            <span className="text-slate-400">
-              📅 {new Date(dueDate).toLocaleDateString("es-ES")}
-            </span>
-          )}
-
-          {isOverdue && (
-          <span className="text-red-400 text-sm font-medium">
-            ⚠ Vencida
-          </span>
-          )}
-
-        </div>
-        </div>
-
-        <div className="flex gap-2">
-          <Button
-              size="icon"
-              variant="ghost"
-              onClick={handleToggle}
-            >
-            <CircleCheck
-              size={18}
-              className={completed ? "text-green-500" : "text-slate-400"}
-            />
-          </Button>
-
-          <Button
-          size="icon"
-          variant="ghost"
-          onClick={() => setOpenEdit(true)}
-        >
-          <Pencil size={18} />
-        </Button>
-
-        <Button
-              size="icon"
-              variant="ghost"
-              onClick={handleDelete}
-            >
-              <Trash2 size={18} className="text-red-500" />
-    </Button>
-        </div>
-      </div>
-
-      <p
-        className={`mt-3 ${
-          completed ? "text-slate-500" : "text-slate-400"
-        }`}
+      <motion.div
+        initial={{ opacity: 0, y: 25 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, ease: "easeOut" }}
+        className={`group rounded-3xl border p-6 transition-all duration-300
+        hover:-translate-y-1
+        hover:scale-[1.02]
+        hover:border-cyan-500
+        hover:shadow-2xl
+        hover:shadow-cyan-500/20
+        ${
+          isOverdue
+            ? "border-red-500 bg-red-950/20"
+            : "border-slate-800 bg-slate-900/80"
+        }
+        ${completed ? "opacity-70" : ""}`}
       >
-        {description}
-      </p>
-    </div>
+        <div className="flex items-start justify-between gap-6">
+          <div className="flex-1">
+            <div className="flex flex-wrap items-center gap-3">
+              <span
+                className={`rounded-full px-3 py-1 text-xs font-semibold transition
+                ${
+                  priority === "HIGH"
+                    ? "bg-red-500/20 text-red-400"
+                    : priority === "MEDIUM"
+                    ? "bg-yellow-500/20 text-yellow-400"
+                    : "bg-green-500/20 text-green-400"
+                }`}
+              >
+                {priority === "HIGH"
+                  ? "🔴 Alta"
+                  : priority === "MEDIUM"
+                  ? "🟡 Media"
+                  : "🟢 Baja"}
+              </span>
 
-    <EditTaskDialog
-      open={openEdit}
-      onOpenChange={setOpenEdit}
-      id={id}
-      title={title}
-      description={description}
-      priority={priority}
-      dueDate={dueDate}
-    />
+              {isOverdue && (
+                <span className="rounded-full bg-red-500/20 px-3 py-1 text-xs font-semibold text-red-400">
+                  ⚠ Vencida
+                </span>
+              )}
+            </div>
+
+            <h3
+              className={`mt-4 text-2xl font-bold transition-colors duration-300
+              ${
+                completed
+                  ? "line-through text-slate-500"
+                  : "text-white group-hover:text-cyan-300"
+              }`}
+            >
+              {title}
+            </h3>
+
+            {description && (
+              <p
+                className={`mt-3 leading-7 ${
+                  completed
+                    ? "text-slate-500"
+                    : "text-slate-400"
+                }`}
+              >
+                {description}
+              </p>
+            )}
+
+            {dueDate && (
+              <div className="mt-5 flex items-center gap-2 text-sm text-slate-400">
+                <Calendar size={16} />
+                {new Date(dueDate).toLocaleDateString("es-ES")}
+              </div>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <motion.div whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }}>
+              <Button
+                size="icon"
+                variant="ghost"
+                className="transition hover:bg-green-500/20"
+                onClick={handleToggle}
+              >
+                <CircleCheck
+                  size={20}
+                  className={
+                    completed
+                      ? "text-green-500"
+                      : "text-slate-400"
+                  }
+                />
+              </Button>
+            </motion.div>
+
+            <motion.div whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }}>
+              <Button
+                size="icon"
+                variant="ghost"
+                className="transition hover:bg-cyan-500/20"
+                onClick={() => setOpenEdit(true)}
+              >
+                <Pencil size={20} />
+              </Button>
+            </motion.div>
+
+            <motion.div whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }}>
+              <Button
+                size="icon"
+                variant="ghost"
+                className="transition hover:bg-red-500/20"
+                onClick={handleDelete}
+              >
+                <Trash2
+                  size={20}
+                  className="text-red-500"
+                />
+              </Button>
+            </motion.div>
+          </div>
+        </div>
+      </motion.div>
+
+      <EditTaskDialog
+        open={openEdit}
+        onOpenChange={setOpenEdit}
+        id={id}
+        title={title}
+        description={description}
+        priority={priority}
+        dueDate={dueDate}
+      />
     </>
-      );
-    }
+  );
+}

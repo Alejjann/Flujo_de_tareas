@@ -11,6 +11,7 @@ import { updateTask } from "@/actions/updateTasks";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 
 interface EditTaskDialogProps {
@@ -34,6 +35,7 @@ export default function EditTaskDialog({
 }: EditTaskDialogProps) {
     async function handleSubmit(formData: FormData) {
     await updateTask(formData);
+    toast.success("Cambios guardados");
     onOpenChange(false);
   }
   return (

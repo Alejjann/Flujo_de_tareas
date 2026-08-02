@@ -30,7 +30,8 @@ model Task {
   completed   Boolean  @default(false)
   priority    Priority @default(MEDIUM)
   dueDate     DateTime?
-
+  tag         String?  @default("Personal")
+  
   userId String
   user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
