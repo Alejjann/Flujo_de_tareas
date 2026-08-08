@@ -32,7 +32,7 @@ export default function AddTaskButton() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger e>
+      <DialogTrigger>
         <Button className="gap-2 bg-cyan-500 text-white hover:bg-cyan-400">
           <Plus size={18} />
           Nueva tarea

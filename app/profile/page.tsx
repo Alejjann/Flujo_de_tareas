@@ -11,7 +11,9 @@ import {
   ListTodo,
   ArrowLeft,
   Settings,
+  Camera,
 } from "lucide-react";
+import ProfileMediaButtons from "@/components/profile/ProfileMediaButtons";
 
 export default async function ProfilePage() {
   const session = await auth();
@@ -84,6 +86,7 @@ export default async function ProfilePage() {
 
           <div className="flex items-center gap-2 text-slate-400">
             <Settings size={18} />
+
             <span className="text-sm">
               Mi perfil
             </span>
@@ -94,9 +97,33 @@ export default async function ProfilePage() {
 
         <section className="overflow-hidden rounded-3xl border border-slate-800 bg-slate-900 shadow-2xl">
 
-          {/* CABECERA */}
+          {/* BANNER */}
 
-          <div className="h-40 bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-700" />
+          <div className="relative h-56 overflow-hidden">
+
+            {user.bannerUrl ? (
+              <img
+                src={user.bannerUrl}
+                alt="Banner del perfil"
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <div className="h-full w-full bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-700" />
+            )}
+
+            <div className="absolute inset-0 bg-black/10" />
+
+            {/* CAMBIAR BANNER DIRECTAMENTE */}
+
+            <div className="absolute right-5 top-5">
+              <ProfileMediaButtons
+                type="banner"
+              />
+            </div>
+
+          </div>
+
+          {/* DATOS */}
 
           <div className="px-6 pb-8 md:px-10">
 
@@ -106,11 +133,31 @@ export default async function ProfilePage() {
 
                 {/* AVATAR */}
 
-                <div className="flex h-32 w-32 shrink-0 items-center justify-center rounded-full border-8 border-slate-900 bg-gradient-to-br from-cyan-400 to-blue-600 text-4xl font-bold text-white shadow-2xl">
-                  {initials}
+                <div className="relative">
+
+                  {user.avatarUrl ? (
+                    <img
+                      src={user.avatarUrl}
+                      alt="Avatar"
+                      className="h-32 w-32 rounded-full border-8 border-slate-900 object-cover shadow-2xl"
+                    />
+                  ) : (
+                    <div className="flex h-32 w-32 shrink-0 items-center justify-center rounded-full border-8 border-slate-900 bg-gradient-to-br from-cyan-400 to-blue-600 text-4xl font-bold text-white shadow-2xl">
+                      {initials}
+                    </div>
+                  )}
+
+                  {/* CAMBIAR AVATAR */}
+
+                  <div className="absolute bottom-1 right-1">
+                    <ProfileMediaButtons
+                      type="avatar"
+                    />
+                  </div>
+
                 </div>
 
-                {/* DATOS */}
+                {/* INFORMACIÓN */}
 
                 <div className="pb-2">
 
@@ -126,6 +173,8 @@ export default async function ProfilePage() {
                 </div>
 
               </div>
+
+              {/* EDITAR PERFIL */}
 
               <Link
                 href="/profile/edit"
@@ -232,6 +281,7 @@ export default async function ProfilePage() {
           <div className="rounded-3xl border border-slate-800 bg-slate-900 p-7">
 
             <div className="mb-6">
+
               <h2 className="text-xl font-bold">
                 Información personal
               </h2>
@@ -239,13 +289,18 @@ export default async function ProfilePage() {
               <p className="mt-1 text-sm text-slate-500">
                 Información asociada a tu cuenta.
               </p>
+
             </div>
 
             <div className="space-y-5">
 
               <div className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
                 <div className="flex items-center gap-3">
-                  <User className="text-cyan-400" size={20} />
+
+                  <User
+                    className="text-cyan-400"
+                    size={20}
+                  />
 
                   <div>
                     <p className="text-xs text-slate-500">
@@ -256,14 +311,21 @@ export default async function ProfilePage() {
                       {user.name || "Sin nombre"}
                     </p>
                   </div>
+
                 </div>
               </div>
 
               <div className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
+
                 <div className="flex items-center gap-3">
-                  <Mail className="text-cyan-400" size={20} />
+
+                  <Mail
+                    className="text-cyan-400"
+                    size={20}
+                  />
 
                   <div>
+
                     <p className="text-xs text-slate-500">
                       Correo electrónico
                     </p>
@@ -271,18 +333,24 @@ export default async function ProfilePage() {
                     <p className="mt-1 font-medium">
                       {user.email}
                     </p>
+
                   </div>
+
                 </div>
+
               </div>
 
               <div className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
+
                 <div className="flex items-center gap-3">
+
                   <CalendarDays
                     className="text-cyan-400"
                     size={20}
                   />
 
                   <div>
+
                     <p className="text-xs text-slate-500">
                       Cuenta creada
                     </p>
@@ -290,11 +358,15 @@ export default async function ProfilePage() {
                     <p className="mt-1 font-medium capitalize">
                       {memberSince}
                     </p>
+
                   </div>
+
                 </div>
+
               </div>
 
             </div>
+
           </div>
 
           {/* ACTIVIDAD */}
@@ -302,6 +374,7 @@ export default async function ProfilePage() {
           <div className="rounded-3xl border border-slate-800 bg-slate-900 p-7">
 
             <div className="mb-6">
+
               <h2 className="text-xl font-bold">
                 Resumen de actividad
               </h2>
@@ -309,6 +382,7 @@ export default async function ProfilePage() {
               <p className="mt-1 text-sm text-slate-500">
                 Cómo llevas tus tareas actualmente.
               </p>
+
             </div>
 
             <div className="space-y-6">
@@ -318,6 +392,7 @@ export default async function ProfilePage() {
               <div>
 
                 <div className="mb-2 flex items-center justify-between">
+
                   <span className="text-sm text-slate-400">
                     Progreso general
                   </span>
@@ -325,6 +400,7 @@ export default async function ProfilePage() {
                   <span className="font-semibold text-cyan-400">
                     {productivity}%
                   </span>
+
                 </div>
 
                 <div className="h-3 overflow-hidden rounded-full bg-slate-800">
@@ -407,6 +483,7 @@ export default async function ProfilePage() {
               </div>
 
             </div>
+
           </div>
 
         </section>

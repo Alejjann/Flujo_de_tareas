@@ -10,11 +10,9 @@ export default async function EditProfilePage() {
     redirect("/login");
   }
 
-  const userId = session.user.id;
-
   const user = await prisma.user.findUnique({
     where: {
-      id: userId,
+      id: session.user.id,
     },
   });
 
