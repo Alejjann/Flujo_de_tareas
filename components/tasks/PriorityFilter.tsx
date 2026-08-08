@@ -1,16 +1,23 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import {
+  usePathname,
+  useRouter,
+  useSearchParams,
+} from "next/navigation";
 
-export default function PriorityFilters() {
+export default function PriorityFilter() {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const current = searchParams.get("priority") || "all";
+  const currentPriority =
+    searchParams.get("priority") || "all";
 
   function changePriority(priority: string) {
-    const params = new URLSearchParams(searchParams);
+    const params = new URLSearchParams(
+      searchParams.toString()
+    );
 
     if (priority === "all") {
       params.delete("priority");
@@ -18,54 +25,71 @@ export default function PriorityFilters() {
       params.set("priority", priority);
     }
 
-    router.push(`/?${params.toString()}`);
+    router.push(
+      `${pathname}?${params.toString()}`
+    );
   }
 
+  const buttonClass =
+    "rounded-xl px-4 py-2 text-sm font-medium transition";
+
   return (
-    <div className="flex gap-2">
-      <Button
-        onClick={() => changePriority("all")}
-        className={
-          current === "all"
-            ? "bg-cyan-500 text-black"
-            : "bg-slate-800 text-white hover:bg-slate-700"
+    <div className="flex flex-wrap gap-2">
+      <button
+        type="button"
+        onClick={() =>
+          changePriority("all")
         }
+        className={`${buttonClass} ${
+          currentPriority === "all"
+            ? "bg-cyan-500 text-white"
+            : "bg-slate-800 text-slate-300 hover:bg-slate-700"
+        }`}
       >
         Todas
-      </Button>
+      </button>
 
-      <Button
-        onClick={() => changePriority("HIGH")}
-        className={
-          current === "HIGH"
-            ? "bg-red-500 text-white"
-            : "bg-slate-800 text-white hover:bg-slate-700"
+      <button
+        type="button"
+        onClick={() =>
+          changePriority("HIGH")
         }
+        className={`${buttonClass} ${
+          currentPriority === "HIGH"
+            ? "bg-red-500 text-white"
+            : "bg-slate-800 text-slate-300 hover:bg-slate-700"
+        }`}
       >
         Alta
-      </Button>
+      </button>
 
-      <Button
-        onClick={() => changePriority("MEDIUM")}
-        className={
-          current === "MEDIUM"
-            ? "bg-yellow-500 text-black"
-            : "bg-slate-800 text-white hover:bg-slate-700"
+      <button
+        type="button"
+        onClick={() =>
+          changePriority("MEDIUM")
         }
+        className={`${buttonClass} ${
+          currentPriority === "MEDIUM"
+            ? "bg-yellow-500 text-white"
+            : "bg-slate-800 text-slate-300 hover:bg-slate-700"
+        }`}
       >
         Media
-      </Button>
+      </button>
 
-      <Button
-        onClick={() => changePriority("LOW")}
-        className={
-          current === "LOW"
-            ? "bg-green-500 text-white"
-            : "bg-slate-800 text-white hover:bg-slate-700"
+      <button
+        type="button"
+        onClick={() =>
+          changePriority("LOW")
         }
+        className={`${buttonClass} ${
+          currentPriority === "LOW"
+            ? "bg-green-500 text-white"
+            : "bg-slate-800 text-slate-300 hover:bg-slate-700"
+        }`}
       >
         Baja
-      </Button>
+      </button>
     </div>
   );
 }

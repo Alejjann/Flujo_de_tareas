@@ -1,60 +1,77 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 export default function TaskFilters() {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const current = searchParams.get("status") || "all";
+  const currentStatus =
+    searchParams.get("status") || "all";
 
-  function changeFilter(filter: string) {
-    const params = new URLSearchParams(searchParams);
+  function changeStatus(status: string) {
+    const params = new URLSearchParams(
+      searchParams.toString()
+    );
 
-    if (filter === "all") {
+    if (status === "all") {
       params.delete("status");
     } else {
-      params.set("status", filter);
+      params.set("status", status);
     }
 
-    router.push(`/?${params.toString()}`);
+    router.push(
+      `${pathname}?${params.toString()}`
+    );
   }
+
+  const buttonClass =
+    "rounded-xl px-4 py-2 text-sm font-medium transition";
 
   return (
-    <div className="flex gap-2">
-      <Button
-  className={
-    current === "all"
-      ? "bg-cyan-500 text-slate-950 hover:bg-cyan-400"
-      : "bg-slate-800 text-slate-300 hover:bg-slate-700"
-  }
-  onClick={() => changeFilter("all")}
->
-  Todas
-</Button>
+    <div className="flex flex-wrap gap-2">
+      <button
+        type="button"
+        onClick={() =>
+          changeStatus("all")
+        }
+        className={`${buttonClass} ${
+          currentStatus === "all"
+            ? "bg-cyan-500 text-white"
+            : "bg-slate-800 text-slate-300 hover:bg-slate-700"
+        }`}
+      >
+        Todas
+      </button>
 
-<Button
-  className={
-    current === "pending"
-      ? "bg-cyan-500 text-slate-950 hover:bg-cyan-400"
-      : "bg-slate-800 text-slate-300 hover:bg-slate-700"
-  }
-  onClick={() => changeFilter("pending")}
->
-  Pendientes
-</Button>
+      <button
+        type="button"
+        onClick={() =>
+          changeStatus("pending")
+        }
+        className={`${buttonClass} ${
+          currentStatus === "pending"
+            ? "bg-yellow-500 text-white"
+            : "bg-slate-800 text-slate-300 hover:bg-slate-700"
+        }`}
+      >
+        Pendientes
+      </button>
 
-<Button
-  className={
-    current === "completed"
-      ? "bg-cyan-500 text-slate-950 hover:bg-cyan-400"
-      : "bg-slate-800 text-slate-300 hover:bg-slate-700"
-  }
-  onClick={() => changeFilter("completed")}
->
-  Completadas
-</Button>
+      <button
+        type="button"
+        onClick={() =>
+          changeStatus("completed")
+        }
+        className={`${buttonClass} ${
+          currentStatus === "completed"
+            ? "bg-green-500 text-white"
+            : "bg-slate-800 text-slate-300 hover:bg-slate-700"
+        }`}
+      >
+        Completadas
+      </button>
     </div>
   );
 }

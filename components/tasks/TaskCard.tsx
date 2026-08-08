@@ -16,7 +16,15 @@ interface TaskCardProps {
   completed: boolean;
   priority: "LOW" | "MEDIUM" | "HIGH";
   dueDate: Date | null;
+  tag: string | null;
 }
+
+const tagColors: Record<string, string> = {
+  Trabajo: "bg-blue-500/20 text-blue-400",
+  Estudios: "bg-purple-500/20 text-purple-400",
+  Personal: "bg-pink-500/20 text-pink-400",
+  Casa: "bg-orange-500/20 text-orange-400",
+};
 
 export default function TaskCard({
   id,
@@ -25,6 +33,7 @@ export default function TaskCard({
   completed,
   priority,
   dueDate,
+  tag,
 }: TaskCardProps) {
   const [openEdit, setOpenEdit] = useState(false);
 
@@ -61,9 +70,8 @@ export default function TaskCard({
         initial={{ opacity: 0, y: 25 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35, ease: "easeOut" }}
+        whileHover={{ y: -4 }}
         className={`group rounded-3xl border p-6 transition-all duration-300
-        hover:-translate-y-1
-        hover:scale-[1.02]
         hover:border-cyan-500
         hover:shadow-2xl
         hover:shadow-cyan-500/20
@@ -77,8 +85,9 @@ export default function TaskCard({
         <div className="flex items-start justify-between gap-6">
           <div className="flex-1">
             <div className="flex flex-wrap items-center gap-3">
+
               <span
-                className={`rounded-full px-3 py-1 text-xs font-semibold transition
+                className={`rounded-full px-3 py-1 text-xs font-semibold
                 ${
                   priority === "HIGH"
                     ? "bg-red-500/20 text-red-400"
@@ -94,6 +103,17 @@ export default function TaskCard({
                   : "🟢 Baja"}
               </span>
 
+              {tag && (
+                <span
+                  className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                    tagColors[tag] ??
+                    "bg-cyan-500/20 text-cyan-300"
+                  }`}
+                >
+                  🏷 {tag}
+                </span>
+              )}
+
               {isOverdue && (
                 <span className="rounded-full bg-red-500/20 px-3 py-1 text-xs font-semibold text-red-400">
                   ⚠ Vencida
@@ -102,7 +122,7 @@ export default function TaskCard({
             </div>
 
             <h3
-              className={`mt-4 text-2xl font-bold transition-colors duration-300
+              className={`mt-4 text-2xl font-bold transition-colors
               ${
                 completed
                   ? "line-through text-slate-500"
@@ -133,11 +153,12 @@ export default function TaskCard({
           </div>
 
           <div className="flex flex-col gap-2">
+
             <motion.div whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }}>
               <Button
                 size="icon"
                 variant="ghost"
-                className="transition hover:bg-green-500/20"
+                className="hover:bg-green-500/20"
                 onClick={handleToggle}
               >
                 <CircleCheck
@@ -155,7 +176,7 @@ export default function TaskCard({
               <Button
                 size="icon"
                 variant="ghost"
-                className="transition hover:bg-cyan-500/20"
+                className="hover:bg-cyan-500/20"
                 onClick={() => setOpenEdit(true)}
               >
                 <Pencil size={20} />
@@ -166,7 +187,7 @@ export default function TaskCard({
               <Button
                 size="icon"
                 variant="ghost"
-                className="transition hover:bg-red-500/20"
+                className="hover:bg-red-500/20"
                 onClick={handleDelete}
               >
                 <Trash2
@@ -175,6 +196,7 @@ export default function TaskCard({
                 />
               </Button>
             </motion.div>
+
           </div>
         </div>
       </motion.div>
@@ -187,6 +209,7 @@ export default function TaskCard({
         description={description}
         priority={priority}
         dueDate={dueDate}
+        tag={tag}
       />
     </>
   );

@@ -1,5 +1,6 @@
 "use client";
 
+import { motion } from "framer-motion";
 import {
   PieChart,
   Pie,
@@ -38,61 +39,42 @@ export default function DashboardCharts({
     { name: "Baja", tareas: low },
   ];
 
+  const total = completed + pending;
+
+  const progress =
+    total === 0 ? 0 : Math.round((completed / total) * 100);
+
   return (
-    <div className="grid gap-6 lg:grid-cols-2">
+    <>
+      <div className="mb-8 rounded-3xl border border-slate-800 bg-slate-900 p-6 shadow-lg">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-white">
+              📈 Productividad
+            </h2>
 
-      <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-        <h2 className="mb-6 text-xl font-bold">
-          Estado de tareas
-        </h2>
+            <p className="mt-1 text-slate-400">
+              {completed} de {total} tareas completadas
+            </p>
+          </div>
 
-        <div className="h-72">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
+          <span className="text-5xl font-bold text-cyan-400">
+            {progress}%
+          </span>
+        </div>
 
-              <Pie
-                data={statusData}
-                dataKey="value"
-                innerRadius={70}
-                outerRadius={110}
-              >
-                <Cell fill="#06b6d4" />
-                <Cell fill="#facc15" />
-              </Pie>
-
-              <Tooltip />
-
-            </PieChart>
-          </ResponsiveContainer>
+        <div className="mt-6 h-4 overflow-hidden rounded-full bg-slate-800">
+          <motion.div
+            initial={{ width: 0 }}
+            animate={{ width: `${progress}%` }}
+            transition={{
+              duration: 1,
+              ease: "easeOut",
+            }}
+            className="h-full rounded-full bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-500"
+          />
         </div>
       </div>
-
-      <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-        <h2 className="mb-6 text-xl font-bold">
-          Prioridades
-        </h2>
-
-        <div className="h-72">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={priorityData}>
-
-              <XAxis dataKey="name" />
-
-              <YAxis />
-
-              <Tooltip />
-
-              <Bar dataKey="tareas">
-                <Cell fill="#ef4444" />
-                <Cell fill="#eab308" />
-                <Cell fill="#22c55e" />
-              </Bar>
-
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
-    </div>
+    </>
   );
 }

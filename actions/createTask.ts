@@ -6,27 +6,42 @@ import { auth } from "@/auth";
 
 export async function createTask(formData: FormData) {
   const session = await auth();
-  const tag = formData.get("tag") as string;
 
   if (!session?.user?.id) {
     throw new Error("Usuario no autenticado");
   }
 
-  const title = formData.get("title") as string;
-  const description = formData.get("description") as string;
-  const priority = formData.get("priority") as "LOW" | "MEDIUM" | "HIGH";
-  const dueDate = formData.get("dueDate") as string;
+  const title = String(formData.get("title") || "").trim();
+  const description = String(formData.get("description") || "").trim();
 
-  if (!title.trim()) return;
+  const priority = String(
+    formData.get("priority") || "MEDIUM"
+  ) as "LOW" | "MEDIUM" | "HIGH";
+
+  const dueDateValue = String(formData.get("dueDate") || "");
+
+  const selectedTag = String(formData.get("tag") || "").trim();
+  const customTag = String(formData.get("customTag") || "").trim();
+
+  const tag =
+    selectedTag === "CUSTOM"
+      ? customTag || null
+      : selectedTag || null;
+
+  if (!title) {
+    throw new Error("El título es obligatorio");
+  }
 
   await prisma.task.create({
     data: {
       title,
       description,
       priority,
-      dueDate: dueDate ? new Date(dueDate) : null,
+      dueDate: dueDateValue ? new Date(dueDateValue) : null,
       userId: session.user.id,
       tag,
+      status: "PENDING",
+      completed: false,
     },
   });
 
