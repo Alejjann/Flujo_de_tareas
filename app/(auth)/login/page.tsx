@@ -12,23 +12,32 @@ export default function LoginPage() {
         subtitle="Accede a tu espacio de trabajo"
       >
         <form action={loginUser} className="space-y-5">
-          <Input
+ <Input
   type="email"
   name="email"
-  placeholder="Correo electrónico"
-  className="bg-slate-900 border-slate-700 text-white placeholder:text-slate-500"
+  placeholder="Correo"
+  required
+  className="border-slate-700 bg-slate-950 text-white placeholder:text-slate-500"
 />
 
 <Input
   type="password"
   name="password"
   placeholder="Contraseña"
-  className="bg-slate-900 border-slate-700 text-white placeholder:text-slate-500"
+  required
+  className="border-slate-700 bg-slate-950 text-white placeholder:text-slate-500"
 />
 
-      
+<div className="flex justify-start">
+  <Link
+    href="/forgot-password"
+    className="text-sm text-cyan-400 transition hover:text-cyan-300"
+  >
+    ¿Has olvidado tu contraseña?
+  </Link>
+</div>
 
-         <Button
+<Button
   type="submit"
   className="w-full bg-cyan-500 text-slate-950 hover:bg-cyan-400"
 >

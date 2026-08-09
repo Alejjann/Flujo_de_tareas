@@ -27,6 +27,7 @@ export default function ProfileEditForm({
   const router = useRouter();
 
   const [loading, setLoading] = useState(false);
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] =
     useState(false);
@@ -41,40 +42,44 @@ export default function ProfileEditForm({
   function handleChange(
     e: React.ChangeEvent<HTMLInputElement>
   ) {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value } = e.target;
+
+    setForm((current) => ({
+      ...current,
+      [name]: value,
+    }));
   }
 
-  async function handleSubmit(
-    e: React.FormEvent<HTMLFormElement>
-  ) {
-    e.preventDefault();
+ async function handleSubmit() {
+  if (loading) return;
 
-    if (!form.name.trim()) {
+    const cleanName = form.name.trim();
+    const cleanEmail = form.email.trim().toLowerCase();
+    const password = form.password;
+    const confirmPassword = form.confirmPassword;
+
+    // -----------------------------
+    // VALIDACIONES
+    // -----------------------------
+
+    if (!cleanName) {
       toast.error("El nombre no puede estar vacío.");
       return;
     }
 
-    if (!form.email.trim()) {
+    if (!cleanEmail) {
       toast.error("El correo no puede estar vacío.");
       return;
     }
 
-    if (
-      form.password &&
-      form.password.length < 6
-    ) {
+    if (password && password.length < 6) {
       toast.error(
         "La contraseña debe tener al menos 6 caracteres."
       );
       return;
     }
 
-    if (
-      form.password !== form.confirmPassword
-    ) {
+    if (password !== confirmPassword) {
       toast.error(
         "Las contraseñas no coinciden."
       );
@@ -84,33 +89,46 @@ export default function ProfileEditForm({
     setLoading(true);
 
     try {
+      console.log("1. Enviando datos...");
+
       const formData = new FormData();
 
-      formData.append("name", form.name);
-      formData.append("email", form.email);
+      formData.set("name", cleanName);
+      formData.set("email", cleanEmail);
 
-      if (form.password) {
-        formData.append(
-          "password",
-          form.password
-        );
+      if (password) {
+        formData.set("password", password);
       }
+
+      console.log(
+        "2. Ejecutando updateProfile..."
+      );
 
       await updateProfile(formData);
 
-      toast.success(
-        "Perfil actualizado correctamente."
+      console.log(
+        "3. Perfil actualizado correctamente"
       );
 
+      // LIMPIAR CONTRASEÑAS
       setForm((current) => ({
         ...current,
         password: "",
         confirmPassword: "",
       }));
 
-      router.refresh();
+      // Mostrar mensaje
+      toast.success(
+        "Perfil actualizado correctamente."
+      );
+
+      // Ir al perfil
+      router.push("/profile");
     } catch (error) {
-      console.error(error);
+      console.error(
+        "ERROR ACTUALIZANDO PERFIL:",
+        error
+      );
 
       toast.error(
         error instanceof Error
@@ -123,8 +141,9 @@ export default function ProfileEditForm({
   }
 
   return (
-    <main className="min-h-screen bg-slate-950 px-4 py-10 text-white">
-      <div className="mx-auto max-w-3xl">
+    <main className="min-h-screen bg-slate-950 text-white">
+      <div className="mx-auto max-w-3xl px-6 py-10 md:px-8">
+
         {/* CABECERA */}
 
         <div className="mb-8 flex items-center justify-between">
@@ -135,24 +154,19 @@ export default function ProfileEditForm({
             <ArrowLeft size={18} />
             Volver al perfil
           </Link>
-
-         
         </div>
 
         {/* FORMULARIO */}
 
         <div className="rounded-3xl border border-slate-800 bg-slate-900 p-6 shadow-2xl md:p-8">
+
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-center">
+            <h1 className="text-center text-3xl font-bold">
               Editar perfil
             </h1>
-
           </div>
 
-          <form
-            onSubmit={handleSubmit}
-            className="space-y-8"
-          >
+        
             {/* INFORMACIÓN PERSONAL */}
 
             <section>
@@ -163,6 +177,7 @@ export default function ProfileEditForm({
               </div>
 
               <div className="space-y-5">
+
                 {/* NOMBRE */}
 
                 <div>
@@ -180,7 +195,8 @@ export default function ProfileEditForm({
                     value={form.name}
                     onChange={handleChange}
                     placeholder="Tu nombre"
-                    className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none transition placeholder:text-slate-600 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20"
+                    disabled={loading}
+                    className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none transition placeholder:text-slate-600 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 disabled:cursor-not-allowed disabled:opacity-60"
                   />
                 </div>
 
@@ -201,15 +217,18 @@ export default function ProfileEditForm({
                     value={form.email}
                     onChange={handleChange}
                     placeholder="correo@ejemplo.com"
-                    className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none transition placeholder:text-slate-600 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20"
+                    disabled={loading}
+                    className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none transition placeholder:text-slate-600 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 disabled:cursor-not-allowed disabled:opacity-60"
                   />
                 </div>
+
               </div>
             </section>
 
             {/* CONTRASEÑA */}
 
             <section className="border-t border-slate-800 pt-8">
+
               <div className="mb-5">
                 <h2 className="flex items-center gap-2 text-xl font-bold">
                   <Lock
@@ -221,6 +240,7 @@ export default function ProfileEditForm({
               </div>
 
               <div className="space-y-5">
+
                 {/* NUEVA CONTRASEÑA */}
 
                 <div>
@@ -229,6 +249,7 @@ export default function ProfileEditForm({
                   </label>
 
                   <div className="relative">
+
                     <input
                       type={
                         showPassword
@@ -239,16 +260,19 @@ export default function ProfileEditForm({
                       value={form.password}
                       onChange={handleChange}
                       placeholder="Nueva contraseña"
-                      className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 pr-12 text-white outline-none transition placeholder:text-slate-600 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20"
+                      disabled={loading}
+                      autoComplete="new-password"
+                      className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 pr-12 text-white outline-none transition placeholder:text-slate-600 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 disabled:cursor-not-allowed disabled:opacity-60"
                     />
 
                     <button
                       type="button"
                       onClick={() =>
                         setShowPassword(
-                          !showPassword
+                          (current) => !current
                         )
                       }
+                      disabled={loading}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 transition hover:text-white"
                     >
                       {showPassword ? (
@@ -257,6 +281,7 @@ export default function ProfileEditForm({
                         <Eye size={19} />
                       )}
                     </button>
+
                   </div>
                 </div>
 
@@ -268,6 +293,7 @@ export default function ProfileEditForm({
                   </label>
 
                   <div className="relative">
+
                     <input
                       type={
                         showConfirmPassword
@@ -278,16 +304,19 @@ export default function ProfileEditForm({
                       value={form.confirmPassword}
                       onChange={handleChange}
                       placeholder="Repite la nueva contraseña"
-                      className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 pr-12 text-white outline-none transition placeholder:text-slate-600 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20"
+                      disabled={loading}
+                      autoComplete="new-password"
+                      className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 pr-12 text-white outline-none transition placeholder:text-slate-600 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 disabled:cursor-not-allowed disabled:opacity-60"
                     />
 
                     <button
                       type="button"
                       onClick={() =>
                         setShowConfirmPassword(
-                          !showConfirmPassword
+                          (current) => !current
                         )
                       }
+                      disabled={loading}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 transition hover:text-white"
                     >
                       {showConfirmPassword ? (
@@ -296,14 +325,17 @@ export default function ProfileEditForm({
                         <Eye size={19} />
                       )}
                     </button>
+
                   </div>
                 </div>
+
               </div>
             </section>
 
             {/* BOTONES */}
 
             <div className="flex flex-col-reverse gap-3 border-t border-slate-800 pt-6 sm:flex-row sm:justify-end">
+
               <Link
                 href="/profile"
                 className="inline-flex items-center justify-center rounded-xl border border-slate-700 px-5 py-3 font-medium text-slate-300 transition hover:bg-slate-800 hover:text-white"
@@ -312,7 +344,11 @@ export default function ProfileEditForm({
               </Link>
 
               <button
-                type="submit"
+                type="button"
+                onClick={() => {
+                  console.log("CLICK EN GUARDAR");
+                  handleSubmit();
+                }}
                 disabled={loading}
                 className="inline-flex items-center justify-center gap-2 rounded-xl bg-cyan-500 px-6 py-3 font-semibold text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
               >
@@ -322,8 +358,9 @@ export default function ProfileEditForm({
                   ? "Guardando..."
                   : "Guardar cambios"}
               </button>
+
             </div>
-          </form>
+
         </div>
       </div>
     </main>
