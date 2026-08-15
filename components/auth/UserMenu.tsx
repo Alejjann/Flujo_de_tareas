@@ -24,7 +24,7 @@ export default function UserMenu({
   const displayName = name || "Usuario";
 
   return (
-    <div className="relative">
+    <div className="relative z-30 translate-y-4">
       {/* BOTÓN DEL USUARIO */}
 
       <button
@@ -111,7 +111,11 @@ export default function UserMenu({
 
           <button
             type="button"
-            onClick={() => signOut({ callbackUrl: "/login" })}
+            onClick={() =>
+              signOut({
+                callbackUrl: "/login",
+              })
+            }
             className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-red-400 transition hover:bg-red-500/10"
           >
             <LogOut size={18} />

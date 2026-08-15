@@ -11,7 +11,6 @@ import {
   ListTodo,
   ArrowLeft,
   Settings,
-  Camera,
 } from "lucide-react";
 import ProfileMediaButtons from "@/components/profile/ProfileMediaButtons";
 
@@ -71,7 +70,7 @@ export default async function ProfilePage() {
 
   return (
     <main className="min-h-screen bg-slate-950 text-white">
-      <div className="mx-auto max-w-6xl px-6 py-10 md:px-8">
+      <div className="mx-auto max-w-6xl px-4 py-6 md:px-8 md:py-10">
 
         {/* HEADER */}
 
@@ -93,13 +92,15 @@ export default async function ProfilePage() {
           </div>
         </div>
 
-        {/* PERFIL */}
+        {/* ===================================================== */}
+        {/* PERFIL - ESTILO LINKEDIN                              */}
+        {/* ===================================================== */}
 
         <section className="overflow-hidden rounded-3xl border border-slate-800 bg-slate-900 shadow-2xl">
 
           {/* BANNER */}
 
-          <div className="relative h-56 overflow-hidden">
+          <div className="relative h-40 overflow-hidden sm:h-44 md:h-48">
 
             {user.bannerUrl ? (
               <img
@@ -111,65 +112,84 @@ export default async function ProfilePage() {
               <div className="h-full w-full bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-700" />
             )}
 
+            {/* OSCURECER LIGERAMENTE EL BANNER */}
+
             <div className="absolute inset-0 bg-black/10" />
 
-            {/* CAMBIAR BANNER DIRECTAMENTE */}
+            {/* CAMBIAR BANNER */}
 
-            <div className="absolute right-5 top-5">
-              <ProfileMediaButtons
-                type="banner"
-              />
+            <div className="absolute right-4 top-4 sm:right-5 sm:top-5">
+              <ProfileMediaButtons type="banner" />
             </div>
-
           </div>
 
-          {/* DATOS */}
+          {/* ================================================= */}
+          {/* INFORMACIÓN DEL USUARIO                           */}
+          {/* ================================================= */}
 
-          <div className="px-6 pb-8 md:px-10">
+          <div className="relative px-5 pb-7 sm:px-8 md:px-10">
 
-            <div className="-mt-16 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+            {/* FOTO SUPERPUESTA AL BANNER */}
 
-              <div className="flex flex-col gap-5 md:flex-row md:items-end">
+            <div className="relative -mt-16 mb-5 flex flex-col sm:-mt-20 sm:mb-6 md:-mt-20">
 
-                {/* AVATAR */}
+              <div className="relative w-fit">
 
-                <div className="relative">
-
-                  {user.avatarUrl ? (
-                    <img
-                      src={user.avatarUrl}
-                      alt="Avatar"
-                      className="h-32 w-32 rounded-full border-8 border-slate-900 object-cover shadow-2xl"
-                    />
-                  ) : (
-                    <div className="flex h-32 w-32 shrink-0 items-center justify-center rounded-full border-8 border-slate-900 bg-gradient-to-br from-cyan-400 to-blue-600 text-4xl font-bold text-white shadow-2xl">
-                      {initials}
-                    </div>
-                  )}
-
-                  {/* CAMBIAR AVATAR */}
-
-                  <div className="absolute bottom-1 right-1">
-                    <ProfileMediaButtons
-                      type="avatar"
-                    />
+                {user.avatarUrl ? (
+                  <img
+                    src={user.avatarUrl}
+                    alt="Avatar"
+                    className="h-40 w-40 rounded-full border-8 border-slate-900 bg-slate-900 object-cover shadow-2xl sm:h-44 sm:w-44"
+                  />
+                ) : (
+                  <div className="flex h-40 w-40 items-center justify-center rounded-full border-8 border-slate-900 bg-gradient-to-br from-cyan-400 to-blue-600 text-4xl font-bold text-white shadow-2xl sm:h-44 sm:w-44">
+                    {initials}
                   </div>
+                )}
 
+                {/* CAMBIAR FOTO */}
+
+                <div className="absolute bottom-1 right-1">
+                  <ProfileMediaButtons type="avatar" />
                 </div>
 
-                {/* INFORMACIÓN */}
+              </div>
+            </div>
 
-                <div className="pb-2">
+            {/* DATOS + BOTÓN */}
 
-                  <h1 className="text-3xl font-bold">
-                    {user.name || "Usuario"}
-                  </h1>
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
 
-                  <div className="mt-2 flex items-center gap-2 text-slate-400">
-                    <Mail size={16} />
+              {/* DATOS DEL USUARIO */}
+
+              <div className="min-w-0">
+
+                <h1 className="break-words text-3xl font-bold tracking-tight text-white sm:text-4xl">
+                  {user.name || "Usuario"}
+                </h1>
+
+                <div className="mt-3 flex items-center gap-2 break-all text-sm text-slate-400 sm:text-base">
+                  <Mail
+                    size={17}
+                    className="shrink-0"
+                  />
+
+                  <span>
                     {user.email}
-                  </div>
+                  </span>
+                </div>
 
+                {/* FECHA */}
+
+                <div className="mt-4 flex items-center gap-2 text-sm text-slate-500">
+                  <CalendarDays
+                    size={16}
+                    className="shrink-0"
+                  />
+
+                  <span>
+                    Miembro desde {memberSince}
+                  </span>
                 </div>
 
               </div>
@@ -178,7 +198,7 @@ export default async function ProfilePage() {
 
               <Link
                 href="/profile/edit"
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-cyan-500 px-5 py-3 font-semibold text-white transition hover:bg-cyan-400"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-cyan-500 px-5 py-3 font-semibold text-slate-950 transition hover:bg-cyan-400 sm:w-fit"
               >
                 <User size={18} />
                 Editar perfil
@@ -186,15 +206,13 @@ export default async function ProfilePage() {
 
             </div>
 
-            <div className="mt-6 flex items-center gap-2 text-sm text-slate-500">
-              <CalendarDays size={16} />
-              Miembro desde {memberSince}
-            </div>
-
           </div>
+
         </section>
 
-        {/* ESTADÍSTICAS */}
+        {/* ===================================================== */}
+        {/* ESTADÍSTICAS                                         */}
+        {/* ===================================================== */}
 
         <section className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
 
@@ -272,7 +290,9 @@ export default async function ProfilePage() {
 
         </section>
 
-        {/* INFORMACIÓN */}
+        {/* ===================================================== */}
+        {/* INFORMACIÓN                                         */}
+        {/* ===================================================== */}
 
         <section className="mt-8 grid gap-8 lg:grid-cols-2">
 
@@ -294,7 +314,10 @@ export default async function ProfilePage() {
 
             <div className="space-y-5">
 
+              {/* NOMBRE */}
+
               <div className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
+
                 <div className="flex items-center gap-3">
 
                   <User
@@ -303,6 +326,7 @@ export default async function ProfilePage() {
                   />
 
                   <div>
+
                     <p className="text-xs text-slate-500">
                       Nombre
                     </p>
@@ -310,10 +334,14 @@ export default async function ProfilePage() {
                     <p className="mt-1 font-medium">
                       {user.name || "Sin nombre"}
                     </p>
+
                   </div>
 
                 </div>
+
               </div>
+
+              {/* EMAIL */}
 
               <div className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
 
@@ -330,7 +358,7 @@ export default async function ProfilePage() {
                       Correo electrónico
                     </p>
 
-                    <p className="mt-1 font-medium">
+                    <p className="mt-1 break-all font-medium">
                       {user.email}
                     </p>
 
@@ -339,6 +367,8 @@ export default async function ProfilePage() {
                 </div>
 
               </div>
+
+              {/* FECHA */}
 
               <div className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
 

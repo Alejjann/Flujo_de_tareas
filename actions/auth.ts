@@ -5,13 +5,104 @@ import bcrypt from "bcryptjs";
 import { redirect } from "next/navigation";
 import { signIn, signOut } from "@/auth";
 
+/* =========================
+   LOGIN
+========================= */
+
+export async function loginUser(formData: FormData) {
+  const emailValue = formData.get("email");
+  const passwordValue = formData.get("password");
+
+  const email =
+    typeof emailValue === "string"
+      ? emailValue.trim().toLowerCase()
+      : "";
+
+  const password =
+    typeof passwordValue === "string"
+      ? passwordValue
+      : "";
+
+  if (!email) {
+    return {
+      error: "Introduce el correo electrÃ³nico.",
+    };
+  }
+
+  if (!password) {
+    return {
+      error: "Introduce la contraseÃ±a.",
+    };
+  }
+
+  const user = await prisma.user.findUnique({
+    where: {
+      email,
+    },
+  });
+
+  if (!user) {
+    return {
+      error: "Correo o contraseÃ±a incorrectos.",
+    };
+  }
+
+  const passwordCorrect = await bcrypt.compare(
+    password,
+    user.password
+  );
+
+  if (!passwordCorrect) {
+    return {
+      error: "Correo o contraseÃ±a incorrectos.",
+    };
+  }
+
+  await signIn("credentials", {
+    email,
+    password,
+    redirectTo: "/",
+  });
+
+  return {
+    success: true,
+  };
+}
+
+/* =========================
+   REGISTRO
+========================= */
+
 export async function registerUser(formData: FormData) {
-  const name = formData.get("name") as string;
-  const email = formData.get("email") as string;
-  const password = formData.get("password") as string;
+  const nameValue = formData.get("name");
+  const emailValue = formData.get("email");
+  const passwordValue = formData.get("password");
+
+  const name =
+    typeof nameValue === "string"
+      ? nameValue.trim()
+      : "";
+
+  const email =
+    typeof emailValue === "string"
+      ? emailValue.trim().toLowerCase()
+      : "";
+
+  const password =
+    typeof passwordValue === "string"
+      ? passwordValue
+      : "";
 
   if (!name || !email || !password) {
-    throw new Error("Todos los campos son obligatorios.");
+    return {
+      error: "Todos los campos son obligatorios.",
+    };
+  }
+
+  if (password.length < 6) {
+    return {
+      error: "La contraseÃ±a debe tener al menos 6 caracteres.",
+    };
   }
 
   const exists = await prisma.user.findUnique({
@@ -21,10 +112,15 @@ export async function registerUser(formData: FormData) {
   });
 
   if (exists) {
-    throw new Error("Ese correo ya está registrado.");
+    return {
+      error: "Ese correo ya estÃ¡ registrado.",
+    };
   }
 
-  const hashedPassword = await bcrypt.hash(password, 10);
+  const hashedPassword = await bcrypt.hash(
+    password,
+    10
+  );
 
   await prisma.user.create({
     data: {
@@ -37,13 +133,9 @@ export async function registerUser(formData: FormData) {
   redirect("/login");
 }
 
-export async function loginUser(formData: FormData) {
-  await signIn("credentials", {
-    email: formData.get("email"),
-    password: formData.get("password"),
-    redirectTo: "/",
-  });
-}
+/* =========================
+   LOGOUT
+========================= */
 
 export async function logoutUser() {
   await signOut({

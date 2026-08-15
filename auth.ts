@@ -1,12 +1,14 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
-  // adapter: PrismaAdapter(prisma),
-
+export const {
+  handlers,
+  auth,
+  signIn,
+  signOut,
+} = NextAuth({
   session: {
     strategy: "jwt",
   },
@@ -14,31 +16,60 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
     Credentials({
       credentials: {
-        email: {},
-        password: {},
+        email: {
+          label: "Correo",
+          type: "email",
+        },
+        password: {
+          label: "Contraseña",
+          type: "password",
+        },
       },
 
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
+        if (
+          !credentials?.email ||
+          !credentials?.password
+        ) {
           return null;
         }
 
-        const user = await prisma.user.findUnique({
-          where: {
-            email: credentials.email as string,
-          },
-        });
+        const email = String(
+          credentials.email
+        )
+          .trim()
+          .toLowerCase();
 
-        if (!user) return null;
-
-        const valid = await bcrypt.compare(
-          credentials.password as string,
-          user.password
+        const password = String(
+          credentials.password
         );
 
-        if (!valid) return null;
+        const user =
+          await prisma.user.findUnique({
+            where: {
+              email,
+            },
+          });
 
-        return user;
+        if (!user) {
+          return null;
+        }
+
+        const valid =
+          await bcrypt.compare(
+            password,
+            user.password
+          );
+
+        if (!valid) {
+          return null;
+        }
+
+        return {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+        };
       },
     }),
   ],
@@ -54,7 +85,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
     async session({ session, token }) {
       if (session.user) {
-        session.user.id = token.id as string;
+        session.user.id =
+          token.id as string;
       }
 
       return session;

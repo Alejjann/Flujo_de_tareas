@@ -27,8 +27,8 @@ export default function ProfileMediaButtons({
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("La imagen no puede superar los 5 MB");
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("La imagen no puede superar los 10 MB");
       return;
     }
 

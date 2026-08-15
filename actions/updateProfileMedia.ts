@@ -12,37 +12,42 @@ export async function updateProfileMedia(
   const session = await auth();
 
   if (!session?.user?.id) {
-    throw new Error("No estás autenticado");
+    throw new Error("No estás autenticado.");
   }
 
   const file = formData.get("file") as File | null;
-  const type = formData.get("type") as
-    | "avatar"
-    | "banner";
+  const type = formData.get("type") as string;
 
-  if (!file) {
-    throw new Error("No se ha seleccionado ninguna imagen");
+  if (!file || file.size === 0) {
+    throw new Error("No se ha seleccionado ninguna imagen.");
   }
 
   if (type !== "avatar" && type !== "banner") {
-    throw new Error("Tipo de imagen no válido");
+    throw new Error("Tipo de imagen no válido.");
   }
 
   if (!file.type.startsWith("image/")) {
-    throw new Error("El archivo debe ser una imagen");
+    throw new Error("El archivo debe ser una imagen.");
   }
 
-  if (file.size > 5 * 1024 * 1024) {
-    throw new Error("La imagen no puede superar los 5 MB");
+ if (file.size > 10 * 1024 * 1024) {
+  throw new Error("La imagen no puede superar los 10 MB.");
+}
+
+  // Extensión segura según el tipo MIME
+  let extension = "jpg";
+
+  if (file.type === "image/png") {
+    extension = "png";
+  } else if (file.type === "image/webp") {
+    extension = "webp";
+  } else if (
+    file.type === "image/jpeg"
+  ) {
+    extension = "jpg";
   }
 
-  const extension =
-    file.type === "image/png"
-      ? "png"
-      : file.type === "image/webp"
-      ? "webp"
-      : "jpg";
-
+  // Nombre fijo para sobrescribir la imagen anterior
   const fileName = `${session.user.id}-${type}.${extension}`;
 
   const uploadDir = path.join(
@@ -62,29 +67,44 @@ export async function updateProfileMedia(
   );
 
   const bytes = await file.arrayBuffer();
+  const buffer = Buffer.from(bytes);
 
   await fs.writeFile(
     filePath,
-    Buffer.from(bytes)
+    buffer
   );
 
   const imageUrl =
     `/uploads/profiles/${fileName}`;
 
-  await prisma.user.update({
-    where: {
-      id: session.user.id,
-    },
-    data:
-      type === "avatar"
-        ? {
-            avatarUrl: imageUrl,
-          }
-        : {
-            bannerUrl: imageUrl,
-          },
-  });
+  if (type === "avatar") {
+    await prisma.user.update({
+      where: {
+        id: session.user.id,
+      },
+      data: {
+        avatarUrl: imageUrl,
+      },
+    });
+  } else {
+    await prisma.user.update({
+      where: {
+        id: session.user.id,
+      },
+      data: {
+        bannerUrl: imageUrl,
+      },
+    });
+  }
 
+  // Actualizar todas las páginas donde puede aparecer
   revalidatePath("/profile");
+  revalidatePath("/profile/edit");
+  revalidatePath("/dashboard");
   revalidatePath("/");
+
+  return {
+    success: true,
+    url: imageUrl,
+  };
 }

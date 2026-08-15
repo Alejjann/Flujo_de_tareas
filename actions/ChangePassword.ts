@@ -23,8 +23,8 @@ export async function updateBanner(formData: FormData) {
     throw new Error("El archivo debe ser una imagen.");
   }
 
-  if (file.size > 5 * 1024 * 1024) {
-    throw new Error("La imagen no puede superar los 5 MB.");
+  if (file.size > 10 * 1024 * 1024) {
+    throw new Error("La imagen no puede superar los 10 MB.");
   }
 
   const bytes = await file.arrayBuffer();
