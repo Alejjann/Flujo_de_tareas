@@ -1,4 +1,9 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 interface AuthCardProps {
   title: string;
@@ -12,7 +17,7 @@ export default function AuthCard({
   children,
 }: AuthCardProps) {
   return (
-    <Card className="w-full max-w-md border-slate-800 bg-slate-900/70 backdrop-blur">
+    <Card className="w-full max-w-md border-slate-800 !bg-slate-900 text-white shadow-2xl shadow-black/30 backdrop-blur">
       <CardHeader className="space-y-2">
         <CardTitle className="text-center text-3xl font-bold text-white">
           {title}
@@ -23,9 +28,7 @@ export default function AuthCard({
         </p>
       </CardHeader>
 
-      <CardContent>
-        {children}
-      </CardContent>
+      <CardContent>{children}</CardContent>
     </Card>
   );
 }

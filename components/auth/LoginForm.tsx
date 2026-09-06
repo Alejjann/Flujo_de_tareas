@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import { loginUser } from "@/actions/auth";
 import { Button } from "@/components/ui/button";
@@ -9,30 +11,31 @@ export default function LoginForm() {
   const [error, setError] = useState("");
 
   async function handleSubmit(
-    e: React.FormEvent<HTMLFormElement>
+    event: React.FormEvent<HTMLFormElement>
   ) {
-    e.preventDefault();
+    event.preventDefault();
 
-    if (loading) return;
+    if (loading) {
+      return;
+    }
 
     setError("");
     setLoading(true);
 
-    const form = e.currentTarget;
-    const formData = new FormData(form);
+    const formData = new FormData(event.currentTarget);
 
     try {
       const result = await loginUser(formData);
 
       if (result?.error) {
         setError(result.error);
-        setLoading(false);
         return;
       }
     } catch (error) {
       console.error("ERROR LOGIN:", error);
 
-      setError("Correo o contraseña incorrectos.");
+      setError("No se pudo iniciar sesión. Inténtalo de nuevo.");
+    } finally {
       setLoading(false);
     }
   }
@@ -40,13 +43,17 @@ export default function LoginForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="w-full max-w-md space-y-4 rounded-2xl border border-slate-800 bg-slate-900 p-8"
+      className="w-full max-w-md space-y-5 rounded-2xl border border-slate-800 bg-slate-900 p-8 text-white shadow-2xl shadow-black/30"
     >
-      <h1 className="text-3xl font-bold text-white">
-        Iniciar sesión
-      </h1>
+      <div className="space-y-2">
+        <h1 className="text-center text-3xl font-bold text-white">
+          Iniciar sesión
+        </h1>
 
-      {/* MENSAJE DE ERROR */}
+        <p className="text-center text-sm text-slate-400">
+          Accede a tu espacio de trabajo
+        </p>
+      </div>
 
       {error && (
         <div
@@ -64,37 +71,41 @@ export default function LoginForm() {
         autoComplete="email"
         required
         disabled={loading}
-        className="border-slate-700 bg-slate-900 text-white placeholder:text-slate-500"
+        className="h-11 border-slate-700 !bg-slate-950 text-white placeholder:text-slate-500 focus:border-cyan-500 focus:ring-cyan-500/30"
       />
 
       <Input
         type="password"
         name="password"
-        placeholder="ContraseÃ±a"
+        placeholder="Contraseña"
         autoComplete="current-password"
         required
         disabled={loading}
-        className="border-slate-700 bg-slate-900 text-white placeholder:text-slate-500"
+        className="h-11 border-slate-700 !bg-slate-950 text-white placeholder:text-slate-500 focus:border-cyan-500 focus:ring-cyan-500/30"
       />
+
+      <Link
+        href="/forgot-password"
+        className="block text-sm font-medium text-cyan-400 transition hover:text-cyan-300 hover:underline"
+      >
+        ¿Has olvidado tu contraseña?
+      </Link>
 
       <Button
         type="submit"
         disabled={loading}
-        className="w-full bg-cyan-500 text-slate-950 hover:bg-cyan-400 disabled:opacity-50"
+        className="h-11 w-full bg-cyan-500 font-semibold text-slate-950 hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
       >
-        {loading
-          ? "Iniciando sesiÃ³n..."
-          : "Iniciar sesiÃ³n"}
+        {loading ? "Iniciando sesión..." : "Iniciar sesión"}
       </Button>
 
       <p className="text-center text-sm text-slate-400">
-        ÂÂ¿No tienes una cuenta?{" "}
-
+        ¿No tienes una cuenta?{" "}
         <Link
           href="/register"
-          className="font-medium text-cyan-400 hover:underline"
+          className="font-semibold text-cyan-400 transition hover:text-cyan-300 hover:underline"
         >
-          Crear cuenta
+          Regístrate
         </Link>
       </p>
     </form>

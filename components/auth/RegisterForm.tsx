@@ -11,7 +11,9 @@ export default function RegisterForm() {
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(formData: FormData) {
-    if (loading) return;
+    if (loading) {
+      return;
+    }
 
     const name = String(formData.get("name") ?? "").trim();
     const email = String(formData.get("email") ?? "")
@@ -19,19 +21,16 @@ export default function RegisterForm() {
       .toLowerCase();
     const password = String(formData.get("password") ?? "");
 
-    // Validar nombre
     if (!name) {
       toast.error("Introduce tu nombre.");
       return;
     }
 
-    // Validar email
     if (!email) {
       toast.error("Introduce tu correo electrónico.");
       return;
     }
 
-    // Validar contraseña
     if (!password) {
       toast.error("Introduce una contraseña.");
       return;
@@ -64,7 +63,7 @@ export default function RegisterForm() {
   return (
     <form
       action={handleSubmit}
-      className="w-full max-w-md space-y-4 rounded-2xl border border-slate-800 bg-slate-900 p-8"
+      className="w-full max-w-md space-y-4 rounded-2xl border border-slate-800 bg-slate-900 p-8 text-white shadow-2xl shadow-black/30"
     >
       <h1 className="text-3xl font-bold text-white">
         Crear cuenta
@@ -73,8 +72,9 @@ export default function RegisterForm() {
       <Input
         name="name"
         placeholder="Nombre"
+        autoComplete="name"
         disabled={loading}
-        className="border-slate-700 bg-slate-900 text-white placeholder:text-slate-500"
+        className="border-slate-700 !bg-slate-950 text-white placeholder:text-slate-500 focus:border-cyan-500 focus:ring-cyan-500/30"
         required
       />
 
@@ -82,8 +82,9 @@ export default function RegisterForm() {
         type="email"
         name="email"
         placeholder="Correo electrónico"
+        autoComplete="email"
         disabled={loading}
-        className="border-slate-700 bg-slate-900 text-white placeholder:text-slate-500"
+        className="border-slate-700 !bg-slate-950 text-white placeholder:text-slate-500 focus:border-cyan-500 focus:ring-cyan-500/30"
         required
       />
 
@@ -94,18 +95,18 @@ export default function RegisterForm() {
         disabled={loading}
         minLength={6}
         autoComplete="new-password"
-        className="border-slate-700 bg-slate-900 text-white placeholder:text-slate-500"
+        className="border-slate-700 !bg-slate-950 text-white placeholder:text-slate-500 focus:border-cyan-500 focus:ring-cyan-500/30"
         required
       />
 
       <p className="text-xs text-slate-500">
-    
+        La contraseña debe tener al menos 6 caracteres.
       </p>
 
       <Button
         type="submit"
         disabled={loading}
-        className="w-full bg-cyan-500 text-slate-950 hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
+        className="w-full bg-cyan-500 font-semibold text-slate-950 hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {loading ? "Creando cuenta..." : "Registrarse"}
       </Button>
@@ -114,7 +115,7 @@ export default function RegisterForm() {
         ¿Ya tienes una cuenta?{" "}
         <Link
           href="/login"
-          className="font-medium text-cyan-400 hover:underline"
+          className="font-semibold text-cyan-400 transition hover:text-cyan-300 hover:underline"
         >
           Inicia sesión
         </Link>

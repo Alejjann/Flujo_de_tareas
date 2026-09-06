@@ -4,6 +4,7 @@ import {
   DndContext,
   DragEndEvent,
   DragOverlay,
+  DragStartEvent,
   closestCorners,
   useDraggable,
   useDroppable,
@@ -28,6 +29,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 import EditTaskDialog from "./EditTaskDialog";
+import { useLanguage } from "@/components/providers/LanguageProvider";
 
 interface Task {
   id: string;
@@ -44,50 +46,25 @@ interface TaskBoardProps {
   tasks: Task[];
 }
 
-const columns = [
-  {
-    id: "PENDING" as const,
-    title: "Pendientes",
-    icon: ListTodo,
-    color: "text-yellow-400",
-    border: "border-yellow-500/30",
-  },
-  {
-    id: "IN_PROGRESS" as const,
-    title: "En progreso",
-    icon: Clock3,
-    color: "text-cyan-400",
-    border: "border-cyan-500/30",
-  },
-  {
-    id: "COMPLETED" as const,
-    title: "Completadas",
-    icon: CircleCheck,
-    color: "text-green-400",
-    border: "border-green-500/30",
-  },
-];
-
 const priorityStyles = {
-  LOW: "bg-green-500/20 text-green-400 border-green-500/20",
-  MEDIUM: "bg-yellow-500/20 text-yellow-400 border-yellow-500/20",
-  HIGH: "bg-red-500/20 text-red-400 border-red-500/20",
+  LOW: "border-success/20 bg-success/15 text-success",
+  MEDIUM: "border-warning/20 bg-warning/15 text-warning",
+  HIGH: "border-destructive/20 bg-destructive/15 text-destructive",
 };
 
 const tagStyles: Record<string, string> = {
-  Trabajo: "bg-blue-500/15 text-blue-300",
-  Estudios: "bg-purple-500/15 text-purple-300",
-  Personal: "bg-pink-500/15 text-pink-300",
-  Casa: "bg-orange-500/15 text-orange-300",
+  Trabajo: "bg-primary/15 text-primary",
+  Estudios: "bg-violet/15 text-violet",
+  Personal: "bg-pink-500/15 text-pink-500",
+  Casa: "bg-orange-500/15 text-orange-500",
 };
 
 function getTagStyle(tag: string | null) {
-  if (!tag) return "";
+  if (!tag) {
+    return "";
+  }
 
-  return (
-    tagStyles[tag] ||
-    "bg-cyan-500/15 text-cyan-300"
-  );
+  return tagStyles[tag] || "bg-info/15 text-info";
 }
 
 function TaskItem({
@@ -99,6 +76,8 @@ function TaskItem({
   onEdit: () => void;
   onDelete: () => void;
 }) {
+  const { t, language } = useLanguage();
+
   const {
     attributes,
     listeners,
@@ -115,58 +94,70 @@ function TaskItem({
       }
     : undefined;
 
+  const isOverdue =
+    task.dueDate &&
+    !task.completed &&
+    new Date(task.dueDate) < new Date();
+
+  const priorityLabel =
+    task.priority === "HIGH"
+      ? t.priority.high
+      : task.priority === "MEDIUM"
+      ? t.priority.medium
+      : t.priority.low;
+
+  const formattedDate = task.dueDate
+    ? new Date(task.dueDate).toLocaleDateString(
+        language === "es" ? "es-ES" : "en-US"
+      )
+    : "";
+
   return (
     <div
       ref={setNodeRef}
       style={style}
-      className={`rounded-2xl border border-slate-700 bg-slate-950 p-4 transition-all ${
+      className={`group rounded-2xl border border-border bg-card p-4 transition-all duration-300 ${
         isDragging
-          ? "z-50 opacity-40"
-          : "hover:border-slate-600"
+          ? "z-50 scale-[1.02] border-primary opacity-40 shadow-2xl shadow-primary/20"
+          : "hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10"
       }`}
     >
       {/* CABECERA */}
       <div className="flex items-start justify-between gap-3">
-
         <h3
           className={`min-w-0 flex-1 break-words text-base font-semibold ${
             task.completed
-              ? "text-slate-500 line-through"
-              : "text-white"
+              ? "text-muted-foreground line-through"
+              : "text-foreground group-hover:text-primary"
           }`}
         >
           {task.title}
         </h3>
 
         <span
-          className={`shrink-0 rounded-full border px-2.5 py-1 text-[11px] font-semibold ${
+          className={`shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide ${
             priorityStyles[task.priority]
           }`}
         >
-          {task.priority === "HIGH"
-            ? "Alta"
-            : task.priority === "MEDIUM"
-            ? "Media"
-            : "Baja"}
+          {priorityLabel}
         </span>
       </div>
 
-      {/* DESCRIPCIÓN COMPLETA */}
+      {/* DESCRIPCIÓN */}
       {task.description && (
         <p
           className={`mt-3 whitespace-pre-wrap break-words text-sm leading-6 ${
             task.completed
-              ? "text-slate-600"
-              : "text-slate-400"
+              ? "text-muted-foreground/70"
+              : "text-muted-foreground"
           }`}
         >
           {task.description}
         </p>
       )}
 
-      {/* DATOS */}
+      {/* ETIQUETA Y FECHA */}
       <div className="mt-4 flex flex-wrap gap-2">
-
         {task.tag && (
           <span
             className={`rounded-full px-2.5 py-1 text-xs font-medium ${getTagStyle(
@@ -178,56 +169,57 @@ function TaskItem({
         )}
 
         {task.dueDate && (
-          <span className="flex items-center gap-1 rounded-full bg-slate-800 px-2.5 py-1 text-xs text-slate-400">
+          <span
+            className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-xs ${
+              isOverdue
+                ? "bg-destructive/15 text-destructive"
+                : "bg-secondary text-muted-foreground"
+            }`}
+          >
             <CalendarDays size={12} />
-            {new Date(
-              task.dueDate
-            ).toLocaleDateString("es-ES")}
+
+            {isOverdue ? `${t.tasks.overdue} · ` : ""}
+
+            {formattedDate}
           </span>
         )}
       </div>
 
       {/* ACCIONES */}
-      <div className="mt-4 flex items-center justify-between border-t border-slate-800 pt-3">
-
-        {/* MOVER */}
+      <div className="mt-4 flex items-center justify-between border-t border-border pt-3">
         <button
           type="button"
           {...listeners}
           {...attributes}
-          className="flex cursor-grab items-center gap-2 rounded-lg px-2 py-1.5 text-xs text-slate-500 transition hover:bg-slate-800 hover:text-slate-300 active:cursor-grabbing"
-          title="Arrastrar tarea"
+          className="flex cursor-grab items-center gap-2 rounded-lg px-2 py-1.5 text-xs text-muted-foreground transition hover:bg-secondary hover:text-foreground active:cursor-grabbing"
+          title={t.board.drag}
         >
           <GripVertical size={16} />
-          Mover
+          {t.tasks.move}
         </button>
 
         <div className="flex items-center gap-1">
-
-          {/* EDITAR */}
           <Button
             type="button"
             size="icon"
             variant="ghost"
             onClick={onEdit}
-            className="h-8 w-8 text-slate-400 hover:bg-cyan-500/10 hover:text-cyan-400"
-            title="Editar tarea"
+            className="h-8 w-8 text-muted-foreground hover:bg-primary/10 hover:text-primary"
+            title={t.tasks.edit}
           >
             <Pencil size={16} />
           </Button>
 
-          {/* ELIMINAR */}
           <Button
             type="button"
             size="icon"
             variant="ghost"
             onClick={onDelete}
-            className="h-8 w-8 text-slate-400 hover:bg-red-500/10 hover:text-red-400"
-            title="Eliminar tarea"
+            className="h-8 w-8 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+            title={t.tasks.delete}
           >
             <Trash2 size={16} />
           </Button>
-
         </div>
       </div>
     </div>
@@ -240,46 +232,65 @@ function TaskColumn({
   onEdit,
   onDelete,
 }: {
-  column: (typeof columns)[number];
+  column: {
+    id: "PENDING" | "IN_PROGRESS" | "COMPLETED";
+    title: string;
+    icon: typeof ListTodo;
+    color: string;
+    bg: string;
+    border: string;
+  };
   tasks: Task[];
   onEdit: (task: Task) => void;
   onDelete: (task: Task) => void;
 }) {
-  const {
-    setNodeRef,
-    isOver,
-  } = useDroppable({
+  const { t } = useLanguage();
+
+  const { setNodeRef, isOver } = useDroppable({
     id: column.id,
   });
 
   const Icon = column.icon;
 
+  const taskCount =
+    tasks.length === 1
+      ? `1 ${t.board.task}`
+      : `${tasks.length} ${t.board.tasks}`;
+
   return (
     <div
       ref={setNodeRef}
-      className={`min-h-[420px] rounded-3xl border bg-slate-900/70 p-4 backdrop-blur transition-all ${
+      className={`min-h-[420px] rounded-3xl border p-4 transition-all duration-300 ${
         column.border
       } ${
         isOver
-          ? "border-cyan-400 bg-slate-800/80"
-          : ""
+          ? "border-primary bg-primary/10 shadow-xl shadow-primary/10"
+          : "bg-card"
       }`}
     >
-      {/* CABECERA COLUMNA */}
-      <div className="mb-4 flex items-center justify-between">
+      {/* CABECERA */}
+      <div className="mb-5 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div
+            className={`flex h-9 w-9 items-center justify-center rounded-xl ${column.bg}`}
+          >
+            <Icon size={18} className={column.color} />
+          </div>
 
-        <div className="flex items-center gap-2">
-          <Icon
-            size={18}
-            className={column.color}
-          />
+          <div>
+            <h2 className="font-bold text-foreground">
+              {column.title}
+            </h2>
 
-          <h2 className="font-bold text-white">
-            {column.title}
-          </h2>
+            <p className="text-xs text-muted-foreground">
+              {taskCount}
+            </p>
+          </div>
         </div>
 
-        <span className="rounded-full bg-slate-800 px-3 py-1 text-sm text-slate-300">
+        <span
+          className={`rounded-full px-3 py-1 text-sm font-bold ${column.bg} ${column.color}`}
+        >
           {tasks.length}
         </span>
       </div>
@@ -287,10 +298,17 @@ function TaskColumn({
       {/* TAREAS */}
       <div className="space-y-3">
         {tasks.length === 0 ? (
-          <div className="flex min-h-[250px] items-center justify-center rounded-2xl border border-dashed border-slate-700 p-6 text-center">
-            <p className="text-sm text-slate-500">
-              Arrastra una tarea aquí
-            </p>
+          <div className="flex min-h-[250px] items-center justify-center rounded-2xl border border-dashed border-border bg-background/60 p-6 text-center">
+            <div>
+              <Icon
+                size={28}
+                className={`mx-auto mb-3 ${column.color} opacity-50`}
+              />
+
+              <p className="text-sm text-muted-foreground">
+                {t.tasks.dragHere}
+              </p>
+            </div>
           </div>
         ) : (
           tasks.map((task) => (
@@ -310,23 +328,50 @@ function TaskColumn({
 export default function TaskBoard({
   tasks: initialTasks,
 }: TaskBoardProps) {
-  const [tasks, setTasks] =
-    useState<Task[]>(initialTasks);
+  const { t } = useLanguage();
 
-  const [activeTask, setActiveTask] =
-    useState<Task | null>(null);
+  const columns = [
+    {
+      id: "PENDING" as const,
+      title: t.board.pending,
+      icon: ListTodo,
+      color: "text-warning",
+      bg: "bg-warning/10",
+      border: "border-warning/30",
+    },
+    {
+      id: "IN_PROGRESS" as const,
+      title: t.board.inProgress,
+      icon: Clock3,
+      color: "text-info",
+      bg: "bg-info/10",
+      border: "border-info/30",
+    },
+    {
+      id: "COMPLETED" as const,
+      title: t.board.completed,
+      icon: CircleCheck,
+      color: "text-success",
+      bg: "bg-success/10",
+      border: "border-success/30",
+    },
+  ];
 
-  const [editingTask, setEditingTask] =
-    useState<Task | null>(null);
+  const [tasks, setTasks] = useState<Task[]>(initialTasks);
+  const [activeTask, setActiveTask] = useState<Task | null>(
+    null
+  );
+  const [editingTask, setEditingTask] = useState<Task | null>(
+    null
+  );
 
   useEffect(() => {
     setTasks(initialTasks);
   }, [initialTasks]);
 
-  function handleDragStart(event: any) {
+  function handleDragStart(event: DragStartEvent) {
     const task = tasks.find(
-      (task) =>
-        task.id === String(event.active.id)
+      (item) => item.id === String(event.active.id)
     );
 
     if (task) {
@@ -334,108 +379,101 @@ export default function TaskBoard({
     }
   }
 
-  async function handleDragEnd(
-    event: DragEndEvent
-  ) {
+  async function handleDragEnd(event: DragEndEvent) {
     setActiveTask(null);
 
     const { active, over } = event;
 
-    if (!over) return;
+    if (!over) {
+      return;
+    }
 
     const taskId = String(active.id);
 
-    const newStatus =
-      String(over.id) as
-        | "PENDING"
-        | "IN_PROGRESS"
-        | "COMPLETED";
+    const newStatus = String(over.id) as
+      | "PENDING"
+      | "IN_PROGRESS"
+      | "COMPLETED";
 
-    const task = tasks.find(
-      (task) => task.id === taskId
-    );
+    const task = tasks.find((item) => item.id === taskId);
 
-    if (!task) return;
-
-    if (task.status === newStatus) return;
+    if (!task || task.status === newStatus) {
+      return;
+    }
 
     const oldStatus = task.status;
 
     setTasks((current) =>
-      current.map((task) =>
-        task.id === taskId
+      current.map((item) =>
+        item.id === taskId
           ? {
-              ...task,
+              ...item,
               status: newStatus,
-              completed:
-                newStatus === "COMPLETED",
+              completed: newStatus === "COMPLETED",
             }
-          : task
+          : item
       )
     );
 
     try {
-      await updateTaskStatus(
-        taskId,
-        newStatus
-      );
+      await updateTaskStatus(taskId, newStatus);
 
       toast.success(
         newStatus === "COMPLETED"
-          ? "Tarea completada ✅"
+          ? t.board.completedMessage
           : newStatus === "IN_PROGRESS"
-          ? "Tarea en progreso 🔵"
-          : "Tarea pendiente 🟡"
+          ? t.board.inProgressMessage
+          : t.board.pendingMessage
       );
     } catch (error) {
       console.error(error);
 
       setTasks((current) =>
-        current.map((task) =>
-          task.id === taskId
+        current.map((item) =>
+          item.id === taskId
             ? {
-                ...task,
+                ...item,
                 status: oldStatus,
-                completed:
-                  oldStatus === "COMPLETED",
+                completed: oldStatus === "COMPLETED",
               }
-            : task
+            : item
         )
       );
 
-      toast.error(
-        "No se pudo mover la tarea"
-      );
+      toast.error(t.board.movedError);
     }
   }
 
   async function handleDelete(task: Task) {
-    const confirmed =
-      window.confirm(
-        `¿Seguro que quieres eliminar "${task.title}"?`
-      );
+    const confirmed = window.confirm(
+      `${t.messages.deleteConfirm}\n\n"${task.title}"`
+    );
 
-    if (!confirmed) return;
+    if (!confirmed) {
+      return;
+    }
 
     try {
       await deleteTask(task.id);
 
       setTasks((current) =>
-        current.filter(
-          (item) => item.id !== task.id
-        )
+        current.filter((item) => item.id !== task.id)
       );
 
-      toast.success(
-        "Tarea eliminada correctamente"
-      );
+      toast.success(t.messages.deleteSuccess);
     } catch (error) {
       console.error(error);
-      toast.error(
-        "No se pudo eliminar la tarea"
-      );
+      toast.error(t.messages.deleteError);
     }
   }
+
+  const activePriorityLabel = activeTask
+    ? activeTask.priority === "HIGH"
+      ? t.priority.high
+      : activeTask.priority === "MEDIUM"
+      ? t.priority.medium
+      : t.priority.low
+    : "";
 
   return (
     <>
@@ -450,12 +488,9 @@ export default function TaskBoard({
               key={column.id}
               column={column}
               tasks={tasks.filter(
-                (task) =>
-                  task.status === column.id
+                (task) => task.status === column.id
               )}
-              onEdit={(task) =>
-                setEditingTask(task)
-              }
+              onEdit={(task) => setEditingTask(task)}
               onDelete={handleDelete}
             />
           ))}
@@ -463,13 +498,23 @@ export default function TaskBoard({
 
         <DragOverlay>
           {activeTask ? (
-            <div className="w-[320px] rounded-2xl border border-cyan-500 bg-slate-900 p-4 shadow-2xl shadow-cyan-500/20">
-              <h3 className="break-words font-semibold text-white">
-                {activeTask.title}
-              </h3>
+            <div className="w-[320px] rounded-2xl border border-primary/50 bg-card p-4 shadow-2xl shadow-primary/20">
+              <div className="flex items-center justify-between gap-3">
+                <h3 className="break-words font-semibold text-foreground">
+                  {activeTask.title}
+                </h3>
+
+                <span
+                  className={`shrink-0 rounded-full border px-2 py-1 text-[10px] font-bold ${
+                    priorityStyles[activeTask.priority]
+                  }`}
+                >
+                  {activePriorityLabel}
+                </span>
+              </div>
 
               {activeTask.description && (
-                <p className="mt-2 whitespace-pre-wrap break-words text-sm text-slate-400">
+                <p className="mt-2 whitespace-pre-wrap break-words text-sm text-muted-foreground">
                   {activeTask.description}
                 </p>
               )}
@@ -478,7 +523,6 @@ export default function TaskBoard({
         </DragOverlay>
       </DndContext>
 
-      {/* EDITAR */}
       {editingTask && (
         <EditTaskDialog
           open={true}

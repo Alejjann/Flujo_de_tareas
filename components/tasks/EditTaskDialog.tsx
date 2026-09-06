@@ -14,11 +14,11 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useLanguage } from "@/components/providers/LanguageProvider";
 
 interface EditTaskDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-
   id: string;
   title: string;
   description: string | null;
@@ -39,30 +39,29 @@ export default function EditTaskDialog({
 }: EditTaskDialogProps) {
   const [currentTag, setCurrentTag] = useState(
     tag &&
-    !["Trabajo", "Estudios", "Personal", "Casa"].includes(tag)
+      !["Trabajo", "Estudios", "Personal", "Casa"].includes(tag)
       ? "CUSTOM"
       : tag || "Personal"
   );
 
   const router = useRouter();
+  const { t } = useLanguage();
 
   async function handleSubmit(formData: FormData) {
     try {
       await updateTask(formData);
 
-      toast.success("Cambios guardados correctamente");
+      toast.success(t.editTask.success);
 
       onOpenChange(false);
-
       router.refresh();
     } catch (error) {
       console.error(error);
-      toast.error("No se pudieron guardar los cambios");
+      toast.error(t.editTask.error);
     }
   }
 
-  const isCustom =
-    currentTag === "CUSTOM";
+  const isCustom = currentTag === "CUSTOM";
 
   const customValue =
     tag &&
@@ -72,111 +71,98 @@ export default function EditTaskDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto border border-slate-700 bg-slate-950 text-white sm:max-w-xl">
+      <DialogContent className="max-h-[90vh] overflow-y-auto border border-border bg-popover text-popover-foreground sm:max-w-xl">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-white">
-            Editar tarea
+          <DialogTitle className="text-2xl font-bold text-foreground">
+            {t.editTask.title}
           </DialogTitle>
         </DialogHeader>
 
         <form action={handleSubmit} className="space-y-5">
+          <input type="hidden" name="id" value={id} />
 
-          <input
-            type="hidden"
-            name="id"
-            value={id}
-          />
-
-          {/* TÍTULO */}
           <div>
-            <label className="mb-2 block text-sm font-medium text-slate-300">
-              Título
+            <label className="mb-2 block text-sm font-medium text-foreground">
+              {t.editTask.titleLabel}
             </label>
 
             <Input
               name="title"
               defaultValue={title}
-              placeholder="Título..."
-              className="border-slate-700 bg-slate-900 text-white placeholder:text-slate-500 focus:border-cyan-500"
+              placeholder={t.editTask.titlePlaceholder}
+              className="border-border bg-background text-foreground placeholder:text-muted-foreground focus:border-primary"
               required
             />
           </div>
 
-          {/* DESCRIPCIÓN */}
           <div>
-            <label className="mb-2 block text-sm font-medium text-slate-300">
-              Descripción
+            <label className="mb-2 block text-sm font-medium text-foreground">
+              {t.editTask.descriptionLabel}
             </label>
 
             <Textarea
               name="description"
               defaultValue={description || ""}
-              placeholder="Descripción..."
+              placeholder={t.editTask.descriptionPlaceholder}
               rows={6}
-              className="resize-y border-slate-700 bg-slate-900 text-white placeholder:text-slate-500 focus:border-cyan-500"
+              className="resize-y border-border bg-background text-foreground placeholder:text-muted-foreground focus:border-primary"
             />
           </div>
 
-          {/* PRIORIDAD */}
           <div>
-            <label className="mb-2 block text-sm font-medium text-slate-300">
-              Prioridad
+            <label className="mb-2 block text-sm font-medium text-foreground">
+              {t.editTask.priorityLabel}
             </label>
 
             <select
               name="priority"
               defaultValue={priority}
-              className="h-10 w-full rounded-md border border-slate-700 bg-slate-900 px-3 text-sm text-white outline-none transition focus:border-cyan-500"
+              className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
             >
-              <option value="LOW">🟢 Baja</option>
-              <option value="MEDIUM">🟡 Media</option>
-              <option value="HIGH">🔴 Alta</option>
+              <option value="LOW">🟢 {t.priority.low}</option>
+              <option value="MEDIUM">🟡 {t.priority.medium}</option>
+              <option value="HIGH">🔴 {t.priority.high}</option>
             </select>
           </div>
 
-          {/* ETIQUETA */}
           <div>
-            <label className="mb-2 block text-sm font-medium text-slate-300">
-              Etiqueta
+            <label className="mb-2 block text-sm font-medium text-foreground">
+              {t.editTask.tagLabel}
             </label>
 
             <select
               name="tag"
               value={currentTag}
-              onChange={(e) =>
-                setCurrentTag(e.target.value)
-              }
-              className="h-10 w-full rounded-md border border-slate-700 bg-slate-900 px-3 text-sm text-white outline-none transition focus:border-cyan-500"
+              onChange={(e) => setCurrentTag(e.target.value)}
+              className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
             >
-              <option value="Trabajo">💼 Trabajo</option>
-              <option value="Estudios">📚 Estudios</option>
-              <option value="Personal">❤️ Personal</option>
-              <option value="Casa">🏠 Casa</option>
-              <option value="CUSTOM">✨ Personalizada</option>
+              <option value="Trabajo">💼 {t.tags.work}</option>
+              <option value="Estudios">📚 {t.tags.studies}</option>
+              <option value="Personal">❤️ {t.tags.personal}</option>
+              <option value="Casa">🏠 {t.tags.home}</option>
+              <option value="CUSTOM">✨ {t.tags.custom}</option>
             </select>
           </div>
 
-          {/* PERSONALIZADA */}
           {isCustom && (
             <div>
-              <label className="mb-2 block text-sm font-medium text-slate-300">
-                Nombre de la etiqueta
+              <label className="mb-2 block text-sm font-medium text-foreground">
+                {t.editTask.customTagLabel}
               </label>
 
               <Input
                 name="customTag"
                 defaultValue={customValue}
-                placeholder="Nombre de tu etiqueta..."
-                className="border-slate-700 bg-slate-900 text-white placeholder:text-slate-500 focus:border-cyan-500"
+                placeholder={t.editTask.customTagPlaceholder}
+                className="border-border bg-background text-foreground placeholder:text-muted-foreground focus:border-primary"
                 required
               />
             </div>
           )}
 
-          {/* FECHA */}
           <div>
-            <label className="mb-2 block text-sm font-medium text-slate-300">
-              Fecha límite
+            <label className="mb-2 block text-sm font-medium text-foreground">
+              {t.editTask.dueDateLabel}
             </label>
 
             <Input
@@ -189,15 +175,15 @@ export default function EditTaskDialog({
                       .split("T")[0]
                   : ""
               }
-              className="border-slate-700 bg-slate-900 text-white"
+              className="border-border bg-background text-foreground"
             />
           </div>
 
           <Button
             type="submit"
-            className="w-full bg-cyan-500 font-semibold text-white hover:bg-cyan-400"
+            className="w-full bg-primary font-semibold text-primary-foreground hover:bg-primary/90"
           >
-            Guardar cambios
+            {t.editTask.saveButton}
           </Button>
         </form>
       </DialogContent>

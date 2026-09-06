@@ -30,7 +30,7 @@ export default async function ProfileLayout({
   }
 
   return (
-    <div className="min-h-screen bg-slate-950">
+    <div className="min-h-screen bg-background text-foreground">
       <Header
         name={user.name}
         email={user.email}

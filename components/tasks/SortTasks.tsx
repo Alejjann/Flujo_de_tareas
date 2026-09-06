@@ -1,31 +1,41 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import {
+  usePathname,
+  useRouter,
+  useSearchParams,
+} from "next/navigation";
+import { useLanguage } from "@/components/providers/LanguageProvider";
 
 export default function SortTasks() {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { t } = useLanguage();
 
   const current = searchParams.get("sort") || "date";
 
   function changeSort(value: string) {
-    const params = new URLSearchParams(searchParams);
+    const params = new URLSearchParams(
+      searchParams.toString()
+    );
 
     params.set("sort", value);
 
-    router.push(`/?${params.toString()}`);
+    router.push(`${pathname}?${params.toString()}`);
   }
 
   return (
     <select
       value={current}
       onChange={(e) => changeSort(e.target.value)}
-      className="rounded-lg border border-slate-700 bg-slate-900 px-4 py-2 text-white"
+      aria-label={t.filters.sort}
+      className="h-10 rounded-xl border border-border bg-secondary px-4 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
     >
-      <option value="date">Fecha creación</option>
-      <option value="due">Fecha límite</option>
-      <option value="priority">Prioridad</option>
-      <option value="title">Título</option>
+      <option value="date">{t.filters.creationDate}</option>
+      <option value="due">{t.filters.dueDate}</option>
+      <option value="priority">{t.filters.prioritySort}</option>
+      <option value="title">{t.filters.title}</option>
     </select>
   );
 }

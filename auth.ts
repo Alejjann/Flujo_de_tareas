@@ -20,6 +20,7 @@ export const {
           label: "Correo",
           type: "email",
         },
+
         password: {
           label: "Contraseña",
           type: "password",
@@ -34,9 +35,7 @@ export const {
           return null;
         }
 
-        const email = String(
-          credentials.email
-        )
+        const email = String(credentials.email)
           .trim()
           .toLowerCase();
 
@@ -44,49 +43,62 @@ export const {
           credentials.password
         );
 
-        const user =
-          await prisma.user.findUnique({
-            where: {
-              email,
-            },
-          });
+        const user = await prisma.user.findUnique({
+          where: {
+            email,
+          },
+        });
 
         if (!user) {
           return null;
         }
 
-        const valid =
-          await bcrypt.compare(
-            password,
-            user.password
-          );
+        const valid = await bcrypt.compare(
+          password,
+          user.password
+        );
 
         if (!valid) {
           return null;
         }
 
+        // 👇 Convertimos avatarUrl de Prisma
+        // en image para NextAuth
         return {
           id: user.id,
           name: user.name,
           email: user.email,
+          image: user.avatarUrl ?? null,
         };
       },
     }),
   ],
 
   callbacks: {
+    // =========================
+    // JWT
+    // =========================
+
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
+        token.image = user.image ?? null;
       }
 
       return token;
     },
 
+    // =========================
+    // SESSION
+    // =========================
+
     async session({ session, token }) {
       if (session.user) {
-        session.user.id =
-          token.id as string;
+        session.user.id = token.id as string;
+
+        session.user.image =
+          (token.image as string | null | undefined) ??
+          null;
       }
 
       return session;

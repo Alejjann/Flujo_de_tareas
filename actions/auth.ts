@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import { AuthError } from "next-auth";
 import { redirect } from "next/navigation";
 import { signIn, signOut } from "@/auth";
 
@@ -25,44 +26,44 @@ export async function loginUser(formData: FormData) {
 
   if (!email) {
     return {
-      error: "Introduce el correo electrÃ³nico.",
+      error: "Introduce el correo electrónico.",
     };
   }
 
   if (!password) {
     return {
-      error: "Introduce la contraseÃ±a.",
+      error: "Introduce la contraseña.",
     };
   }
 
-  const user = await prisma.user.findUnique({
-    where: {
+  try {
+    await signIn("credentials", {
       email,
-    },
-  });
+      password,
+      redirectTo: "/dashboard",
+    });
+  } catch (error) {
+    if (error instanceof AuthError) {
+      if (error.type === "CredentialsSignin") {
+        return {
+          error: "Correo o contraseña incorrectos.",
+        };
+      }
 
-  if (!user) {
-    return {
-      error: "Correo o contraseÃ±a incorrectos.",
-    };
+      return {
+        error: "No se pudo iniciar sesión. Inténtalo de nuevo.",
+      };
+    }
+
+    /*
+      No captures otros errores aquí.
+
+      Si el login es correcto, Auth.js/Next.js realiza la redirección
+      internamente. También es importante dejar visibles errores reales
+      de conexión, Prisma o configuración.
+    */
+    throw error;
   }
-
-  const passwordCorrect = await bcrypt.compare(
-    password,
-    user.password
-  );
-
-  if (!passwordCorrect) {
-    return {
-      error: "Correo o contraseÃ±a incorrectos.",
-    };
-  }
-
-  await signIn("credentials", {
-    email,
-    password,
-    redirectTo: "/",
-  });
 
   return {
     success: true,
@@ -101,7 +102,7 @@ export async function registerUser(formData: FormData) {
 
   if (password.length < 6) {
     return {
-      error: "La contraseÃ±a debe tener al menos 6 caracteres.",
+      error: "La contraseña debe tener al menos 6 caracteres.",
     };
   }
 
@@ -113,14 +114,11 @@ export async function registerUser(formData: FormData) {
 
   if (exists) {
     return {
-      error: "Ese correo ya estÃ¡ registrado.",
+      error: "Ese correo ya está registrado.",
     };
   }
 
-  const hashedPassword = await bcrypt.hash(
-    password,
-    10
-  );
+  const hashedPassword = await bcrypt.hash(password, 10);
 
   await prisma.user.create({
     data: {

@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { Camera, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { updateProfileMedia } from "@/actions/updateProfileMedia";
+import { useLanguage } from "@/components/providers/LanguageProvider";
 
 interface Props {
   type: "avatar" | "banner";
@@ -14,13 +15,16 @@ export default function ProfileMediaButtons({
 }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
+  const { t } = useLanguage();
 
   async function handleFileChange(
     event: React.ChangeEvent<HTMLInputElement>
   ) {
     const file = event.target.files?.[0];
 
-    if (!file) return;
+    if (!file) {
+      return;
+    }
 
     if (!file.type.startsWith("image/")) {
       toast.error("Selecciona una imagen válida");
@@ -36,6 +40,7 @@ export default function ProfileMediaButtons({
       setLoading(true);
 
       const formData = new FormData();
+
       formData.append("file", file);
       formData.append("type", type);
 
@@ -60,6 +65,11 @@ export default function ProfileMediaButtons({
     }
   }
 
+  const label =
+    type === "avatar"
+      ? t.profile.changeAvatar
+      : t.profile.changeBanner;
+
   return (
     <>
       <input
@@ -76,14 +86,10 @@ export default function ProfileMediaButtons({
         disabled={loading}
         className={
           type === "banner"
-            ? "inline-flex items-center gap-2 rounded-xl border border-white/20 bg-black/40 px-4 py-2 text-sm font-semibold text-white backdrop-blur-md transition hover:bg-black/60 disabled:opacity-50"
-            : "flex h-10 w-10 items-center justify-center rounded-full border-2 border-slate-900 bg-slate-800 text-white shadow-lg transition hover:bg-cyan-500 disabled:opacity-50"
+            ? "inline-flex items-center gap-2 rounded-xl border border-white/30 bg-black/45 px-4 py-2 text-sm font-semibold text-white backdrop-blur-md transition hover:bg-black/65 disabled:opacity-50"
+            : "flex h-10 w-10 items-center justify-center rounded-full border-2 border-card bg-secondary text-foreground shadow-lg transition hover:bg-primary hover:text-primary-foreground disabled:opacity-50"
         }
-        title={
-          type === "avatar"
-            ? "Cambiar foto de perfil"
-            : "Cambiar banner"
-        }
+        title={label}
       >
         {loading ? (
           <Loader2
@@ -91,16 +97,10 @@ export default function ProfileMediaButtons({
             className="animate-spin"
           />
         ) : (
-          <Camera
-            size={type === "banner" ? 16 : 18}
-          />
+          <Camera size={type === "banner" ? 16 : 18} />
         )}
 
-        {type === "banner" && (
-          <span>
-            Cambiar banner
-          </span>
-        )}
+        {type === "banner" && <span>{label}</span>}
       </button>
     </>
   );
