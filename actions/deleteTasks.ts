@@ -1,8 +1,8 @@
 "use server";
 
+import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { auth } from "@/auth";
 
 export async function deleteTask(id: string) {
   const session = await auth();
@@ -11,12 +11,23 @@ export async function deleteTask(id: string) {
     throw new Error("No autenticado");
   }
 
-  await prisma.task.delete({
+  const result = await prisma.task.deleteMany({
     where: {
       id,
       userId: session.user.id,
     },
   });
 
-  revalidatePath("/");
+  if (result.count === 0) {
+    throw new Error(
+      "No se encontró la tarea o no tienes permiso para eliminarla."
+    );
+  }
+
+  revalidatePath("/dashboard");
+  revalidatePath("/profile");
+
+  return {
+    success: true,
+  };
 }

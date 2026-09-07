@@ -50,9 +50,13 @@
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary-foreground: var(
+    --sidebar-primary-foreground
+  );
   --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent-foreground: var(
+    --sidebar-accent-foreground
+  );
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
@@ -67,11 +71,10 @@
 
 /* =========================================================
    MODO CLARO
-   Se aplica por defecto cuando html NO tiene la clase .dark
    ========================================================= */
 
 :root {
-  --background: #f8fafc;
+  --background: #f7f9fc;
   --foreground: #0f172a;
 
   --card: #ffffff;
@@ -95,7 +98,7 @@
   --destructive: #ef4444;
 
   --border: #e2e8f0;
-  --input: #e2e8f0;
+  --input: #d9e2ee;
   --ring: #2586d4;
 
   --success: #22c55e;
@@ -109,7 +112,7 @@
   --chart-4: #f59e0b;
   --chart-5: #ef4444;
 
-  --radius: 0.75rem;
+  --radius: 0.875rem;
 
   --sidebar: #ffffff;
   --sidebar-foreground: #0f172a;
@@ -123,57 +126,60 @@
 
 /* =========================================================
    MODO OSCURO
-   Se aplica cuando <html> tiene class="dark"
    ========================================================= */
 
 .dark {
-  --background: #080f17;
+  --background: #08111f;
   --foreground: #f8fafc;
 
-  --card: #121c2c;
+  --card: #101c2e;
   --card-foreground: #f8fafc;
 
-  --popover: #121c2c;
+  --popover: #101c2e;
   --popover-foreground: #f8fafc;
 
-  --primary: #2586d4;
+  --primary: #38a1f0;
   --primary-foreground: #ffffff;
 
-  --secondary: #1e293b;
-  --secondary-foreground: #e2e8f0;
+  --secondary: #18263a;
+  --secondary-foreground: #dce6f2;
 
-  --muted: #172235;
-  --muted-foreground: #94a3b8;
+  --muted: #162337;
+  --muted-foreground: #a8b5c7;
 
-  --accent: #102d45;
-  --accent-foreground: #6ec8ff;
+  --accent: #102f4a;
+  --accent-foreground: #8cd4ff;
 
-  --destructive: #ff4444;
+  --destructive: #ff5c5c;
 
-  --border: #24344b;
-  --input: #24344b;
-  --ring: #38bdf8;
+  --border: #263950;
+  --input: #2b4058;
+  --ring: #5ab7f7;
 
-  --success: #22c55e;
-  --warning: #f59e0b;
-  --info: #15c9d8;
+  --success: #3ddc7a;
+  --warning: #fbbf24;
+  --info: #22d3ee;
   --violet: #a78bfa;
 
-  --chart-1: #2586d4;
-  --chart-2: #15c9d8;
-  --chart-3: #22c55e;
-  --chart-4: #f59e0b;
-  --chart-5: #ff4444;
+  --chart-1: #38a1f0;
+  --chart-2: #22d3ee;
+  --chart-3: #3ddc7a;
+  --chart-4: #fbbf24;
+  --chart-5: #ff5c5c;
 
-  --sidebar: #0b1220;
+  --sidebar: #0a1424;
   --sidebar-foreground: #f8fafc;
-  --sidebar-primary: #2586d4;
+  --sidebar-primary: #38a1f0;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #16243a;
+  --sidebar-accent: #152842;
   --sidebar-accent-foreground: #e0f2fe;
-  --sidebar-border: #24344b;
-  --sidebar-ring: #38bdf8;
+  --sidebar-border: #263950;
+  --sidebar-ring: #5ab7f7;
 }
+
+/* =========================================================
+   BASE
+   ========================================================= */
 
 @layer base {
   * {
@@ -181,13 +187,24 @@
   }
 
   html {
-    @apply font-sans;
+    @apply font-sans antialiased;
     background-color: var(--background);
   }
 
   body {
     @apply min-h-screen bg-background text-foreground;
     background-color: var(--background);
+    background-image:
+      radial-gradient(
+        circle at 50% -20%,
+        color-mix(in srgb, var(--primary) 12%, transparent),
+        transparent 38rem
+      ),
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--primary) 2%, transparent),
+        transparent 20rem
+      );
   }
 
   button,
@@ -196,5 +213,306 @@
   select,
   textarea {
     font-family: inherit;
+  }
+
+  button,
+  a {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  button,
+  a,
+  input,
+  select,
+  textarea,
+  [role="button"] {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+  }
+
+  ::selection {
+    background-color: color-mix(
+      in srgb,
+      var(--primary) 28%,
+      transparent
+    );
+    color: var(--foreground);
+  }
+}
+
+/* =========================================================
+   FLOWDESK UI SYSTEM
+   ========================================================= */
+
+@layer utilities {
+  /* =========================
+     ESTRUCTURA GENERAL
+     ========================= */
+
+  .ui-page {
+    @apply min-h-screen bg-background text-foreground;
+  }
+
+  .ui-container {
+    @apply mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8 md:px-8 md:py-10;
+  }
+
+  .ui-page-header {
+    @apply mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between;
+  }
+
+  .ui-section {
+    @apply mt-8;
+  }
+
+  .ui-page-title-group {
+    @apply min-w-0;
+  }
+
+  /* =========================
+     TARJETAS
+     ========================= */
+
+  .ui-card {
+    @apply rounded-2xl border border-border bg-card shadow-sm shadow-slate-950/[0.03];
+  }
+
+  .ui-card-main {
+    @apply rounded-3xl border border-border bg-card shadow-xl shadow-slate-950/[0.06];
+  }
+
+  .ui-card-subtle {
+    @apply rounded-2xl border border-border bg-secondary/45;
+  }
+
+  .ui-card-interactive {
+    @apply rounded-2xl border border-border bg-card shadow-sm shadow-slate-950/[0.03] transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-primary/35 hover:shadow-lg hover:shadow-primary/[0.08];
+  }
+
+  .ui-card-hover {
+    @apply transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-primary/35 hover:shadow-lg hover:shadow-primary/[0.08];
+  }
+
+  /* =========================
+     ICONOS
+     ========================= */
+
+  .ui-icon-box {
+    @apply flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ring-1 ring-inset ring-black/5 dark:ring-white/10;
+  }
+
+  .ui-icon-primary {
+    @apply bg-primary/10 text-primary;
+  }
+
+  .ui-icon-success {
+    @apply bg-success/10 text-success;
+  }
+
+  .ui-icon-warning {
+    @apply bg-warning/10 text-warning;
+  }
+
+  .ui-icon-info {
+    @apply bg-info/10 text-info;
+  }
+
+  .ui-icon-violet {
+    @apply bg-violet/10 text-violet;
+  }
+
+  .ui-icon-danger {
+    @apply bg-destructive/10 text-destructive;
+  }
+
+  /* =========================
+     BOTONES
+     ========================= */
+
+  .ui-button-primary {
+    @apply inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/20 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/25 active:translate-y-0 disabled:pointer-events-none disabled:opacity-50;
+  }
+
+  .ui-button-secondary {
+    @apply inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-border bg-card px-5 text-sm font-semibold text-muted-foreground shadow-sm transition-all duration-200 ease-out hover:border-primary/35 hover:bg-secondary hover:text-foreground active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50;
+  }
+
+  .ui-button-ghost {
+    @apply inline-flex h-10 items-center justify-center gap-2 rounded-xl px-4 text-sm font-medium text-muted-foreground transition-all duration-200 hover:bg-secondary hover:text-foreground active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50;
+  }
+
+  .ui-button-danger {
+    @apply inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-destructive/25 bg-destructive/10 px-5 text-sm font-semibold text-destructive transition-all duration-200 ease-out hover:-translate-y-0.5 hover:bg-destructive hover:text-white hover:shadow-lg hover:shadow-destructive/20 active:translate-y-0 disabled:pointer-events-none disabled:opacity-50;
+  }
+
+  .ui-icon-button {
+    @apply inline-flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-card text-muted-foreground shadow-sm transition-all duration-200 hover:border-primary/35 hover:bg-secondary hover:text-foreground active:scale-[0.96] disabled:pointer-events-none disabled:opacity-50;
+  }
+
+  /* =========================
+     FORMULARIOS
+     ========================= */
+
+  .ui-input {
+    @apply h-11 w-full rounded-xl border border-input bg-background px-4 text-sm text-foreground shadow-sm outline-none transition-all duration-200 placeholder:text-muted-foreground focus:border-primary focus:ring-4 focus:ring-primary/10 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .ui-label {
+    @apply mb-2 block text-sm font-semibold text-foreground;
+  }
+
+  .ui-label-icon {
+    @apply mb-2 flex items-center gap-2 text-sm font-semibold text-foreground;
+  }
+
+  .ui-form-error {
+    @apply rounded-xl border border-destructive/25 bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive;
+  }
+
+  .ui-form-help {
+    @apply mt-1.5 text-xs leading-5 text-muted-foreground;
+  }
+
+  /* =========================
+     TIPOGRAFÍA
+     ========================= */
+
+  .ui-title {
+    @apply text-3xl font-bold tracking-[-0.035em] text-foreground sm:text-4xl;
+  }
+
+  .ui-section-title {
+    @apply text-xl font-bold tracking-[-0.025em] text-foreground;
+  }
+
+  .ui-section-description {
+    @apply mt-1 text-sm leading-6 text-muted-foreground;
+  }
+
+  .ui-kpi-label {
+    @apply text-sm font-medium text-muted-foreground;
+  }
+
+  .ui-kpi-value {
+    @apply mt-2 text-4xl font-bold tracking-[-0.04em] text-foreground;
+  }
+
+  .ui-caption {
+    @apply text-xs leading-5 text-muted-foreground;
+  }
+
+  /* =========================
+     BADGES Y ESTADOS
+     ========================= */
+
+  .ui-badge {
+    @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold leading-none ring-1 ring-inset ring-black/5 dark:ring-white/10;
+  }
+
+  .ui-badge-primary {
+    @apply bg-primary/10 text-primary;
+  }
+
+  .ui-badge-success {
+    @apply bg-success/10 text-success;
+  }
+
+  .ui-badge-warning {
+    @apply bg-warning/10 text-warning;
+  }
+
+  .ui-badge-danger {
+    @apply bg-destructive/10 text-destructive;
+  }
+
+  .ui-badge-info {
+    @apply bg-info/10 text-info;
+  }
+
+  .ui-badge-violet {
+    @apply bg-violet/10 text-violet;
+  }
+
+  /* =========================
+     KANBAN
+     ========================= */
+
+  .ui-kanban-column {
+    @apply relative min-h-[330px] overflow-hidden rounded-3xl border border-border bg-card/75 p-4 shadow-sm shadow-slate-950/[0.03] backdrop-blur-sm transition-all duration-200 sm:p-5;
+  }
+
+  .ui-kanban-column::before {
+    content: "";
+    @apply absolute inset-x-0 top-0 h-1 bg-border;
+  }
+
+  .ui-kanban-column-active {
+    @apply border-primary/55 bg-primary/[0.07] shadow-xl shadow-primary/[0.10] ring-1 ring-primary/25;
+  }
+
+  .ui-kanban-column-active::before {
+    @apply bg-primary;
+  }
+
+  .ui-drop-zone {
+    @apply flex min-h-[190px] items-center justify-center rounded-2xl border border-dashed border-border bg-secondary/30 p-6 transition-colors duration-200;
+  }
+
+  .ui-drop-zone-active {
+    @apply border-primary bg-primary/10 text-primary;
+  }
+
+  .ui-task-card {
+    @apply relative rounded-2xl border border-border bg-card p-4 shadow-sm shadow-slate-950/[0.035] transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-primary/35 hover:shadow-lg hover:shadow-primary/[0.08];
+  }
+
+  .ui-task-card::after {
+    content: "";
+    @apply pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/40 dark:ring-white/[0.03];
+  }
+
+  /* =========================
+     SCROLLBAR
+     ========================= */
+
+  .ui-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+
+  .ui-scrollbar::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .ui-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .ui-scrollbar::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border: 2px solid transparent;
+    border-radius: 9999px;
+    background-clip: content-box;
+  }
+
+  .ui-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: var(--muted-foreground);
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+
+  /* =========================
+     ANIMACIONES RESPETUOSAS
+     ========================= */
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      scroll-behavior: auto !important;
+      transition-duration: 0.01ms !important;
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+    }
   }
 }

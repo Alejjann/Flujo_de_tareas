@@ -5,6 +5,8 @@ import {
   useRouter,
   useSearchParams,
 } from "next/navigation";
+
+import { Check, ListFilter } from "lucide-react";
 import { useLanguage } from "@/components/providers/LanguageProvider";
 
 export default function TaskFilters() {
@@ -29,49 +31,74 @@ export default function TaskFilters() {
 
     const query = params.toString();
 
-    router.push(query ? `${pathname}?${query}` : pathname);
+    router.push(
+      query ? `${pathname}?${query}` : pathname
+    );
   }
 
-  const buttonClass =
-    "rounded-xl px-4 py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
+  const buttonBase =
+    "inline-flex h-9 items-center justify-center gap-1.5 rounded-lg px-3 text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:h-10 sm:px-4 sm:text-sm";
+
+  const filters = [
+    {
+      value: "all",
+      label: t.filters.all,
+      activeClass:
+        "bg-primary text-primary-foreground shadow-sm",
+      inactiveClass:
+        "border border-border bg-card text-muted-foreground hover:border-primary/40 hover:bg-secondary hover:text-foreground",
+    },
+    {
+      value: "pending",
+      label: t.filters.pending,
+      activeClass:
+        "bg-warning text-slate-950 shadow-sm",
+      inactiveClass:
+        "border border-border bg-card text-muted-foreground hover:border-warning/40 hover:bg-warning/10 hover:text-warning",
+    },
+    {
+      value: "completed",
+      label: t.filters.completed,
+      activeClass:
+        "bg-success text-white shadow-sm",
+      inactiveClass:
+        "border border-border bg-card text-muted-foreground hover:border-success/40 hover:bg-success/10 hover:text-success",
+    },
+  ];
 
   return (
-    <div className="flex flex-wrap gap-2">
-      <button
-        type="button"
-        onClick={() => changeStatus("all")}
-        className={`${buttonClass} ${
-          currentStatus === "all"
-            ? "bg-primary text-primary-foreground shadow-sm"
-            : "border border-border bg-secondary text-secondary-foreground hover:border-primary/40 hover:bg-accent hover:text-accent-foreground"
-        }`}
-      >
-        {t.filters.all}
-      </button>
+    <div className="flex flex-wrap items-center gap-2">
+      <div className="hidden h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary sm:flex">
+        <ListFilter size={17} />
+      </div>
 
-      <button
-        type="button"
-        onClick={() => changeStatus("pending")}
-        className={`${buttonClass} ${
-          currentStatus === "pending"
-            ? "bg-warning text-slate-950 shadow-sm"
-            : "border border-border bg-secondary text-secondary-foreground hover:border-warning/40 hover:bg-warning/10 hover:text-warning"
-        }`}
-      >
-        {t.filters.pending}
-      </button>
+      <div className="flex flex-wrap gap-2">
+        {filters.map((filter) => {
+          const isActive =
+            currentStatus === filter.value;
 
-      <button
-        type="button"
-        onClick={() => changeStatus("completed")}
-        className={`${buttonClass} ${
-          currentStatus === "completed"
-            ? "bg-success text-white shadow-sm"
-            : "border border-border bg-secondary text-secondary-foreground hover:border-success/40 hover:bg-success/10 hover:text-success"
-        }`}
-      >
-        {t.filters.completed}
-      </button>
+          return (
+            <button
+              key={filter.value}
+              type="button"
+              onClick={() =>
+                changeStatus(filter.value)
+              }
+              className={`${buttonBase} ${
+                isActive
+                  ? filter.activeClass
+                  : filter.inactiveClass
+              }`}
+            >
+              {isActive && (
+                <Check size={14} strokeWidth={3} />
+              )}
+
+              {filter.label}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }

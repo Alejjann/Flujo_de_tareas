@@ -10,11 +10,12 @@ import DashboardCharts from "@/components/dashboard/DashboardCharts";
 import TaskBoard from "@/components/tasks/TaskBoard";
 
 import {
+  AlertCircle,
+  CalendarDays,
   CheckCircle2,
   Clock3,
   ListTodo,
   TrendingUp,
-  AlertCircle,
 } from "lucide-react";
 
 import { useLanguage } from "@/components/providers/LanguageProvider";
@@ -30,13 +31,92 @@ interface DashboardContentProps {
     dueDate: Date | null;
     tag: string | null;
   }[];
-
   completed: number;
   pending: number;
   high: number;
   medium: number;
   low: number;
   productivity: number;
+}
+
+function StatCard({
+  icon,
+  iconClassName,
+  label,
+  value,
+  description,
+  accentClassName = "",
+  children,
+}: {
+  icon: React.ReactNode;
+  iconClassName: string;
+  label: string;
+  value: string | number;
+  description: string;
+  accentClassName?: string;
+  children?: React.ReactNode;
+}) {
+  return (
+    <article
+      className={`ui-card-interactive group relative min-w-0 overflow-hidden p-4 sm:p-5 lg:p-6 ${accentClassName}`}
+    >
+      <div className="absolute inset-x-0 top-0 h-0.5 bg-current opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
+
+      <div className="mb-4 flex items-start justify-between gap-3 sm:mb-5">
+        <div
+          className={`ui-icon-box h-10 w-10 rounded-xl sm:h-11 sm:w-11 sm:rounded-2xl ${iconClassName}`}
+        >
+          {icon}
+        </div>
+
+        <span className="max-w-[55%] truncate text-right text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground sm:text-[11px]">
+          {label}
+        </span>
+      </div>
+
+      <p className="text-2xl font-black tracking-[-0.04em] text-foreground sm:text-3xl">
+        {value}
+      </p>
+
+      <p className="mt-1 min-h-5 text-xs leading-5 text-muted-foreground sm:text-sm">
+        {description}
+      </p>
+
+      {children}
+    </article>
+  );
+}
+
+function SummaryRow({
+  icon,
+  iconClassName,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  iconClassName: string;
+  label: string;
+  value: number;
+}) {
+  return (
+    <div className="ui-card-subtle group flex items-center justify-between gap-3 px-3.5 py-3 transition-colors duration-200 hover:border-primary/25 hover:bg-secondary/70 sm:px-4 sm:py-3.5">
+      <div className="flex min-w-0 items-center gap-3">
+        <div
+          className={`ui-icon-box h-9 w-9 rounded-xl transition-transform duration-200 group-hover:scale-105 ${iconClassName}`}
+        >
+          {icon}
+        </div>
+
+        <span className="truncate text-sm font-semibold text-foreground">
+          {label}
+        </span>
+      </div>
+
+      <span className="shrink-0 rounded-lg bg-card px-2.5 py-1 text-sm font-bold tabular-nums text-foreground shadow-sm ring-1 ring-inset ring-border">
+        {value}
+      </span>
+    </div>
+  );
 }
 
 export default function DashboardContent({
@@ -50,185 +130,198 @@ export default function DashboardContent({
 }: DashboardContentProps) {
   const { t } = useLanguage();
 
+  const safeProductivity = Math.min(
+    Math.max(productivity, 0),
+    100
+  );
+
   return (
     <>
-      {/* HEADER DEL DASHBOARD */}
-      <header className="mb-8 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-        <div>
+      {/* CABECERA */}
+      <header className="ui-page-header mb-6 sm:mb-8">
+        <div className="ui-page-title-group max-w-2xl">
           <div className="mb-3 flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
-              <ListTodo
-                size={22}
-                className="text-primary"
-              />
+            <div className="ui-icon-box ui-icon-primary h-10 w-10 rounded-xl">
+              <ListTodo size={20} />
             </div>
 
-            <span className="text-sm font-semibold tracking-[0.2em] text-primary">
+            <span className="text-xs font-bold tracking-[0.18em] text-primary sm:text-sm">
               FLOWDESK
             </span>
           </div>
 
-          <h1 className="text-4xl font-black tracking-tight text-foreground sm:text-5xl">
+          <h1 className="ui-title text-3xl sm:text-4xl lg:text-5xl">
             {t.dashboard.title}
           </h1>
 
-          <p className="mt-3 max-w-xl text-muted-foreground">
+          <p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground sm:mt-3 sm:text-base">
             {t.dashboard.description}
           </p>
         </div>
 
-        <AddTaskButton />
+        <div className="w-full sm:w-auto">
+          <AddTaskButton />
+        </div>
       </header>
 
-      {/* BIENVENIDA */}
-      <section className="relative mb-8 overflow-hidden rounded-[28px] border border-primary/20 bg-gradient-to-br from-primary/15 via-info/10 to-violet/10 p-7 shadow-2xl shadow-primary/10 sm:p-9">
-        <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
+      {/* RESUMEN PRINCIPAL */}
+      <section className="relative mb-6 overflow-hidden rounded-3xl border border-primary/20 bg-card p-5 shadow-lg shadow-primary/[0.06] sm:mb-8 sm:p-7 lg:p-8">
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/[0.13] via-transparent to-info/[0.08]" />
 
-        <div className="absolute -bottom-24 left-1/3 h-64 w-64 rounded-full bg-info/10 blur-3xl" />
+        <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-primary/15 blur-3xl" />
 
-        <div className="relative flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <p className="mb-2 text-sm font-semibold uppercase tracking-wider text-primary">
+        <div className="pointer-events-none absolute -bottom-24 left-[28%] h-56 w-56 rounded-full bg-info/10 blur-3xl" />
+
+        <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+          <div className="max-w-2xl">
+            <p className="text-xs font-bold uppercase tracking-[0.14em] text-primary">
               {t.dashboard.todaySummary}
             </p>
 
-            <h2 className="text-3xl font-bold text-foreground sm:text-4xl">
+            <h2 className="mt-2 text-2xl font-bold tracking-[-0.03em] text-foreground sm:text-3xl">
               {t.dashboard.welcome}
             </h2>
 
-            <p className="mt-3 max-w-2xl leading-7 text-muted-foreground">
+            <p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground sm:text-base">
               {t.dashboard.welcomeDescription}
             </p>
+
+            <div className="mt-5 flex flex-wrap items-center gap-2.5 sm:gap-3">
+              <a
+                href="#my-tasks"
+                className="ui-button-primary h-10 px-4 text-sm"
+              >
+                <ListTodo size={16} />
+                {t.dashboard.myTasks}
+              </a>
+
+              <span className="inline-flex h-10 items-center rounded-xl border border-border bg-card/75 px-4 text-sm font-semibold text-muted-foreground shadow-sm backdrop-blur-sm">
+                <Clock3 size={15} className="mr-2 text-warning" />
+                {pending} {t.status.pendingPlural.toLowerCase()}
+              </span>
+            </div>
           </div>
 
-          <div className="min-w-[190px] rounded-2xl border border-border bg-card/70 p-5 backdrop-blur-xl">
-            <div className="mb-2 flex items-center gap-2 text-sm text-muted-foreground">
-              <ListTodo size={16} />
-              {t.dashboard.totalTasks}
+          <div className="grid w-full grid-cols-2 gap-3 sm:max-w-[360px] lg:w-[340px] lg:grid-cols-1">
+            <div className="rounded-2xl border border-border bg-card/80 p-4 shadow-sm backdrop-blur-xl sm:p-5">
+              <div className="mb-2 flex items-center gap-2 text-xs font-semibold text-muted-foreground sm:text-sm">
+                <ListTodo size={16} className="text-primary" />
+                {t.dashboard.totalTasks}
+              </div>
+
+              <p className="text-4xl font-black tracking-[-0.05em] text-foreground sm:text-5xl">
+                {tasks.length}
+              </p>
             </div>
 
-            <p className="text-5xl font-black text-foreground">
-              {tasks.length}
-            </p>
+            <div className="rounded-2xl border border-border bg-card/80 p-4 shadow-sm backdrop-blur-xl sm:p-5">
+              <div className="mb-2 flex items-center justify-between gap-3 text-xs font-semibold text-muted-foreground sm:text-sm">
+                <span className="flex items-center gap-2">
+                  <TrendingUp size={16} className="text-violet" />
+                  {t.dashboard.statistics.productivity}
+                </span>
+
+                <span className="font-bold text-violet">
+                  {safeProductivity}%
+                </span>
+              </div>
+
+              <div
+                className="h-2 overflow-hidden rounded-full bg-secondary"
+                role="progressbar"
+                aria-label={t.dashboard.statistics.productivity}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-valuenow={safeProductivity}
+              >
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-primary via-info to-violet transition-all duration-700 ease-out"
+                  style={{
+                    width: `${safeProductivity}%`,
+                  }}
+                />
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ESTADÍSTICAS */}
-      <section className="mb-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
-        {/* TOTAL */}
-        <div className="group rounded-2xl border border-border bg-card p-6 transition duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5">
-          <div className="mb-5 flex items-center justify-between">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10">
-              <ListTodo
-                size={21}
-                className="text-primary"
-              />
-            </div>
+      {/* MÉTRICAS */}
+      <section
+        className="mb-6 grid grid-cols-2 gap-3 sm:mb-8 sm:gap-5 xl:grid-cols-4"
+        aria-label={t.dashboard.statistics.total}
+      >
+        <StatCard
+          icon={<ListTodo size={20} />}
+          iconClassName="ui-icon-primary"
+          label={t.dashboard.statistics.total}
+          value={tasks.length}
+          description={t.dashboard.statistics.createdTasks}
+          accentClassName="text-primary hover:border-primary/45 hover:shadow-primary/10"
+        />
 
-            <span className="text-xs font-semibold tracking-wider text-muted-foreground">
-              {t.dashboard.statistics.total}
-            </span>
-          </div>
+        <StatCard
+          icon={<CheckCircle2 size={20} />}
+          iconClassName="ui-icon-success"
+          label={t.dashboard.statistics.completed}
+          value={completed}
+          description={t.dashboard.statistics.finishedTasks}
+          accentClassName="text-success hover:border-success/45 hover:shadow-success/10"
+        />
 
-          <p className="text-3xl font-bold text-foreground">
-            {tasks.length}
-          </p>
+        <StatCard
+          icon={<Clock3 size={20} />}
+          iconClassName="ui-icon-warning"
+          label={t.dashboard.statistics.pending}
+          value={pending}
+          description={t.dashboard.statistics.pendingTasks}
+          accentClassName="text-warning hover:border-warning/45 hover:shadow-warning/10"
+        />
 
-          <p className="mt-1 text-sm text-muted-foreground">
-            {t.dashboard.statistics.createdTasks}
-          </p>
-        </div>
-
-        {/* COMPLETADAS */}
-        <div className="group rounded-2xl border border-border bg-card p-6 transition duration-300 hover:-translate-y-1 hover:border-success/50 hover:shadow-lg hover:shadow-success/5">
-          <div className="mb-5 flex items-center justify-between">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-success/10">
-              <CheckCircle2
-                size={21}
-                className="text-success"
-              />
-            </div>
-
-            <span className="text-xs font-semibold tracking-wider text-muted-foreground">
-              {t.dashboard.statistics.completed}
-            </span>
-          </div>
-
-          <p className="text-3xl font-bold text-foreground">
-            {completed}
-          </p>
-
-          <p className="mt-1 text-sm text-muted-foreground">
-            {t.dashboard.statistics.finishedTasks}
-          </p>
-        </div>
-
-        {/* PENDIENTES */}
-        <div className="group rounded-2xl border border-border bg-card p-6 transition duration-300 hover:-translate-y-1 hover:border-warning/50 hover:shadow-lg hover:shadow-warning/5">
-          <div className="mb-5 flex items-center justify-between">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-warning/10">
-              <Clock3
-                size={21}
-                className="text-warning"
-              />
-            </div>
-
-            <span className="text-xs font-semibold tracking-wider text-muted-foreground">
-              {t.dashboard.statistics.pending}
-            </span>
-          </div>
-
-          <p className="text-3xl font-bold text-foreground">
-            {pending}
-          </p>
-
-          <p className="mt-1 text-sm text-muted-foreground">
-            {t.dashboard.statistics.pendingTasks}
-          </p>
-        </div>
-
-        {/* PRODUCTIVIDAD */}
-        <div className="group rounded-2xl border border-border bg-card p-6 transition duration-300 hover:-translate-y-1 hover:border-violet/50 hover:shadow-lg hover:shadow-violet/5">
-          <div className="mb-5 flex items-center justify-between">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-violet/10">
-              <TrendingUp
-                size={21}
-                className="text-violet"
-              />
-            </div>
-
-            <span className="text-xs font-semibold tracking-wider text-muted-foreground">
-              {t.dashboard.statistics.productivity}
-            </span>
-          </div>
-
-          <p className="text-3xl font-bold text-foreground">
-            {productivity}%
-          </p>
-
-          <div className="mt-3 h-2 overflow-hidden rounded-full bg-secondary">
+        <StatCard
+          icon={<TrendingUp size={20} />}
+          iconClassName="ui-icon-violet"
+          label={t.dashboard.statistics.productivity}
+          value={`${safeProductivity}%`}
+          description={t.dashboard.statistics.productivity}
+          accentClassName="text-violet hover:border-violet/45 hover:shadow-violet/10"
+        >
+          <div
+            className="mt-3 h-2 overflow-hidden rounded-full bg-secondary"
+            role="progressbar"
+            aria-label={t.dashboard.statistics.productivity}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={safeProductivity}
+          >
             <div
-              className="h-full rounded-full bg-gradient-to-r from-primary to-info transition-all duration-700"
+              className="h-full rounded-full bg-gradient-to-r from-primary via-info to-violet transition-all duration-700 ease-out"
               style={{
-                width: `${productivity}%`,
+                width: `${safeProductivity}%`,
               }}
             />
           </div>
-        </div>
+        </StatCard>
       </section>
 
       {/* ACTIVIDAD Y RESUMEN */}
-      <section className="mb-8 grid gap-6 lg:grid-cols-[1.5fr_1fr]">
-        <div className="rounded-2xl border border-border bg-card p-6">
-          <div className="mb-6">
-            <h2 className="text-xl font-bold text-foreground">
-              {t.dashboard.activity}
-            </h2>
+      <section className="mb-6 grid gap-6 sm:mb-8 lg:grid-cols-[minmax(0,1.55fr)_minmax(290px,1fr)]">
+        <article className="ui-card-main overflow-hidden p-5 sm:p-6">
+          <div className="mb-5 flex flex-col gap-3 border-b border-border pb-5 sm:mb-6 sm:flex-row sm:items-start sm:justify-between sm:pb-6">
+            <div>
+              <h2 className="ui-section-title">
+                {t.dashboard.activity}
+              </h2>
 
-            <p className="mt-1 text-sm text-muted-foreground">
-              {t.dashboard.activityDescription}
-            </p>
+              <p className="ui-section-description">
+                {t.dashboard.activityDescription}
+              </p>
+            </div>
+
+            <div className="ui-badge ui-badge-primary w-fit">
+              <TrendingUp size={14} />
+              {safeProductivity}%
+            </div>
           </div>
 
           <DashboardCharts
@@ -238,130 +331,116 @@ export default function DashboardContent({
             medium={medium}
             low={low}
           />
-        </div>
+        </article>
 
-        <div className="rounded-2xl border border-border bg-card p-6">
-          <div className="mb-6">
-            <h2 className="text-xl font-bold text-foreground">
+        <article className="ui-card-main p-5 sm:p-6">
+          <div className="mb-5 border-b border-border pb-5 sm:mb-6 sm:pb-6">
+            <h2 className="ui-section-title">
               {t.dashboard.summary}
             </h2>
 
-            <p className="mt-1 text-sm text-muted-foreground">
+            <p className="ui-section-description">
               {t.dashboard.summaryDescription}
             </p>
           </div>
 
-          <div className="space-y-4">
-            <div className="flex items-center justify-between rounded-xl border border-border bg-secondary/50 p-4">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-success/10">
-                  <CheckCircle2
-                    size={18}
-                    className="text-success"
-                  />
-                </div>
+          <div className="space-y-3">
+            <SummaryRow
+              icon={<CheckCircle2 size={18} />}
+              iconClassName="ui-icon-success"
+              label={t.dashboard.completed}
+              value={completed}
+            />
 
-                <span className="text-sm text-foreground">
-                  {t.dashboard.completed}
-                </span>
-              </div>
+            <SummaryRow
+              icon={<Clock3 size={18} />}
+              iconClassName="ui-icon-warning"
+              label={t.dashboard.pending}
+              value={pending}
+            />
 
-              <span className="font-bold text-foreground">
-                {completed}
-              </span>
-            </div>
-
-            <div className="flex items-center justify-between rounded-xl border border-border bg-secondary/50 p-4">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-warning/10">
-                  <Clock3
-                    size={18}
-                    className="text-warning"
-                  />
-                </div>
-
-                <span className="text-sm text-foreground">
-                  {t.dashboard.pending}
-                </span>
-              </div>
-
-              <span className="font-bold text-foreground">
-                {pending}
-              </span>
-            </div>
-
-            <div className="flex items-center justify-between rounded-xl border border-border bg-secondary/50 p-4">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-destructive/10">
-                  <AlertCircle
-                    size={18}
-                    className="text-destructive"
-                  />
-                </div>
-
-                <span className="text-sm text-foreground">
-                  {t.dashboard.highPriority}
-                </span>
-              </div>
-
-              <span className="font-bold text-foreground">
-                {high}
-              </span>
-            </div>
+            <SummaryRow
+              icon={<AlertCircle size={18} />}
+              iconClassName="ui-icon-danger"
+              label={t.dashboard.highPriority}
+              value={high}
+            />
           </div>
-        </div>
+        </article>
       </section>
 
       {/* FILTROS */}
-      <section className="mb-8 rounded-2xl border border-border bg-card p-5">
-        <div className="mb-5">
-          <h2 className="font-bold text-foreground">
+      <section
+        id="my-tasks"
+        className="ui-card-main mb-6 scroll-mt-28 p-4 sm:mb-8 sm:p-5"
+      >
+        <div className="mb-4 flex flex-col gap-1 border-b border-border pb-4 sm:mb-5 sm:pb-5">
+          <h2 className="ui-section-title text-lg sm:text-xl">
             {t.dashboard.myTasks}
           </h2>
 
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="ui-section-description text-xs sm:text-sm">
             {t.dashboard.myTasksDescription}
           </p>
         </div>
 
-        <div className="flex flex-wrap gap-3">
-          <SearchBar />
-          <TaskFilters />
-          <PriorityFilters />
-          <SortTasks />
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="w-full lg:max-w-md">
+            <SearchBar />
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2 lg:justify-end">
+            <TaskFilters />
+            <PriorityFilters />
+            <SortTasks />
+          </div>
         </div>
       </section>
 
       {/* CALENDARIO Y TABLERO */}
-      <section className="grid gap-6 xl:grid-cols-[320px_1fr]">
-        <div className="rounded-2xl border border-border bg-card p-4">
-          <h2 className="mb-4 px-2 font-bold text-foreground">
-            {t.dashboard.calendar}
-          </h2>
+      <section className="grid gap-6 xl:grid-cols-[280px_minmax(0,1fr)]">
+        <aside className="ui-card-main h-fit overflow-hidden p-4 sm:p-5 xl:sticky xl:top-24">
+          <div className="mb-4 flex items-center gap-3 border-b border-border pb-4">
+            <div className="ui-icon-box ui-icon-primary h-9 w-9 rounded-xl">
+              <CalendarDays size={18} />
+            </div>
 
-          <CalendarView tasks={tasks} />
-        </div>
-
-        <div>
-          {tasks.length === 0 ? (
-            <div className="flex min-h-[400px] flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card p-12 text-center">
-              <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
-                <ListTodo
-                  size={30}
-                  className="text-primary"
-                />
-              </div>
-
-              <h2 className="text-2xl font-bold text-foreground">
-                {t.dashboard.noTasks}
+            <div>
+              <h2 className="text-sm font-bold text-foreground sm:text-base">
+                {t.dashboard.calendar}
               </h2>
 
-              <p className="mt-2 max-w-md text-muted-foreground">
-                {t.dashboard.noTasksDescription}
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                {tasks.length} {t.dashboard.totalTasks.toLowerCase()}
               </p>
+            </div>
+          </div>
 
-              <div className="mt-6">
-                <AddTaskButton />
+          <CalendarView tasks={tasks} />
+        </aside>
+
+        <div className="min-w-0">
+          {tasks.length === 0 ? (
+            <div className="relative flex min-h-[360px] flex-col items-center justify-center overflow-hidden rounded-3xl border border-dashed border-primary/35 bg-card p-7 text-center shadow-sm sm:min-h-[420px] sm:p-12">
+              <div className="pointer-events-none absolute -left-16 -top-16 h-48 w-48 rounded-full bg-primary/10 blur-3xl" />
+              <div className="pointer-events-none absolute -bottom-16 -right-16 h-48 w-48 rounded-full bg-info/10 blur-3xl" />
+
+              <div className="relative">
+                <div className="ui-icon-box ui-icon-primary mx-auto mb-5 h-16 w-16 rounded-3xl sm:h-20 sm:w-20">
+                  <ListTodo size={32} />
+                </div>
+
+                <h2 className="text-xl font-bold tracking-[-0.03em] text-foreground sm:text-2xl">
+                  {t.dashboard.noTasks}
+                </h2>
+
+                <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-muted-foreground sm:text-base">
+                  {t.dashboard.noTasksDescription}
+                </p>
+
+                <div className="mt-6 flex justify-center">
+                  <AddTaskButton />
+                </div>
               </div>
             </div>
           ) : (

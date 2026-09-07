@@ -202,6 +202,15 @@ export const translations = {
 
       cancel: "Cancelar",
 
+      deleteTitle: 
+        "Eliminar tarea",
+        
+      deleteDescription:
+        "¿Seguro que quieres eliminar esta tarea? Esta acción no se puede deshacer.",
+
+      deleting: 
+        "Eliminando...",
+
       move: "Mover",
 
       moveTask: "Mover tarea",
@@ -1109,6 +1118,15 @@ export const translations = {
 
       taskPlural:
         "tasks",
+
+      deleteTitle: 
+         "Delete task",
+
+      deleteDescription:
+         "Are you sure you want to delete this task? This action cannot be undone.",
+
+      deleting:
+         "Deleting...",
     },
 
     /*
@@ -1493,6 +1511,15 @@ export const translations = {
 
       taskMoved:
         "Task moved successfully.",
+
+      deleteTitle: 
+        "Delete task",
+
+      deleteDescription:
+        "Are you sure you want to delete this task? This action cannot be undone.",
+
+      deleting:   
+        "Deleting...",
 
       error:
         "An error occurred.",

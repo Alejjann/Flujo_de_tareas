@@ -1,8 +1,6 @@
 import { prisma } from "@/lib/prisma";
-
 import DashboardContent from "@/components/dashboard/DashboardContent";
 import Header from "@/components/layout/Header";
-
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 
@@ -16,10 +14,6 @@ export default async function Home({
     sort?: string;
   }>;
 }) {
-  // ==========================================
-  // SEARCH PARAMS
-  // ==========================================
-
   const {
     search,
     status,
@@ -27,27 +21,15 @@ export default async function Home({
     sort,
   } = await searchParams;
 
-  // ==========================================
-  // SESIÓN
-  // ==========================================
-
   const session = await auth();
 
   if (!session?.user?.id) {
     redirect("/login");
   }
 
-  // ==========================================
-  // OBTENER TAREAS
-  // ==========================================
-
   const tasks = await prisma.task.findMany({
     where: {
       userId: session.user.id,
-
-      // ==============================
-      // BUSCADOR
-      // ==============================
 
       ...(search
         ? {
@@ -68,10 +50,6 @@ export default async function Home({
           }
         : {}),
 
-      // ==============================
-      // ESTADO
-      // ==============================
-
       ...(status === "completed"
         ? {
             status: "COMPLETED" as const,
@@ -81,32 +59,20 @@ export default async function Home({
       ...(status === "pending"
         ? {
             status: {
-              in: [
-                "PENDING",
-                "IN_PROGRESS",
-              ] as const,
+              in: ["PENDING", "IN_PROGRESS"] as const,
             },
           }
         : {}),
 
-      // ==============================
-      // PRIORIDAD
-      // ==============================
-
       ...(priority
         ? {
-            priority:
-              priority as
-                | "LOW"
-                | "MEDIUM"
-                | "HIGH",
+            priority: priority as
+              | "LOW"
+              | "MEDIUM"
+              | "HIGH",
           }
         : {}),
     },
-
-    // ==========================================
-    // ORDENACIÓN
-    // ==========================================
 
     orderBy:
       sort === "priority"
@@ -126,16 +92,11 @@ export default async function Home({
           },
   });
 
-  // ==========================================
-  // ESTADÍSTICAS
-  // ==========================================
-
   const completed = tasks.filter(
     (task) => task.completed
   ).length;
 
-  const pending =
-    tasks.length - completed;
+  const pending = tasks.length - completed;
 
   const high = tasks.filter(
     (task) => task.priority === "HIGH"
@@ -149,39 +110,20 @@ export default async function Home({
     (task) => task.priority === "LOW"
   ).length;
 
-  // ==========================================
-  // PRODUCTIVIDAD
-  // ==========================================
-
   const productivity =
     tasks.length > 0
-      ? Math.round(
-          (completed / tasks.length) * 100
-        )
+      ? Math.round((completed / tasks.length) * 100)
       : 0;
 
-  // ==========================================
-  // RENDER
-  // ==========================================
-
   return (
-<main className="min-h-screen bg-background text-foreground">
-      {/* ======================================
-          HEADER PRINCIPAL
-      ====================================== */}
-
+    <main className="ui-page">
       <Header
         name={session.user.name}
         email={session.user.email}
         avatarUrl={session.user.image}
       />
 
-      {/* ======================================
-          CONTENIDO DASHBOARD
-      ====================================== */}
-
-      <div className="mx-auto max-w-[1500px] px-5 py-8 sm:px-8">
-
+      <div className="ui-container max-w-[1440px]">
         <DashboardContent
           tasks={tasks.map((task) => ({
             id: task.id,
@@ -193,7 +135,6 @@ export default async function Home({
             dueDate: task.dueDate,
             tag: task.tag,
           }))}
-
           completed={completed}
           pending={pending}
           high={high}
@@ -201,9 +142,7 @@ export default async function Home({
           low={low}
           productivity={productivity}
         />
-
       </div>
-
     </main>
   );
 }

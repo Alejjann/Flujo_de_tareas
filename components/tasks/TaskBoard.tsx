@@ -9,27 +9,27 @@ import {
   useDraggable,
   useDroppable,
 } from "@dnd-kit/core";
-
 import { useEffect, useState } from "react";
-
-import { updateTaskStatus } from "@/actions/updateTaskStatus";
-import { deleteTask } from "@/actions/deleteTasks";
-
 import { toast } from "sonner";
 
+import { updateTaskStatus } from "@/actions/updateTaskStatus";
+import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/components/providers/LanguageProvider";
+import { formatTaskDate } from "@/lib/formatTaskDate";
+
 import {
+  AlertCircle,
+  CalendarDays,
   CircleCheck,
   Clock3,
+  GripVertical,
   ListTodo,
   Pencil,
   Trash2,
-  GripVertical,
-  CalendarDays,
 } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import EditTaskDialog from "./EditTaskDialog";
-import { useLanguage } from "@/components/providers/LanguageProvider";
+import DeleteTaskDialog from "./DeleteTaskDialog";
 
 interface Task {
   id: string;
@@ -47,16 +47,16 @@ interface TaskBoardProps {
 }
 
 const priorityStyles = {
-  LOW: "border-success/20 bg-success/15 text-success",
-  MEDIUM: "border-warning/20 bg-warning/15 text-warning",
-  HIGH: "border-destructive/20 bg-destructive/15 text-destructive",
+  LOW: "border-success/20 bg-success/10 text-success",
+  MEDIUM: "border-warning/20 bg-warning/10 text-warning",
+  HIGH: "border-destructive/20 bg-destructive/10 text-destructive",
 };
 
 const tagStyles: Record<string, string> = {
-  Trabajo: "bg-primary/15 text-primary",
-  Estudios: "bg-violet/15 text-violet",
-  Personal: "bg-pink-500/15 text-pink-500",
-  Casa: "bg-orange-500/15 text-orange-500",
+  Trabajo: "bg-primary/10 text-primary",
+  Estudios: "bg-violet/10 text-violet",
+  Personal: "bg-pink-500/10 text-pink-500",
+  Casa: "bg-orange-500/10 text-orange-500",
 };
 
 function getTagStyle(tag: string | null) {
@@ -64,7 +64,22 @@ function getTagStyle(tag: string | null) {
     return "";
   }
 
-  return tagStyles[tag] || "bg-info/15 text-info";
+  return tagStyles[tag] || "bg-info/10 text-info";
+}
+
+function getPriorityLabel(
+  priority: Task["priority"],
+  t: ReturnType<typeof useLanguage>["t"]
+) {
+  if (priority === "HIGH") {
+    return t.priority.high;
+  }
+
+  if (priority === "MEDIUM") {
+    return t.priority.medium;
+  }
+
+  return t.priority.low;
 }
 
 function TaskItem({
@@ -94,38 +109,31 @@ function TaskItem({
       }
     : undefined;
 
-  const isOverdue =
-    task.dueDate &&
-    !task.completed &&
-    new Date(task.dueDate) < new Date();
+  const priorityLabel = getPriorityLabel(task.priority, t);
 
-  const priorityLabel =
-    task.priority === "HIGH"
-      ? t.priority.high
-      : task.priority === "MEDIUM"
-      ? t.priority.medium
-      : t.priority.low;
+  const taskDate = task.dueDate
+    ? formatTaskDate({
+        dueDate: task.dueDate,
+        language,
+        completed: task.completed,
+      })
+    : null;
 
-  const formattedDate = task.dueDate
-    ? new Date(task.dueDate).toLocaleDateString(
-        language === "es" ? "es-ES" : "en-US"
-      )
-    : "";
+  const isOverdue = taskDate?.isOverdue ?? false;
 
   return (
-    <div
+    <article
       ref={setNodeRef}
       style={style}
-      className={`group rounded-2xl border border-border bg-card p-4 transition-all duration-300 ${
+      className={`ui-task-card group ${
         isDragging
           ? "z-50 scale-[1.02] border-primary opacity-40 shadow-2xl shadow-primary/20"
-          : "hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10"
+          : ""
       }`}
     >
-      {/* CABECERA */}
       <div className="flex items-start justify-between gap-3">
         <h3
-          className={`min-w-0 flex-1 break-words text-base font-semibold ${
+          className={`line-clamp-2 min-w-0 flex-1 text-sm font-semibold leading-5 transition-colors ${
             task.completed
               ? "text-muted-foreground line-through"
               : "text-foreground group-hover:text-primary"
@@ -135,7 +143,7 @@ function TaskItem({
         </h3>
 
         <span
-          className={`shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide ${
+          className={`shrink-0 rounded-full border px-2 py-1 text-[10px] font-bold uppercase tracking-wide ${
             priorityStyles[task.priority]
           }`}
         >
@@ -143,10 +151,9 @@ function TaskItem({
         </span>
       </div>
 
-      {/* DESCRIPCIÓN */}
       {task.description && (
         <p
-          className={`mt-3 whitespace-pre-wrap break-words text-sm leading-6 ${
+          className={`mt-2 line-clamp-2 whitespace-pre-wrap break-words text-xs leading-5 ${
             task.completed
               ? "text-muted-foreground/70"
               : "text-muted-foreground"
@@ -156,49 +163,53 @@ function TaskItem({
         </p>
       )}
 
-      {/* ETIQUETA Y FECHA */}
-      <div className="mt-4 flex flex-wrap gap-2">
-        {task.tag && (
-          <span
-            className={`rounded-full px-2.5 py-1 text-xs font-medium ${getTagStyle(
-              task.tag
-            )}`}
-          >
-            🏷 {task.tag}
-          </span>
-        )}
+      {(task.tag || task.dueDate) && (
+        <div className="mt-3 flex flex-wrap gap-2">
+          {task.tag && (
+            <span
+              className={`max-w-[130px] truncate rounded-full px-2.5 py-1 text-xs font-medium ${getTagStyle(
+                task.tag
+              )}`}
+              title={task.tag}
+            >
+              {task.tag}
+            </span>
+          )}
 
-        {task.dueDate && (
-          <span
-            className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-xs ${
-              isOverdue
-                ? "bg-destructive/15 text-destructive"
-                : "bg-secondary text-muted-foreground"
-            }`}
-          >
-            <CalendarDays size={12} />
+          {task.dueDate && (
+            <span
+              className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-xs ${
+                isOverdue
+                  ? "bg-destructive/10 text-destructive"
+                  : "bg-secondary text-muted-foreground"
+              }`}
+            >
+              {isOverdue ? (
+                <AlertCircle size={12} />
+              ) : (
+                <CalendarDays size={12} />
+              )}
 
-            {isOverdue ? `${t.tasks.overdue} · ` : ""}
+              {taskDate?.label}
+            </span>
+          )}
+        </div>
+      )}
 
-            {formattedDate}
-          </span>
-        )}
-      </div>
-
-      {/* ACCIONES */}
-      <div className="mt-4 flex items-center justify-between border-t border-border pt-3">
+      <div className="mt-4 flex items-center justify-between gap-2 border-t border-border pt-3">
         <button
           type="button"
           {...listeners}
           {...attributes}
-          className="flex cursor-grab items-center gap-2 rounded-lg px-2 py-1.5 text-xs text-muted-foreground transition hover:bg-secondary hover:text-foreground active:cursor-grabbing"
+          className="inline-flex min-h-8 cursor-grab items-center gap-1.5 rounded-lg px-2 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-secondary hover:text-foreground active:cursor-grabbing"
           title={t.board.drag}
+          aria-label={t.board.drag}
         >
-          <GripVertical size={16} />
-          {t.tasks.move}
+          <GripVertical size={15} />
+          <span className="hidden sm:inline">{t.tasks.move}</span>
         </button>
 
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 opacity-100 transition sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100">
           <Button
             type="button"
             size="icon"
@@ -206,8 +217,9 @@ function TaskItem({
             onClick={onEdit}
             className="h-8 w-8 text-muted-foreground hover:bg-primary/10 hover:text-primary"
             title={t.tasks.edit}
+            aria-label={t.tasks.edit}
           >
-            <Pencil size={16} />
+            <Pencil size={15} />
           </Button>
 
           <Button
@@ -217,12 +229,13 @@ function TaskItem({
             onClick={onDelete}
             className="h-8 w-8 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
             title={t.tasks.delete}
+            aria-label={t.tasks.delete}
           >
-            <Trash2 size={16} />
+            <Trash2 size={15} />
           </Button>
         </div>
       </div>
-    </div>
+    </article>
   );
 }
 
@@ -258,54 +271,46 @@ function TaskColumn({
       : `${tasks.length} ${t.board.tasks}`;
 
   return (
-    <div
+    <section
       ref={setNodeRef}
-      className={`min-h-[420px] rounded-3xl border p-4 transition-all duration-300 ${
+      className={`ui-kanban-column ${
         column.border
-      } ${
-        isOver
-          ? "border-primary bg-primary/10 shadow-xl shadow-primary/10"
-          : "bg-card"
-      }`}
+      } ${isOver ? "ui-kanban-column-active" : ""}`}
     >
-      {/* CABECERA */}
-      <div className="mb-5 flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <header className="mb-4 flex items-start justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-3">
           <div
-            className={`flex h-9 w-9 items-center justify-center rounded-xl ${column.bg}`}
+            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${column.bg}`}
           >
             <Icon size={18} className={column.color} />
           </div>
 
-          <div>
-            <h2 className="font-bold text-foreground">
+          <div className="min-w-0">
+            <h2 className="truncate text-sm font-bold text-foreground">
               {column.title}
             </h2>
 
-            <p className="text-xs text-muted-foreground">
-              {taskCount}
-            </p>
+            <p className="text-xs text-muted-foreground">{taskCount}</p>
           </div>
         </div>
 
         <span
-          className={`rounded-full px-3 py-1 text-sm font-bold ${column.bg} ${column.color}`}
+          className={`inline-flex min-w-8 shrink-0 items-center justify-center rounded-full px-2.5 py-1 text-xs font-bold ${column.bg} ${column.color}`}
         >
           {tasks.length}
         </span>
-      </div>
+      </header>
 
-      {/* TAREAS */}
       <div className="space-y-3">
         {tasks.length === 0 ? (
-          <div className="flex min-h-[250px] items-center justify-center rounded-2xl border border-dashed border-border bg-background/60 p-6 text-center">
-            <div>
+          <div className="ui-drop-zone">
+            <div className="text-center">
               <Icon
                 size={28}
-                className={`mx-auto mb-3 ${column.color} opacity-50`}
+                className={`mx-auto mb-3 ${column.color} opacity-60`}
               />
 
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm font-medium text-muted-foreground">
                 {t.tasks.dragHere}
               </p>
             </div>
@@ -321,7 +326,7 @@ function TaskColumn({
           ))
         )}
       </div>
-    </div>
+    </section>
   );
 }
 
@@ -358,12 +363,9 @@ export default function TaskBoard({
   ];
 
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
-  const [activeTask, setActiveTask] = useState<Task | null>(
-    null
-  );
-  const [editingTask, setEditingTask] = useState<Task | null>(
-    null
-  );
+  const [activeTask, setActiveTask] = useState<Task | null>(null);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [deletingTask, setDeletingTask] = useState<Task | null>(null);
 
   useEffect(() => {
     setTasks(initialTasks);
@@ -444,35 +446,8 @@ export default function TaskBoard({
     }
   }
 
-  async function handleDelete(task: Task) {
-    const confirmed = window.confirm(
-      `${t.messages.deleteConfirm}\n\n"${task.title}"`
-    );
-
-    if (!confirmed) {
-      return;
-    }
-
-    try {
-      await deleteTask(task.id);
-
-      setTasks((current) =>
-        current.filter((item) => item.id !== task.id)
-      );
-
-      toast.success(t.messages.deleteSuccess);
-    } catch (error) {
-      console.error(error);
-      toast.error(t.messages.deleteError);
-    }
-  }
-
   const activePriorityLabel = activeTask
-    ? activeTask.priority === "HIGH"
-      ? t.priority.high
-      : activeTask.priority === "MEDIUM"
-      ? t.priority.medium
-      : t.priority.low
+    ? getPriorityLabel(activeTask.priority, t)
     : "";
 
   return (
@@ -482,30 +457,32 @@ export default function TaskBoard({
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
-        <div className="grid gap-5 xl:grid-cols-3">
-          {columns.map((column) => (
-            <TaskColumn
-              key={column.id}
-              column={column}
-              tasks={tasks.filter(
-                (task) => task.status === column.id
-              )}
-              onEdit={(task) => setEditingTask(task)}
-              onDelete={handleDelete}
-            />
-          ))}
+        <div className="ui-scrollbar overflow-x-auto pb-4">
+          <div className="grid min-w-[900px] grid-cols-3 gap-4 lg:min-w-0 lg:gap-5">
+            {columns.map((column) => (
+              <TaskColumn
+                key={column.id}
+                column={column}
+                tasks={tasks.filter(
+                  (task) => task.status === column.id
+                )}
+                onEdit={(task) => setEditingTask(task)}
+                onDelete={(task) => setDeletingTask(task)}
+              />
+            ))}
+          </div>
         </div>
 
         <DragOverlay>
           {activeTask ? (
-            <div className="w-[320px] rounded-2xl border border-primary/50 bg-card p-4 shadow-2xl shadow-primary/20">
-              <div className="flex items-center justify-between gap-3">
-                <h3 className="break-words font-semibold text-foreground">
+            <div className="w-[300px] rounded-2xl border border-primary/50 bg-card p-4 shadow-2xl shadow-primary/20">
+              <div className="flex items-start justify-between gap-3">
+                <h3 className="line-clamp-2 break-words text-sm font-semibold text-foreground">
                   {activeTask.title}
                 </h3>
 
                 <span
-                  className={`shrink-0 rounded-full border px-2 py-1 text-[10px] font-bold ${
+                  className={`shrink-0 rounded-full border px-2 py-1 text-[10px] font-bold uppercase ${
                     priorityStyles[activeTask.priority]
                   }`}
                 >
@@ -514,7 +491,7 @@ export default function TaskBoard({
               </div>
 
               {activeTask.description && (
-                <p className="mt-2 whitespace-pre-wrap break-words text-sm text-muted-foreground">
+                <p className="mt-2 line-clamp-2 whitespace-pre-wrap break-words text-xs leading-5 text-muted-foreground">
                   {activeTask.description}
                 </p>
               )}
@@ -537,6 +514,28 @@ export default function TaskBoard({
           priority={editingTask.priority}
           dueDate={editingTask.dueDate}
           tag={editingTask.tag}
+        />
+      )}
+
+      {deletingTask && (
+        <DeleteTaskDialog
+          open={true}
+          onOpenChange={(open) => {
+            if (!open) {
+              setDeletingTask(null);
+            }
+          }}
+          taskId={deletingTask.id}
+          taskTitle={deletingTask.title}
+          onDeleted={() => {
+            setTasks((current) =>
+              current.filter(
+                (task) => task.id !== deletingTask.id
+              )
+            );
+
+            setDeletingTask(null);
+          }}
         />
       )}
     </>

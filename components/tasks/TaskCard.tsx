@@ -1,24 +1,23 @@
 "use client";
 
 import {
+  AlertCircle,
+  Calendar,
+  CircleCheck,
   Pencil,
   Trash2,
-  CircleCheck,
-  Calendar,
 } from "lucide-react";
-
-import { Button } from "@/components/ui/button";
-
-import { toggleTask } from "@/actions/toggleTasks";
-import { deleteTask } from "@/actions/deleteTasks";
-
 import { useState } from "react";
-
-import EditTaskDialog from "./EditTaskDialog";
-
+import { motion } from "framer-motion";
 import { toast } from "sonner";
 
-import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { toggleTask } from "@/actions/toggleTasks";
+import { useLanguage } from "@/components/providers/LanguageProvider";
+import { formatTaskDate } from "@/lib/formatTaskDate";
+
+import EditTaskDialog from "./EditTaskDialog";
+import DeleteTaskDialog from "./DeleteTaskDialog";
 
 interface TaskCardProps {
   id: string;
@@ -31,14 +30,10 @@ interface TaskCardProps {
 }
 
 const tagColors: Record<string, string> = {
-  Trabajo:
-    "bg-blue-500/20 text-blue-400",
-  Estudios:
-    "bg-purple-500/20 text-purple-400",
-  Personal:
-    "bg-pink-500/20 text-pink-400",
-  Casa:
-    "bg-orange-500/20 text-orange-400",
+  Trabajo: "bg-primary/10 text-primary",
+  Estudios: "bg-violet/10 text-violet",
+  Personal: "bg-pink-500/10 text-pink-500",
+  Casa: "bg-orange-500/10 text-orange-500",
 };
 
 export default function TaskCard({
@@ -50,274 +45,188 @@ export default function TaskCard({
   dueDate,
   tag,
 }: TaskCardProps) {
-  const [openEdit, setOpenEdit] =
-    useState(false);
+  const [openEdit, setOpenEdit] = useState(false);
+  const [openDelete, setOpenDelete] = useState(false);
+
+  const { t, language } = useLanguage();
 
   async function handleToggle() {
     try {
-      await toggleTask(
-        id,
-        completed
-      );
+      await toggleTask(id, completed);
 
       toast.success(
         completed
-          ? "Tarea marcada como pendiente"
-          : "Tarea completada"
+          ? t.messages.togglePending
+          : t.messages.toggleCompleted
       );
     } catch (error) {
       console.error(error);
-
-      toast.error(
-        "No se pudo actualizar la tarea"
-      );
+      toast.error(t.messages.updateError);
     }
   }
 
-  async function handleDelete() {
-    const confirmed =
-      window.confirm(
-        "¿Seguro que quieres eliminar esta tarea?"
-      );
+  const taskDate = dueDate
+    ? formatTaskDate({
+        dueDate,
+        language,
+        completed,
+      })
+    : null;
 
-    if (!confirmed) return;
+  const isOverdue = taskDate?.isOverdue ?? false;
 
-    try {
-      await deleteTask(id);
+  const priorityLabel =
+    priority === "HIGH"
+      ? t.priority.high
+      : priority === "MEDIUM"
+      ? t.priority.medium
+      : t.priority.low;
 
-      toast.success(
-        "Tarea eliminada correctamente"
-      );
-    } catch (error) {
-      console.error(error);
-
-      toast.error(
-        "No se pudo eliminar la tarea"
-      );
-    }
-  }
-
-  const isOverdue =
-    dueDate &&
-    !completed &&
-    new Date(dueDate) < new Date();
+  const priorityClass =
+    priority === "HIGH"
+      ? "ui-badge-danger"
+      : priority === "MEDIUM"
+      ? "ui-badge-warning"
+      : "ui-badge-success";
 
   return (
     <>
-      <motion.div
+      <motion.article
         initial={{
           opacity: 0,
-          y: 25,
+          y: 18,
         }}
         animate={{
           opacity: 1,
           y: 0,
         }}
         transition={{
-          duration: 0.35,
+          duration: 0.3,
           ease: "easeOut",
         }}
         whileHover={{
-          y: -4,
+          y: -3,
         }}
-        className={`group rounded-3xl border p-6 transition-all duration-300 ${
-          isOverdue
-            ? "border-red-500/50 bg-red-950/20"
-            : "border-slate-800 bg-slate-900/80"
-        } ${
-          completed
-            ? "opacity-70"
-            : "hover:border-cyan-500/50 hover:shadow-2xl hover:shadow-cyan-500/10"
-        }`}
+        className={`ui-task-card group ${
+          isOverdue ? "border-destructive/40" : ""
+        } ${completed ? "opacity-70" : ""}`}
       >
-        <div className="flex items-start justify-between gap-6">
+        <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
-
-            {/* BADGES */}
-
-            <div className="flex flex-wrap items-center gap-3">
-
-              {/* PRIORIDAD */}
-
-              <span
-                className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                  priority === "HIGH"
-                    ? "bg-red-500/20 text-red-400"
-                    : priority === "MEDIUM"
-                    ? "bg-yellow-500/20 text-yellow-400"
-                    : "bg-green-500/20 text-green-400"
-                }`}
-              >
-                {priority === "HIGH"
-                  ? "🔴 Alta"
-                  : priority === "MEDIUM"
-                  ? "🟡 Media"
-                  : "🟢 Baja"}
+            <div className="flex flex-wrap items-center gap-2">
+              <span className={`ui-badge ${priorityClass}`}>
+                {priorityLabel}
               </span>
-
-              {/* TAG */}
 
               {tag && (
                 <span
-                  className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                    tagColors[tag] ??
-                    "bg-cyan-500/20 text-cyan-300"
+                  className={`ui-badge ${
+                    tagColors[tag] ?? "ui-badge-info"
                   }`}
                 >
-                  🏷 {tag}
+                  {tag}
                 </span>
               )}
 
-              {/* VENCIDA */}
-
               {isOverdue && (
-                <span className="rounded-full bg-red-500/20 px-3 py-1 text-xs font-semibold text-red-400">
-                  ⚠ Vencida
+                <span className="ui-badge ui-badge-danger">
+                  <AlertCircle size={13} />
+                  {t.tasks.overdue}
                 </span>
               )}
             </div>
 
-            {/* TÍTULO */}
-
             <h3
-              className={`mt-4 break-words text-2xl font-bold transition-colors ${
+              className={`mt-3 line-clamp-2 break-words text-lg font-bold leading-6 transition-colors sm:text-xl ${
                 completed
-                  ? "line-through text-slate-500"
-                  : "text-white group-hover:text-cyan-300"
+                  ? "text-muted-foreground line-through"
+                  : "text-foreground group-hover:text-primary"
               }`}
             >
               {title}
             </h3>
 
-            {/* DESCRIPCIÓN */}
-
             {description && (
               <p
-                className={`mt-3 break-words leading-7 ${
+                className={`mt-2 line-clamp-3 break-words text-sm leading-6 ${
                   completed
-                    ? "text-slate-500"
-                    : "text-slate-400"
+                    ? "text-muted-foreground/70"
+                    : "text-muted-foreground"
                 }`}
               >
                 {description}
               </p>
             )}
 
-            {/* FECHA */}
-
             {dueDate && (
               <div
-                className={`mt-5 flex items-center gap-2 text-sm ${
+                className={`mt-4 flex items-center gap-2 text-xs font-medium sm:text-sm ${
                   isOverdue
-                    ? "text-red-400"
-                    : "text-slate-400"
+                    ? "text-destructive"
+                    : "text-muted-foreground"
                 }`}
               >
-                <Calendar size={16} />
-
-                {isOverdue
-                  ? "Vencida · "
-                  : ""}
-
-                {new Date(
-                  dueDate
-                ).toLocaleDateString(
-                  "es-ES"
+                {isOverdue ? (
+                  <AlertCircle size={16} />
+                ) : (
+                  <Calendar size={16} />
                 )}
+
+                {taskDate?.label}
               </div>
             )}
           </div>
 
-          {/* ACCIONES */}
-
-          <div className="flex shrink-0 flex-col gap-2">
-
-            {/* COMPLETAR */}
-
-            <motion.div
-              whileHover={{
-                scale: 1.15,
-              }}
-              whileTap={{
-                scale: 0.9,
-              }}
+          <div className="flex shrink-0 flex-col gap-1 opacity-100 transition sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100">
+            <Button
+              type="button"
+              size="icon"
+              variant="ghost"
+              className="h-9 w-9 text-muted-foreground hover:bg-success/10 hover:text-success"
+              onClick={handleToggle}
+              title={
+                completed
+                  ? t.tasks.markPending
+                  : t.tasks.complete
+              }
+              aria-label={
+                completed
+                  ? t.tasks.markPending
+                  : t.tasks.complete
+              }
             >
-              <Button
-                type="button"
-                size="icon"
-                variant="ghost"
-                className="hover:bg-green-500/20"
-                onClick={handleToggle}
-                title={
-                  completed
-                    ? "Marcar como pendiente"
-                    : "Completar tarea"
-                }
-              >
-                <CircleCheck
-                  size={20}
-                  className={
-                    completed
-                      ? "text-green-500"
-                      : "text-slate-400 hover:text-green-400"
-                  }
-                />
-              </Button>
-            </motion.div>
+              <CircleCheck
+                size={18}
+                className={completed ? "text-success" : ""}
+              />
+            </Button>
 
-            {/* EDITAR */}
-
-            <motion.div
-              whileHover={{
-                scale: 1.15,
-              }}
-              whileTap={{
-                scale: 0.9,
-              }}
+            <Button
+              type="button"
+              size="icon"
+              variant="ghost"
+              className="h-9 w-9 text-muted-foreground hover:bg-primary/10 hover:text-primary"
+              onClick={() => setOpenEdit(true)}
+              title={t.tasks.edit}
+              aria-label={t.tasks.edit}
             >
-              <Button
-                type="button"
-                size="icon"
-                variant="ghost"
-                className="hover:bg-cyan-500/20 hover:text-cyan-400"
-                onClick={() =>
-                  setOpenEdit(true)
-                }
-                title="Editar tarea"
-              >
-                <Pencil size={20} />
-              </Button>
-            </motion.div>
+              <Pencil size={18} />
+            </Button>
 
-            {/* ELIMINAR */}
-
-            <motion.div
-              whileHover={{
-                scale: 1.15,
-              }}
-              whileTap={{
-                scale: 0.9,
-              }}
+            <Button
+              type="button"
+              size="icon"
+              variant="ghost"
+              className="h-9 w-9 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+              onClick={() => setOpenDelete(true)}
+              title={t.tasks.delete}
+              aria-label={t.tasks.delete}
             >
-              <Button
-                type="button"
-                size="icon"
-                variant="ghost"
-                className="hover:bg-red-500/20"
-                onClick={handleDelete}
-                title="Eliminar tarea"
-              >
-                <Trash2
-                  size={20}
-                  className="text-red-500"
-                />
-              </Button>
-            </motion.div>
+              <Trash2 size={18} />
+            </Button>
           </div>
         </div>
-      </motion.div>
-
-      {/* EDITAR */}
+      </motion.article>
 
       <EditTaskDialog
         open={openEdit}
@@ -328,6 +237,13 @@ export default function TaskCard({
         priority={priority}
         dueDate={dueDate}
         tag={tag}
+      />
+
+      <DeleteTaskDialog
+        open={openDelete}
+        onOpenChange={setOpenDelete}
+        taskId={id}
+        taskTitle={title}
       />
     </>
   );

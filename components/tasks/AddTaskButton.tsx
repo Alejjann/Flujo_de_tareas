@@ -1,159 +1,259 @@
 "use client";
 
-import { Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { createTask } from "@/actions/createTask";
+import {
+  AlignLeft,
+  CalendarDays,
+  Flag,
+  Folder,
+  LoaderCircle,
+  Plus,
+  Tag,
+} from "lucide-react";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+
+import { createTask } from "@/actions/createTask";
 import { useLanguage } from "@/components/providers/LanguageProvider";
 
 export default function AddTaskButton() {
   const [open, setOpen] = useState(false);
   const [tag, setTag] = useState("Personal");
+  const [isCreating, setIsCreating] = useState(false);
+
   const router = useRouter();
   const { t } = useLanguage();
 
+  function handleDialogChange(nextOpen: boolean) {
+    if (isCreating) {
+      return;
+    }
+
+    setOpen(nextOpen);
+  }
+
   async function handleSubmit(formData: FormData) {
+    if (isCreating) {
+      return;
+    }
+
+    setIsCreating(true);
+
     try {
       await createTask(formData);
 
       toast.success(t.createTask.success);
 
       setOpen(false);
+      setTag("Personal");
+
       router.refresh();
     } catch (error) {
       console.error(error);
       toast.error(t.createTask.error);
+    } finally {
+      setIsCreating(false);
     }
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleDialogChange}>
       <DialogTrigger
         render={
-          <Button className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90">
+          <Button className="ui-button-primary w-full sm:w-auto">
             <Plus size={18} />
             {t.tasks.newTask}
           </Button>
         }
       />
 
-      <DialogContent className="max-h-[90vh] overflow-y-auto border border-border bg-popover text-popover-foreground sm:max-w-xl">
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-foreground">
+      <DialogContent className="max-h-[90vh] w-[calc(100%-2rem)] overflow-y-auto rounded-3xl border border-border bg-popover p-0 text-popover-foreground shadow-2xl shadow-slate-950/20 sm:max-w-xl">
+        <DialogHeader className="border-b border-border bg-gradient-to-br from-primary/10 via-transparent to-info/5 px-5 py-5 sm:px-6 sm:py-6">
+          <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary ring-1 ring-inset ring-primary/15">
+            <Plus size={21} />
+          </div>
+
+          <DialogTitle className="text-xl font-bold tracking-[-0.03em] text-foreground sm:text-2xl">
             {t.createTask.title}
           </DialogTitle>
+
+          <DialogDescription className="mt-1 max-w-md text-sm leading-6 text-muted-foreground">
+            {t.createTask.descriptionLabel}
+          </DialogDescription>
         </DialogHeader>
 
-        <form action={handleSubmit} className="space-y-5">
-          <div>
-            <label className="mb-2 block text-sm font-medium text-foreground">
-              {t.createTask.titleLabel}
-            </label>
-
-            <Input
-              name="title"
-              placeholder={t.createTask.titlePlaceholder}
-              className="border-border bg-background text-foreground placeholder:text-muted-foreground focus:border-primary"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="mb-2 block text-sm font-medium text-foreground">
-              {t.createTask.descriptionLabel}
-            </label>
-
-            <Textarea
-              name="description"
-              placeholder={t.createTask.descriptionPlaceholder}
-              rows={6}
-              className="resize-y border-border bg-background text-foreground placeholder:text-muted-foreground focus:border-primary"
-            />
-          </div>
-
-          <div>
-            <label className="mb-2 block text-sm font-medium text-foreground">
-              {t.createTask.priorityLabel}
-            </label>
-
-            <select
-              name="priority"
-              defaultValue="MEDIUM"
-              className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
-            >
-              <option value="LOW">🟢 {t.priority.low}</option>
-              <option value="MEDIUM">🟡 {t.priority.medium}</option>
-              <option value="HIGH">🔴 {t.priority.high}</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="mb-2 block text-sm font-medium text-foreground">
-              {t.createTask.tagLabel}
-            </label>
-
-            <select
-              name="tag"
-              value={tag}
-              onChange={(e) => setTag(e.target.value)}
-              className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
-            >
-              <option value="Trabajo">💼 {t.tags.work}</option>
-              <option value="Estudios">📚 {t.tags.studies}</option>
-              <option value="Personal">❤️ {t.tags.personal}</option>
-              <option value="Casa">🏠 {t.tags.home}</option>
-              <option value="CUSTOM">✨ {t.tags.custom}</option>
-            </select>
-          </div>
-
-          {tag === "CUSTOM" && (
+        <form action={handleSubmit} className="p-5 sm:p-6">
+          <fieldset
+            disabled={isCreating}
+            className="space-y-5 disabled:cursor-not-allowed disabled:opacity-70"
+          >
             <div>
-              <label className="mb-2 block text-sm font-medium text-foreground">
-                {t.createTask.customTagLabel}
+              <label
+                htmlFor="task-title"
+                className="ui-label-icon"
+              >
+                <Tag size={16} className="text-primary" />
+                {t.createTask.titleLabel}
               </label>
 
               <Input
-                name="customTag"
-                placeholder={t.createTask.customTagPlaceholder}
-                className="border-border bg-background text-foreground placeholder:text-muted-foreground focus:border-primary"
+                id="task-title"
+                name="title"
+                placeholder={t.createTask.titlePlaceholder}
+                className="ui-input"
                 required
+                autoFocus
               />
-
-              <p className="mt-2 text-xs text-muted-foreground">
-                {t.createTask.customTagHelp}
-              </p>
             </div>
-          )}
 
-          <div>
-            <label className="mb-2 block text-sm font-medium text-foreground">
-              {t.createTask.dueDateLabel}
-            </label>
+            <div>
+              <label
+                htmlFor="task-description"
+                className="ui-label-icon"
+              >
+                <AlignLeft size={16} className="text-muted-foreground" />
+                {t.createTask.descriptionLabel}
+              </label>
 
-            <Input
-              type="date"
-              name="dueDate"
-              className="border-border bg-background text-foreground"
-            />
+              <Textarea
+                id="task-description"
+                name="description"
+                placeholder={t.createTask.descriptionPlaceholder}
+                rows={5}
+                className="min-h-30 w-full resize-y rounded-xl border border-input bg-background px-4 py-3 text-sm leading-6 text-foreground shadow-sm outline-none transition-all duration-200 placeholder:text-muted-foreground focus:border-primary focus:ring-4 focus:ring-primary/10"
+              />
+            </div>
+
+            <div className="grid gap-5 sm:grid-cols-2">
+              <div>
+                <label
+                  htmlFor="task-priority"
+                  className="ui-label-icon"
+                >
+                  <Flag size={16} className="text-warning" />
+                  {t.createTask.priorityLabel}
+                </label>
+
+                <select
+                  id="task-priority"
+                  name="priority"
+                  defaultValue="MEDIUM"
+                  className="ui-input cursor-pointer appearance-none"
+                >
+                  <option value="LOW">{t.priority.low}</option>
+                  <option value="MEDIUM">{t.priority.medium}</option>
+                  <option value="HIGH">{t.priority.high}</option>
+                </select>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="task-tag"
+                  className="ui-label-icon"
+                >
+                  <Folder size={16} className="text-violet" />
+                  {t.createTask.tagLabel}
+                </label>
+
+                <select
+                  id="task-tag"
+                  name="tag"
+                  value={tag}
+                  onChange={(event) => setTag(event.target.value)}
+                  className="ui-input cursor-pointer appearance-none"
+                >
+                  <option value="Trabajo">{t.tags.work}</option>
+                  <option value="Estudios">{t.tags.studies}</option>
+                  <option value="Personal">{t.tags.personal}</option>
+                  <option value="Casa">{t.tags.home}</option>
+                  <option value="CUSTOM">{t.tags.custom}</option>
+                </select>
+              </div>
+            </div>
+
+            {tag === "CUSTOM" && (
+              <div className="rounded-2xl border border-violet/20 bg-violet/5 p-4">
+                <label
+                  htmlFor="custom-tag"
+                  className="ui-label-icon"
+                >
+                  <Folder size={16} className="text-violet" />
+                  {t.createTask.customTagLabel}
+                </label>
+
+                <Input
+                  id="custom-tag"
+                  name="customTag"
+                  placeholder={t.createTask.customTagPlaceholder}
+                  className="ui-input"
+                  required
+                />
+
+                <p className="ui-form-help">
+                  {t.createTask.customTagHelp}
+                </p>
+              </div>
+            )}
+
+            <div className="border-t border-border pt-5">
+              <label
+                htmlFor="task-due-date"
+                className="ui-label-icon"
+              >
+                <CalendarDays size={16} className="text-info" />
+                {t.createTask.dueDateLabel}
+              </label>
+
+              <Input
+                id="task-due-date"
+                type="date"
+                name="dueDate"
+                className="ui-input cursor-pointer"
+              />
+            </div>
+          </fieldset>
+
+          <div className="mt-6 flex flex-col-reverse gap-3 border-t border-border pt-5 sm:flex-row sm:items-center sm:justify-end">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setOpen(false)}
+              disabled={isCreating}
+              className="ui-button-secondary w-full sm:w-auto"
+            >
+              {t.common.cancel}
+            </Button>
+
+            <Button
+              type="submit"
+              disabled={isCreating}
+              className="ui-button-primary w-full sm:w-auto"
+            >
+              {isCreating ? (
+                <>
+                  <LoaderCircle size={17} className="animate-spin" />
+                  {t.form.creating}
+                </>
+              ) : (
+                <>
+                  <Plus size={17} />
+                  {t.createTask.createButton}
+                </>
+              )}
+            </Button>
           </div>
-
-          <Button
-            type="submit"
-            className="w-full bg-primary font-semibold text-primary-foreground hover:bg-primary/90"
-          >
-            {t.createTask.createButton}
-          </Button>
         </form>
       </DialogContent>
     </Dialog>
