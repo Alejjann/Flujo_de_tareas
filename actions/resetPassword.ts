@@ -1,7 +1,17 @@
 "use server";
 
-import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
+
+import { getPasswordErrors } from "@/lib/password";
+import { prisma } from "@/lib/prisma";
+
+function hashResetToken(token: string) {
+  return crypto
+    .createHash("sha256")
+    .update(token)
+    .digest("hex");
+}
 
 export async function resetPassword(
   token: string,
@@ -19,38 +29,44 @@ export async function resetPassword(
     );
   }
 
-  if (newPassword.length < 6) {
-    throw new Error(
-      "La contraseña debe tener al menos 6 caracteres."
-    );
+  const passwordErrors = getPasswordErrors(newPassword);
+
+  if (passwordErrors.length > 0) {
+    throw new Error(passwordErrors[0]);
   }
+
+  /*
+   * Del email llega el token original. Se convierte a SHA-256
+   * para buscar el hash guardado en PostgreSQL.
+   */
+  const tokenHash = hashResetToken(token);
 
   const user = await prisma.user.findFirst({
     where: {
-      resetToken: token,
+      resetToken: tokenHash,
       resetTokenExpiry: {
         gt: new Date(),
       },
+    },
+    select: {
+      id: true,
     },
   });
 
   if (!user) {
     throw new Error(
-      "El enlace ha caducado o no es válido."
+      "El enlace ha caducado, ya se utilizó o no es válido."
     );
   }
 
-  const hashedPassword = await bcrypt.hash(
-    newPassword,
-    10
-  );
+  const passwordHash = await bcrypt.hash(newPassword, 12);
 
   await prisma.user.update({
     where: {
       id: user.id,
     },
     data: {
-      password: hashedPassword,
+      password: passwordHash,
       resetToken: null,
       resetTokenExpiry: null,
     },

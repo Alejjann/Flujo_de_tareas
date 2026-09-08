@@ -4,20 +4,21 @@ import {
   AlertCircle,
   Calendar,
   CircleCheck,
+  GripVertical,
   Pencil,
   Trash2,
 } from "lucide-react";
-import { useState } from "react";
 import { motion } from "framer-motion";
+import { useState } from "react";
 import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
 import { toggleTask } from "@/actions/toggleTasks";
+import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/components/providers/LanguageProvider";
 import { formatTaskDate } from "@/lib/formatTaskDate";
 
-import EditTaskDialog from "./EditTaskDialog";
 import DeleteTaskDialog from "./DeleteTaskDialog";
+import EditTaskDialog from "./EditTaskDialog";
 
 interface TaskCardProps {
   id: string;
@@ -79,15 +80,15 @@ export default function TaskCard({
     priority === "HIGH"
       ? t.priority.high
       : priority === "MEDIUM"
-      ? t.priority.medium
-      : t.priority.low;
+        ? t.priority.medium
+        : t.priority.low;
 
   const priorityClass =
     priority === "HIGH"
       ? "ui-badge-danger"
       : priority === "MEDIUM"
-      ? "ui-badge-warning"
-      : "ui-badge-success";
+        ? "ui-badge-warning"
+        : "ui-badge-success";
 
   return (
     <>
@@ -178,6 +179,17 @@ export default function TaskCard({
           </div>
 
           <div className="flex shrink-0 flex-col gap-1 opacity-100 transition sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100">
+            {/* Cursor grab / grabbing. Solo visual hasta conectar dnd-kit. */}
+            <button
+              type="button"
+              data-drag-handle
+              aria-label="Mover tarea"
+              title="Mover tarea"
+              className="ui-icon-button h-9 w-9 touch-none"
+            >
+              <GripVertical size={18} />
+            </button>
+
             <Button
               type="button"
               size="icon"

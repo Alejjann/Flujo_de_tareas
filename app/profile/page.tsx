@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
+
 import ProfileContent from "@/components/profile/ProfileContent";
 
 export default async function ProfilePage() {
@@ -42,6 +43,24 @@ export default async function ProfilePage() {
       ? 0
       : Math.round((completedTasks / totalTasks) * 100);
 
+  /*
+   * Próxima tarea:
+   * - No completada.
+   * - Con fecha de vencimiento.
+   * - Ordenada por la fecha más cercana.
+   */
+  const nextTask = user.tasks
+    .filter(
+      (task) =>
+        !task.completed &&
+        task.dueDate !== null
+    )
+    .sort(
+      (firstTask, secondTask) =>
+        new Date(firstTask.dueDate!).getTime() -
+        new Date(secondTask.dueDate!).getTime()
+    )[0];
+
   return (
     <ProfileContent
       name={user.name}
@@ -54,6 +73,7 @@ export default async function ProfilePage() {
       pendingTasks={pendingTasks}
       inProgressTasks={inProgressTasks}
       productivity={productivity}
+      
     />
   );
 }

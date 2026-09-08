@@ -17,7 +17,6 @@ import { useRouter } from "next/navigation";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -132,18 +131,10 @@ export default function EditTaskDialog({
   return (
     <Dialog open={open} onOpenChange={handleDialogChange}>
       <DialogContent className="max-h-[90vh] w-[calc(100%-2rem)] overflow-y-auto rounded-3xl border border-border bg-popover p-0 text-popover-foreground shadow-2xl shadow-slate-950/20 sm:max-w-xl">
-        <DialogHeader className="border-b border-border bg-gradient-to-br from-primary/10 via-transparent to-violet/5 px-5 py-5 sm:px-6 sm:py-6">
-          <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary ring-1 ring-inset ring-primary/15">
-            <Pencil size={20} />
-          </div>
-
+        <DialogHeader className="border-b border-border bg-gradient-to-br from-primary/10 via-transparent to-violet/5 px-5 py-4 sm:px-6 sm:py-5">
           <DialogTitle className="text-xl font-bold tracking-[-0.03em] text-foreground sm:text-2xl">
             {t.editTask.title}
           </DialogTitle>
-
-          <DialogDescription className="mt-1 max-w-md text-sm leading-6 text-muted-foreground">
-            {title}
-          </DialogDescription>
         </DialogHeader>
 
         <form action={handleSubmit} className="p-5 sm:p-6">
@@ -178,7 +169,10 @@ export default function EditTaskDialog({
                 htmlFor={`edit-task-description-${id}`}
                 className="ui-label-icon"
               >
-                <AlignLeft size={16} className="text-muted-foreground" />
+                <AlignLeft
+                  size={16}
+                  className="text-muted-foreground"
+                />
                 {t.editTask.descriptionLabel}
               </label>
 
@@ -209,7 +203,9 @@ export default function EditTaskDialog({
                   className="ui-input cursor-pointer appearance-none"
                 >
                   <option value="LOW">{t.priority.low}</option>
-                  <option value="MEDIUM">{t.priority.medium}</option>
+                  <option value="MEDIUM">
+                    {t.priority.medium}
+                  </option>
                   <option value="HIGH">{t.priority.high}</option>
                 </select>
               </div>
@@ -233,8 +229,12 @@ export default function EditTaskDialog({
                   className="ui-input cursor-pointer appearance-none"
                 >
                   <option value="Trabajo">{t.tags.work}</option>
-                  <option value="Estudios">{t.tags.studies}</option>
-                  <option value="Personal">{t.tags.personal}</option>
+                  <option value="Estudios">
+                    {t.tags.studies}
+                  </option>
+                  <option value="Personal">
+                    {t.tags.personal}
+                  </option>
                   <option value="Casa">{t.tags.home}</option>
                   <option value="CUSTOM">{t.tags.custom}</option>
                 </select>
@@ -277,6 +277,19 @@ export default function EditTaskDialog({
                 name="dueDate"
                 defaultValue={formatDateForInput(dueDate)}
                 className="ui-input cursor-pointer"
+                onClick={(event) => {
+                  const input =
+                    event.currentTarget as HTMLInputElement & {
+                      showPicker?: () => void;
+                    };
+
+                  try {
+                    input.showPicker?.();
+                  } catch {
+                    // Algunos navegadores no permiten abrir
+                    // el selector nativo desde JavaScript.
+                  }
+                }}
               />
             </div>
           </fieldset>
@@ -299,7 +312,10 @@ export default function EditTaskDialog({
             >
               {isSaving ? (
                 <>
-                  <LoaderCircle size={17} className="animate-spin" />
+                  <LoaderCircle
+                    size={17}
+                    className="animate-spin"
+                  />
                   {t.form.updating}
                 </>
               ) : (

@@ -81,9 +81,7 @@ export default function AddTaskButton() {
 
       <DialogContent className="max-h-[90vh] w-[calc(100%-2rem)] overflow-y-auto rounded-3xl border border-border bg-popover p-0 text-popover-foreground shadow-2xl shadow-slate-950/20 sm:max-w-xl">
         <DialogHeader className="border-b border-border bg-gradient-to-br from-primary/10 via-transparent to-info/5 px-5 py-5 sm:px-6 sm:py-6">
-          <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary ring-1 ring-inset ring-primary/15">
-            <Plus size={21} />
-          </div>
+         
 
           <DialogTitle className="text-xl font-bold tracking-[-0.03em] text-foreground sm:text-2xl">
             {t.createTask.title}
@@ -216,12 +214,18 @@ export default function AddTaskButton() {
                 {t.createTask.dueDateLabel}
               </label>
 
-              <Input
-                id="task-due-date"
-                type="date"
-                name="dueDate"
-                className="ui-input cursor-pointer"
-              />
+             <Input
+              id="task-due-date"
+              type="date"
+              name="dueDate"
+              className="ui-input cursor-pointer"
+              onClick={(event) => {
+                event.currentTarget.showPicker?.();
+              }}
+              onFocus={(event) => {
+                event.currentTarget.showPicker?.();
+              }}
+            />
             </div>
           </fieldset>
 

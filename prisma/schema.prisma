@@ -35,6 +35,8 @@ model User {
   tasks      Task[]
 
   createdAt DateTime @default(now())
+
+   @@index([resetTokenExpiry])
 }
 
 model Task {

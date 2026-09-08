@@ -1,25 +1,34 @@
 "use client";
 
+import type { ChangeEvent } from "react";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { toast } from "sonner";
+
 import {
-  User,
-  Mail,
-  Lock,
-  Save,
+  AlertCircle,
   ArrowLeft,
+  Check,
+  Circle,
   Eye,
   EyeOff,
+  Lock,
+  Mail,
+  Save,
+  User,
 } from "lucide-react";
-import Link from "next/link";
+
 import { updateProfile } from "@/actions/updateProfile";
-import { toast } from "sonner";
 import { useLanguage } from "@/components/providers/LanguageProvider";
 
 interface ProfileEditFormProps {
   name: string | null;
   email: string;
 }
+
+const PASSWORD_MIN_LENGTH = 8;
 
 export default function ProfileEditForm({
   name,
@@ -32,6 +41,7 @@ export default function ProfileEditForm({
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] =
     useState(false);
+  const [passwordError, setPasswordError] = useState("");
 
   const [form, setForm] = useState({
     name: name || "",
@@ -40,15 +50,59 @@ export default function ProfileEditForm({
     confirmPassword: "",
   });
 
-  function handleChange(
-    event: React.ChangeEvent<HTMLInputElement>
-  ) {
-    const { name, value } = event.target;
+  const passwordRules = [
+    {
+      label: `Al menos ${PASSWORD_MIN_LENGTH} caracteres`,
+      valid: form.password.length >= PASSWORD_MIN_LENGTH,
+    },
+    {
+      label: "Una letra mayúscula",
+      valid: /[A-Z]/.test(form.password),
+    },
+    {
+      label: "Una letra minúscula",
+      valid: /[a-z]/.test(form.password),
+    },
+    {
+      label: "Un número",
+      valid: /\d/.test(form.password),
+    },
+    {
+      label: "Un carácter especial (_, !, @, #)",
+      valid: /[^A-Za-z0-9]/.test(form.password),
+    },
+  ];
 
-    setForm((current) => ({
-      ...current,
-      [name]: value,
-    }));
+  const isPasswordValid = passwordRules.every(
+    (rule) => rule.valid
+  );
+
+  const hasPasswordMismatch = Boolean(passwordError);
+
+  function handleChange(event: ChangeEvent<HTMLInputElement>) {
+    const { name: fieldName, value } = event.target;
+
+    const nextForm = {
+      ...form,
+      [fieldName]: value,
+    };
+
+    setForm(nextForm);
+
+    if (
+      fieldName === "password" ||
+      fieldName === "confirmPassword"
+    ) {
+      if (
+        !nextForm.password ||
+        !nextForm.confirmPassword ||
+        nextForm.password === nextForm.confirmPassword
+      ) {
+        setPasswordError("");
+      } else {
+        setPasswordError(t.profile.passwordMismatch);
+      }
+    }
   }
 
   async function handleSubmit() {
@@ -71,16 +125,20 @@ export default function ProfileEditForm({
       return;
     }
 
-    if (password && password.length < 6) {
-      toast.error(t.profile.passwordTooShort);
+    if (password && !isPasswordValid) {
+      toast.error(
+        "La contraseña no cumple todos los requisitos."
+      );
       return;
     }
 
     if (password !== confirmPassword) {
+      setPasswordError(t.profile.passwordMismatch);
       toast.error(t.profile.passwordMismatch);
       return;
     }
 
+    setPasswordError("");
     setLoading(true);
 
     try {
@@ -109,7 +167,9 @@ export default function ProfileEditForm({
       console.error("ERROR UPDATING PROFILE:", error);
 
       toast.error(
-        error instanceof Error ? error.message : t.profile.updateError
+        error instanceof Error
+          ? error.message
+          : t.profile.updateError
       );
     } finally {
       setLoading(false);
@@ -117,199 +177,299 @@ export default function ProfileEditForm({
   }
 
   return (
-    <main className="min-h-screen bg-background text-foreground">
-      <div className="mx-auto max-w-3xl px-6 py-10 md:px-8">
-        <div className="mb-8 flex items-center justify-between">
+    <main className="ui-page">
+      <div className="ui-container max-w-3xl">
+        <header className="mb-6 flex items-center justify-between sm:mb-8">
           <Link
             href="/profile"
-            className="inline-flex items-center gap-2 rounded-xl border border-border bg-card px-4 py-2 text-sm text-muted-foreground transition hover:border-primary hover:bg-secondary hover:text-foreground"
+            className="ui-button-secondary h-10 px-3 text-xs sm:h-11 sm:px-4 sm:text-sm"
           >
-            <ArrowLeft size={18} />
-            {t.profile.backToProfile}
-          </Link>
-        </div>
+            <ArrowLeft size={17} />
 
-        <div className="rounded-3xl border border-border bg-card p-6 text-card-foreground shadow-2xl shadow-black/10 md:p-8">
-          <div className="mb-8">
-            <h1 className="text-center text-3xl font-bold text-foreground">
+            <span className="hidden sm:inline">
+              {t.profile.backToProfile}
+            </span>
+
+            <span className="sm:hidden">
+              {t.common.cancel}
+            </span>
+          </Link>
+        </header>
+
+        <div className="ui-card-main overflow-hidden">
+          <div className="border-b border-border bg-gradient-to-br from-primary/10 via-transparent to-info/5 px-5 py-6 sm:px-8 sm:py-8">
+            <div className="ui-icon-box ui-icon-primary mb-4 h-11 w-11 rounded-2xl">
+              <User size={21} />
+            </div>
+
+            <h1 className="text-2xl font-black tracking-[-0.04em] text-foreground sm:text-3xl">
               {t.profile.editProfile}
             </h1>
+
+            <p className="mt-2 max-w-lg text-sm leading-6 text-muted-foreground">
+              {t.profile.information}
+            </p>
           </div>
 
-          <section>
-            <div className="mb-5">
-              <h2 className="text-xl font-bold text-foreground">
-                {t.profile.information}
-              </h2>
-
-         
-            </div>
-
-            <div className="space-y-5">
-              <div>
-                <label
-                  htmlFor="name"
-                  className="mb-2 flex items-center gap-2 text-sm font-medium text-foreground"
-                >
-                  <User size={17} className="text-primary" />
-                  {t.profile.name}
-                </label>
-
-                <input
-                  id="name"
-                  type="text"
-                  name="name"
-                  value={form.name}
-                  onChange={handleChange}
-                  placeholder={t.profile.name}
-                  disabled={loading}
-                  autoComplete="name"
-                  className="w-full rounded-xl border border-border bg-background px-4 py-3 text-foreground outline-none transition placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:cursor-not-allowed disabled:opacity-60"
-                />
+          <div className="p-5 sm:p-8">
+            <section>
+              <div className="mb-5 border-b border-border pb-5">
+                <h2 className="ui-section-title text-lg sm:text-xl">
+                  {t.profile.information}
+                </h2>
               </div>
 
-              <div>
-                <label
-                  htmlFor="email"
-                  className="mb-2 flex items-center gap-2 text-sm font-medium text-foreground"
-                >
-                  <Mail size={17} className="text-primary" />
-                  {t.profile.email}
-                </label>
-
-                <input
-                  id="email"
-                  type="email"
-                  name="email"
-                  value={form.email}
-                  onChange={handleChange}
-                  placeholder={t.profile.emailPlaceholder}
-                  disabled={loading}
-                  autoComplete="email"
-                  className="w-full rounded-xl border border-border bg-background px-4 py-3 text-foreground outline-none transition placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:cursor-not-allowed disabled:opacity-60"
-                />
-              </div>
-            </div>
-          </section>
-
-          <section className="mt-8 border-t border-border pt-8">
-            <div className="mb-5">
-              <h2 className="flex items-center gap-2 text-xl font-bold text-foreground">
-                <Lock size={20} className="text-primary" />
-                {t.profile.changePassword}
-              </h2>
-            </div>
-
-            <div className="space-y-5">
-              <div>
-                <label
-                  htmlFor="password"
-                  className="mb-2 block text-sm font-medium text-foreground"
-                >
-                  {t.profile.newPassword}
-                </label>
-
-                <div className="relative">
-                  <input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    name="password"
-                    value={form.password}
-                    onChange={handleChange}
-                    placeholder={t.profile.newPassword}
-                    disabled={loading}
-                    autoComplete="new-password"
-                    className="w-full rounded-xl border border-border bg-background px-4 py-3 pr-12 text-foreground outline-none transition placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:cursor-not-allowed disabled:opacity-60"
-                  />
-
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setShowPassword((current) => !current)
-                    }
-                    disabled={loading}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition hover:text-foreground disabled:opacity-50"
-                    aria-label={
-                      showPassword
-                        ? t.profile.hidePassword
-                        : t.profile.showPassword
-                    }
+              <div className="space-y-5">
+                <div>
+                  <label
+                    htmlFor="name"
+                    className="ui-label-icon"
                   >
-                    {showPassword ? (
-                      <EyeOff size={19} />
-                    ) : (
-                      <Eye size={19} />
-                    )}
-                  </button>
+                    <User size={16} className="text-primary" />
+                    {t.profile.name}
+                  </label>
+
+                  <input
+                    id="name"
+                    type="text"
+                    name="name"
+                    value={form.name}
+                    onChange={handleChange}
+                    placeholder={t.profile.name}
+                    disabled={loading}
+                    autoComplete="name"
+                    className="ui-input"
+                  />
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="email"
+                    className="ui-label-icon"
+                  >
+                    <Mail size={16} className="text-primary" />
+                    {t.profile.email}
+                  </label>
+
+                  <input
+                    id="email"
+                    type="email"
+                    name="email"
+                    value={form.email}
+                    onChange={handleChange}
+                    placeholder={t.profile.emailPlaceholder}
+                    disabled={loading}
+                    autoComplete="email"
+                    className="ui-input"
+                  />
                 </div>
               </div>
+            </section>
 
-              <div>
-                <label
-                  htmlFor="confirmPassword"
-                  className="mb-2 block text-sm font-medium text-foreground"
-                >
-                  {t.profile.confirmNewPassword}
-                </label>
+            <section className="mt-8 border-t border-border pt-8">
+              <div className="mb-5">
+                <h2 className="flex items-center gap-2 text-lg font-bold tracking-[-0.03em] text-foreground sm:text-xl">
+                  <span className="ui-icon-box ui-icon-primary h-9 w-9 rounded-xl">
+                    <Lock size={17} />
+                  </span>
 
-                <div className="relative">
-                  <input
-                    id="confirmPassword"
-                    type={
-                      showConfirmPassword ? "text" : "password"
-                    }
-                    name="confirmPassword"
-                    value={form.confirmPassword}
-                    onChange={handleChange}
-                    placeholder={t.profile.repeatNewPassword}
-                    disabled={loading}
-                    autoComplete="new-password"
-                    className="w-full rounded-xl border border-border bg-background px-4 py-3 pr-12 text-foreground outline-none transition placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:cursor-not-allowed disabled:opacity-60"
-                  />
+                  {t.profile.changePassword}
+                </h2>
 
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setShowConfirmPassword(
-                        (current) => !current
-                      )
-                    }
-                    disabled={loading}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition hover:text-foreground disabled:opacity-50"
-                    aria-label={
-                      showConfirmPassword
-                        ? t.profile.hidePassword
-                        : t.profile.showPassword
-                    }
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                  Crea una contraseña segura para proteger tu cuenta.
+                </p>
+              </div>
+
+              <div className="space-y-5">
+                <div>
+                  <label
+                    htmlFor="password"
+                    className="ui-label"
                   >
-                    {showConfirmPassword ? (
-                      <EyeOff size={19} />
-                    ) : (
-                      <Eye size={19} />
-                    )}
-                  </button>
+                    {t.profile.newPassword}
+                  </label>
+
+                  <div className="relative">
+                    <input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      name="password"
+                      value={form.password}
+                      onChange={handleChange}
+                      placeholder={t.profile.newPassword}
+                      disabled={loading}
+                      autoComplete="new-password"
+                      aria-invalid={hasPasswordMismatch}
+                      aria-describedby={
+                        hasPasswordMismatch
+                          ? "password-mismatch-error"
+                          : form.password
+                          ? "password-rules"
+                          : undefined
+                      }
+                      className={`ui-input pr-12 ${
+                        hasPasswordMismatch
+                          ? "border-destructive focus:border-destructive focus:ring-destructive/15"
+                          : ""
+                      }`}
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setShowPassword((current) => !current)
+                      }
+                      disabled={loading}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1 text-muted-foreground transition hover:bg-secondary hover:text-foreground disabled:opacity-50"
+                      aria-label={
+                        showPassword
+                          ? t.profile.hidePassword
+                          : t.profile.showPassword
+                      }
+                    >
+                      {showPassword ? (
+                        <EyeOff size={19} />
+                      ) : (
+                        <Eye size={19} />
+                      )}
+                    </button>
+                  </div>
+
+                  {form.password && (
+                    <div
+                      id="password-rules"
+                      className="mt-3 rounded-xl border border-border bg-secondary/35 p-3.5"
+                    >
+                      <p className="mb-2.5 text-xs font-bold text-foreground">
+                        Requisitos de la contraseña
+                      </p>
+
+                      <ul className="grid gap-2 sm:grid-cols-2">
+                        {passwordRules.map((rule) => (
+                          <li
+                            key={rule.label}
+                            className={`flex items-center gap-2 text-xs font-medium ${
+                              rule.valid
+                                ? "text-success"
+                                : "text-muted-foreground"
+                            }`}
+                          >
+                            {rule.valid ? (
+                              <Check
+                                size={14}
+                                className="shrink-0"
+                              />
+                            ) : (
+                              <Circle
+                                size={14}
+                                className="shrink-0"
+                              />
+                            )}
+
+                            {rule.label}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="confirmPassword"
+                    className="ui-label"
+                  >
+                    {t.profile.confirmNewPassword}
+                  </label>
+
+                  <div className="relative">
+                    <input
+                      id="confirmPassword"
+                      type={
+                        showConfirmPassword
+                          ? "text"
+                          : "password"
+                      }
+                      name="confirmPassword"
+                      value={form.confirmPassword}
+                      onChange={handleChange}
+                      placeholder={t.profile.repeatNewPassword}
+                      disabled={loading}
+                      autoComplete="new-password"
+                      aria-invalid={hasPasswordMismatch}
+                      aria-describedby={
+                        hasPasswordMismatch
+                          ? "password-mismatch-error"
+                          : undefined
+                      }
+                      className={`ui-input pr-12 ${
+                        hasPasswordMismatch
+                          ? "border-destructive focus:border-destructive focus:ring-destructive/15"
+                          : ""
+                      }`}
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setShowConfirmPassword(
+                          (current) => !current
+                        )
+                      }
+                      disabled={loading}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1 text-muted-foreground transition hover:bg-secondary hover:text-foreground disabled:opacity-50"
+                      aria-label={
+                        showConfirmPassword
+                          ? t.profile.hidePassword
+                          : t.profile.showPassword
+                      }
+                    >
+                      {showConfirmPassword ? (
+                        <EyeOff size={19} />
+                      ) : (
+                        <Eye size={19} />
+                      )}
+                    </button>
+                  </div>
+
+                  {hasPasswordMismatch && (
+                    <p
+                      id="password-mismatch-error"
+                      role="alert"
+                      className="mt-2 flex items-center gap-2 text-sm font-medium text-destructive"
+                    >
+                      <AlertCircle
+                        size={16}
+                        className="shrink-0"
+                      />
+                      {passwordError}
+                    </p>
+                  )}
                 </div>
               </div>
+            </section>
+
+            <div className="mt-8 flex flex-col-reverse gap-3 border-t border-border pt-6 sm:flex-row sm:justify-end">
+              <Link
+                href="/profile"
+                className="ui-button-secondary w-full sm:w-auto"
+              >
+                {t.common.cancel}
+              </Link>
+
+              <button
+                type="button"
+                onClick={handleSubmit}
+                disabled={loading}
+                className="ui-button-primary w-full sm:w-auto"
+              >
+                <Save size={18} />
+                {loading
+                  ? t.profile.saving
+                  : t.profile.saveChanges}
+              </button>
             </div>
-          </section>
-
-          <div className="mt-8 flex flex-col-reverse gap-3 border-t border-border pt-6 sm:flex-row sm:justify-end">
-            <Link
-              href="/profile"
-              className="inline-flex items-center justify-center rounded-xl border border-border bg-card px-5 py-3 font-medium text-muted-foreground transition hover:bg-secondary hover:text-foreground"
-            >
-              {t.common.cancel}
-            </Link>
-
-            <button
-              type="button"
-              onClick={handleSubmit}
-              disabled={loading}
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 font-semibold text-primary-foreground transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              <Save size={18} />
-              {loading ? t.profile.saving : t.profile.saveChanges}
-            </button>
           </div>
         </div>
       </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -79,14 +80,21 @@ export default function Header({
         {/* LOGO */}
         <Link
           href="/dashboard"
-          aria-label="FlowDesk dashboard"
-          className="group flex shrink-0 items-center gap-2.5 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:gap-3"
+          aria-label="Ir al dashboard de FlowDesk"
+          className="group flex shrink-0 items-center gap-2.5 rounded-xl transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:gap-3"
         >
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-info text-primary-foreground shadow-lg shadow-primary/20 transition-all duration-200 group-hover:-translate-y-0.5 group-hover:shadow-primary/30">
-            <CheckSquare size={21} />
+          <div className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl shadow-lg shadow-primary/20 transition-all duration-200 group-hover:-translate-y-0.5 group-hover:scale-[1.03] group-hover:shadow-primary/30">
+            <Image
+              src="/taskflow_logo.png"
+              alt=""
+              width={40}
+              height={40}
+              priority
+              className="h-full w-full object-contain"
+            />
           </div>
 
-          <span className="hidden text-xl font-bold tracking-[-0.03em] text-foreground xs:inline sm:text-2xl">
+          <span className="hidden text-xl font-bold tracking-[-0.04em] text-foreground sm:inline sm:text-2xl">
             Flow<span className="text-primary">Desk</span>
           </span>
         </Link>
@@ -135,9 +143,15 @@ export default function Header({
               onClick={() => setOpen((value) => !value)}
               aria-expanded={open}
               aria-haspopup="menu"
-              aria-label={open ? "Cerrar menú de usuario" : "Abrir menú de usuario"}
+              aria-label={
+                open
+                  ? "Cerrar menú de usuario"
+                  : "Abrir menú de usuario"
+              }
               className={`flex h-11 items-center gap-2 rounded-2xl border bg-card px-1.5 text-foreground shadow-sm transition-all duration-200 hover:border-primary/45 hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:px-2 ${
-                open ? "border-primary/45 bg-secondary" : "border-border"
+                open
+                  ? "border-primary/45 bg-secondary"
+                  : "border-border"
               }`}
             >
               {avatarUrl ? (
@@ -204,7 +218,7 @@ export default function Header({
                   </div>
                 </div>
 
-                {/* En móvil, los enlaces aparecen dentro del menú. */}
+                {/* Navegación que se muestra dentro del menú en móvil */}
                 <div className="mb-2 border-b border-border pb-2 md:hidden">
                   {navigation.map((item) => {
                     const Icon = item.icon;
@@ -214,7 +228,9 @@ export default function Header({
                         key={item.href}
                         href={item.href}
                         role="menuitem"
-                        aria-current={item.active ? "page" : undefined}
+                        aria-current={
+                          item.active ? "page" : undefined
+                        }
                         onClick={() => setOpen(false)}
                         className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition ${
                           item.active

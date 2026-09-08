@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "TaskFlow",
+  title: "FlowDesk",
   description: "Organiza tus tareas de forma sencilla",
 };
 

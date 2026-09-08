@@ -1,248 +1,181 @@
 "use server";
 
-import { prisma } from "@/lib/prisma";
 import crypto from "crypto";
-import nodemailer from "nodemailer";
 
-export async function requestPasswordReset(email: string) {
-  const cleanEmail = email.trim().toLowerCase();
+import { resend } from "@/lib/mail";
+import { prisma } from "@/lib/prisma";
 
-  if (!cleanEmail) {
-    throw new Error("Introduce tu correo electrónico.");
+const RESET_TOKEN_TTL_MS = 30 * 60 * 1000;
+
+const GENERIC_SUCCESS_MESSAGE =
+  "Si existe una cuenta con ese correo, te hemos enviado un enlace para restablecer la contraseña.";
+
+function hashResetToken(token: string) {
+  return crypto
+    .createHash("sha256")
+    .update(token)
+    .digest("hex");
+}
+
+function getAppUrl() {
+  const appUrl =
+    process.env.NEXTAUTH_URL ||
+    process.env.APP_URL ||
+    "http://localhost:3000";
+
+  return appUrl.replace(/\/$/, "");
+}
+
+function escapeHtml(value: string) {
+  return value.replace(
+    /[&<>"']/g,
+    (character) =>
+      ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;",
+      })[character] ?? character
+  );
+}
+
+export async function requestPasswordReset(emailInput: string) {
+  const email = emailInput.trim().toLowerCase();
+
+  /*
+   * Mismo mensaje si no existe usuario: evita que alguien compruebe
+   * qué correos tienen una cuenta creada.
+   */
+  if (!email) {
+    return {
+      success: true,
+      message: GENERIC_SUCCESS_MESSAGE,
+    };
   }
 
   const user = await prisma.user.findUnique({
     where: {
-      email: cleanEmail,
+      email,
+    },
+    select: {
+      id: true,
+      email: true,
+      name: true,
     },
   });
 
-  /*
-   * No mostramos si el correo existe o no.
-   * Esto evita revelar qué correos tienen cuenta.
-   */
   if (!user) {
     return {
       success: true,
-      message:
-        "Si existe una cuenta con ese correo, recibirás un enlace para recuperar la contraseña.",
+      message: GENERIC_SUCCESS_MESSAGE,
     };
   }
 
-  // Crear token aleatorio
-  const resetToken = crypto
-    .randomBytes(32)
-    .toString("hex");
+  const rawToken = crypto.randomBytes(32).toString("hex");
+  const tokenHash = hashResetToken(rawToken);
 
-  // El token caduca en 30 minutos
-  const resetTokenExpiry = new Date(
-    Date.now() + 1000 * 60 * 30
-  );
-
-  // Guardar token en la base de datos
   await prisma.user.update({
     where: {
       id: user.id,
     },
     data: {
-      resetToken,
-      resetTokenExpiry,
+      resetToken: tokenHash,
+      resetTokenExpiry: new Date(
+        Date.now() + RESET_TOKEN_TTL_MS
+      ),
     },
   });
 
-  const appUrl =
-    process.env.NEXT_PUBLIC_APP_URL ||
-    "http://localhost:3000";
+  const resetUrl = new URL("/reset-password", getAppUrl());
+  resetUrl.searchParams.set("token", rawToken);
 
-  const resetUrl =
-    `${appUrl}/reset-password?token=${resetToken}`;
+  const safeName = user.name ? escapeHtml(user.name) : "";
 
-  // Comprobar configuración de Gmail
-  if (
-    !process.env.GMAIL_USER ||
-    !process.env.GMAIL_APP_PASSWORD
-  ) {
-    console.error(
-      "Faltan GMAIL_USER o GMAIL_APP_PASSWORD en .env.local"
-    );
-
-    throw new Error(
-      "El sistema de correo no está configurado correctamente."
-    );
-  }
-
-  // Crear conexión con Gmail
-  const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-      user: process.env.GMAIL_USER,
-      pass: process.env.GMAIL_APP_PASSWORD,
-    },
-  });
-
-  // Enviar correo
   try {
-    await transporter.sendMail({
-      from: `"FlowDesk" <${process.env.GMAIL_USER}>`,
-      to: user.email,
-      subject: "Recupera tu contraseña - FlowDesk",
+    const { error } = await resend.emails.send({
+      from:
+        process.env.EMAIL_FROM ??
+        "FlowDesk <onboarding@resend.dev>",
+      to: [user.email],
+      subject: "Restablece tu contraseña de FlowDesk",
+      text: `
+Hola${user.name ? ` ${user.name}` : ""},
 
+Hemos recibido una solicitud para restablecer la contraseña de tu cuenta de FlowDesk.
+
+Crea una contraseña nueva desde este enlace:
+${resetUrl.toString()}
+
+Este enlace caduca en 30 minutos y solo puede utilizarse una vez.
+
+Si no solicitaste este cambio, puedes ignorar este correo.
+      `.trim(),
       html: `
-        <div
-          style="
-            margin: 0;
-            padding: 40px 20px;
-            background: #020617;
-            font-family: Arial, sans-serif;
-          "
-        >
-
-          <div
-            style="
-              max-width: 520px;
-              margin: 0 auto;
-              padding: 32px;
-              background: #0f172a;
-              border: 1px solid #1e293b;
-              border-radius: 20px;
-              color: white;
-            "
-          >
-
-            <h1
-              style="
-                margin: 0 0 10px;
-                color: #22d3ee;
-                font-size: 28px;
-              "
-            >
+        <div style="margin:0; padding:32px 16px; background:#07101f; font-family:Arial, Helvetica, sans-serif;">
+          <div style="max-width:560px; margin:0 auto; padding:32px; border:1px solid #2b4564; border-radius:24px; background:#13233a; color:#f8fbff;">
+            <p style="margin:0 0 20px; color:#38bdf8; font-size:13px; font-weight:800; letter-spacing:1.4px; text-transform:uppercase;">
               FlowDesk
+            </p>
+
+            <h1 style="margin:0 0 16px; color:#ffffff; font-size:28px; line-height:1.2;">
+              Restablece tu contraseña
             </h1>
 
-            <h2
-              style="
-                margin: 0 0 20px;
-                color: white;
-              "
-            >
-              Recuperación de contraseña
-            </h2>
-
-            <p
-              style="
-                color: #94a3b8;
-                line-height: 1.6;
-              "
-            >
-              Hola ${user.name || "usuario"},
+            <p style="margin:0 0 16px; color:#cbd5e1; font-size:16px; line-height:1.65;">
+              Hola${safeName ? ` ${safeName}` : ""},
             </p>
 
-            <p
-              style="
-                color: #94a3b8;
-                line-height: 1.6;
-              "
-            >
-              Hemos recibido una solicitud para cambiar
-              la contraseña de tu cuenta de FlowDesk.
+            <p style="margin:0 0 16px; color:#cbd5e1; font-size:16px; line-height:1.65;">
+              Hemos recibido una solicitud para restablecer la contraseña de tu cuenta.
             </p>
 
-            <p
-              style="
-                color: #94a3b8;
-                line-height: 1.6;
-              "
-            >
-              Pulsa el siguiente botón para crear una
-              nueva contraseña:
-            </p>
-
-            <div
-              style="
-                margin: 30px 0;
-                text-align: center;
-              "
-            >
-
+            <p style="margin:28px 0;">
               <a
-                href="${resetUrl}"
-                style="
-                  display: inline-block;
-                  padding: 14px 24px;
-                  background: #06b6d4;
-                  color: #020617;
-                  text-decoration: none;
-                  border-radius: 10px;
-                  font-weight: bold;
-                "
+                href="${resetUrl.toString()}"
+                style="display:inline-block; padding:14px 20px; border-radius:12px; background:#38bdf8; color:#06111f; font-size:15px; font-weight:800; text-decoration:none;"
               >
-                Cambiar contraseña
+                Crear contraseña nueva
               </a>
-
-            </div>
-
-            <p
-              style="
-                color: #64748b;
-                font-size: 13px;
-                line-height: 1.6;
-              "
-            >
-              Este enlace caducará en 30 minutos.
             </p>
 
-            <p
-              style="
-                color: #64748b;
-                font-size: 13px;
-                line-height: 1.6;
-              "
-            >
-              Si no has solicitado cambiar tu contraseña,
-              puedes ignorar este correo.
+            <p style="margin:0 0 12px; color:#b5c5da; font-size:14px; line-height:1.6;">
+              Este enlace caduca en 30 minutos y solo puede utilizarse una vez.
             </p>
 
-            <hr
-              style="
-                margin: 30px 0;
-                border: 0;
-                border-top: 1px solid #1e293b;
-              "
-            />
-
-            <p
-              style="
-                margin: 0;
-                color: #475569;
-                font-size: 12px;
-                text-align: center;
-              "
-            >
-              © ${new Date().getFullYear()} FlowDesk
+            <p style="margin:0; color:#8ea3bd; font-size:13px; line-height:1.6;">
+              Si no solicitaste este cambio, puedes ignorar este mensaje.
             </p>
-
           </div>
         </div>
       `,
     });
 
-    console.log(
-      `Correo de recuperación enviado a ${user.email}`
-    );
+    if (error) {
+      throw new Error(error.message);
+    }
   } catch (error) {
     console.error(
-      "Error enviando correo con Gmail:",
+      "ERROR ENVIANDO EMAIL DE RECUPERACIÓN CON RESEND:",
       error
     );
 
-    throw new Error(
-      "No se pudo enviar el correo de recuperación."
-    );
+    /*
+     * Anula el token si Resend no ha podido enviar el mensaje.
+     */
+    await prisma.user.update({
+      where: {
+        id: user.id,
+      },
+      data: {
+        resetToken: null,
+        resetTokenExpiry: null,
+      },
+    });
   }
 
   return {
     success: true,
-    message:
-      "Si existe una cuenta con ese correo, recibirás un enlace para recuperar la contraseña.",
+    message: GENERIC_SUCCESS_MESSAGE,
   };
 }

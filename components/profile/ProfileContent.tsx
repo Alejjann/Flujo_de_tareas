@@ -1,15 +1,17 @@
 "use client";
 
 import Link from "next/link";
+
 import {
-  User,
-  Mail,
+  ArrowLeft,
   CalendarDays,
   CheckCircle,
   Clock3,
   ListTodo,
-  ArrowLeft,
+  Mail,
   Settings,
+  TrendingUp,
+  User,
 } from "lucide-react";
 
 import ProfileMediaButtons from "@/components/profile/ProfileMediaButtons";
@@ -28,6 +30,98 @@ interface ProfileContentProps {
   productivity: number;
 }
 
+function ProfileStat({
+  icon,
+  iconClassName,
+  label,
+  value,
+  valueClassName = "text-foreground",
+}: {
+  icon: React.ReactNode;
+  iconClassName: string;
+  label: string;
+  value: string | number;
+  valueClassName?: string;
+}) {
+  return (
+    <article className="ui-card-interactive group relative min-w-0 overflow-hidden p-4 sm:p-5 lg:p-6">
+      <div className="absolute inset-x-0 top-0 h-0.5 bg-current opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
+
+      <div
+        className={`ui-icon-box h-10 w-10 rounded-xl sm:h-11 sm:w-11 sm:rounded-2xl ${iconClassName}`}
+      >
+        {icon}
+      </div>
+
+      <p className="ui-kpi-label mt-4 sm:mt-5">{label}</p>
+
+      <h2
+        className={`ui-kpi-value ${valueClassName}`}
+      >
+        {value}
+      </h2>
+    </article>
+  );
+}
+
+function ProfileInfoRow({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="ui-card-subtle group flex items-start gap-3 p-3.5 transition-colors duration-200 hover:border-primary/25 hover:bg-secondary/60 sm:items-center sm:p-4">
+      <div className="ui-icon-box ui-icon-primary h-9 w-9 rounded-xl transition-transform duration-200 group-hover:scale-105">
+        {icon}
+      </div>
+
+      <div className="min-w-0">
+        <p className="ui-caption">{label}</p>
+
+        <p className="mt-1 break-words text-sm font-semibold text-foreground sm:text-base">
+          {value}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function ActivityRow({
+  icon,
+  iconClassName,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  iconClassName: string;
+  label: string;
+  value: number;
+}) {
+  return (
+    <div className="ui-card-subtle group flex items-center justify-between gap-3 px-3.5 py-3 transition-colors duration-200 hover:border-primary/25 hover:bg-secondary/60 sm:px-4 sm:py-3.5">
+      <div className="flex min-w-0 items-center gap-3">
+        <div
+          className={`ui-icon-box h-9 w-9 rounded-xl transition-transform duration-200 group-hover:scale-105 ${iconClassName}`}
+        >
+          {icon}
+        </div>
+
+        <span className="truncate text-sm font-semibold text-foreground sm:text-base">
+          {label}
+        </span>
+      </div>
+
+      <span className="shrink-0 rounded-lg bg-card px-2.5 py-1 text-sm font-bold tabular-nums text-foreground shadow-sm ring-1 ring-inset ring-border">
+        {value}
+      </span>
+    </div>
+  );
+}
+
 export default function ProfileContent({
   name,
   email,
@@ -44,6 +138,11 @@ export default function ProfileContent({
 
   const dateLocale = language === "es" ? "es-ES" : "en-US";
 
+  const safeProductivity = Math.min(
+    Math.max(productivity, 0),
+    100
+  );
+
   const memberSince = new Date(createdAt).toLocaleDateString(
     dateLocale,
     {
@@ -57,6 +156,7 @@ export default function ProfileContent({
 
   const initials = displayName
     .split(" ")
+    .filter(Boolean)
     .map((word) => word[0])
     .join("")
     .slice(0, 2)
@@ -72,9 +172,11 @@ export default function ProfileContent({
             className="ui-button-secondary h-10 px-3 text-xs sm:h-11 sm:px-4 sm:text-sm"
           >
             <ArrowLeft size={17} />
+
             <span className="hidden sm:inline">
               {t.profile.backToDashboard}
             </span>
+
             <span className="sm:hidden">
               {language === "es" ? "Volver" : "Back"}
             </span>
@@ -82,7 +184,8 @@ export default function ProfileContent({
 
           <div className="flex shrink-0 items-center gap-2 text-muted-foreground">
             <Settings size={17} />
-            <span className="hidden text-sm sm:inline">
+
+            <span className="hidden text-sm font-medium sm:inline">
               {t.profile.title}
             </span>
           </div>
@@ -102,7 +205,7 @@ export default function ProfileContent({
               <div className="h-full w-full bg-gradient-to-r from-primary via-info to-violet" />
             )}
 
-            <div className="absolute inset-0 bg-gradient-to-t from-card via-card/10 to-black/10" />
+            <div className="absolute inset-0 bg-gradient-to-t from-card via-card/10 to-black/15" />
 
             <div className="absolute right-3 top-3 sm:right-5 sm:top-5">
               <ProfileMediaButtons type="banner" />
@@ -118,10 +221,10 @@ export default function ProfileContent({
                   <img
                     src={avatarUrl}
                     alt={`${t.profile.avatar} ${t.profile.of} ${displayName}`}
-                    className="h-24 w-24 rounded-full border-4 border-card bg-card object-cover shadow-xl sm:h-32 sm:w-32 sm:border-6 md:h-40 md:w-40 md:border-8"
+                    className="h-24 w-24 rounded-full border-4 border-card bg-card object-cover shadow-xl shadow-slate-950/20 sm:h-32 sm:w-32 sm:border-6 md:h-40 md:w-40 md:border-8"
                   />
                 ) : (
-                  <div className="flex h-24 w-24 items-center justify-center rounded-full border-4 border-card bg-gradient-to-br from-primary to-info text-2xl font-bold text-primary-foreground shadow-xl sm:h-32 sm:w-32 sm:border-6 sm:text-3xl md:h-40 md:w-40 md:border-8 md:text-4xl">
+                  <div className="flex h-24 w-24 items-center justify-center rounded-full border-4 border-card bg-gradient-to-br from-primary to-info text-2xl font-bold text-primary-foreground shadow-xl shadow-slate-950/20 sm:h-32 sm:w-32 sm:border-6 sm:text-3xl md:h-40 md:w-40 md:border-8 md:text-4xl">
                     {initials}
                   </div>
                 )}
@@ -134,22 +237,22 @@ export default function ProfileContent({
 
             <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
               <div className="min-w-0">
-                <h1 className="break-words text-2xl font-bold tracking-tight text-foreground sm:text-3xl md:text-4xl">
+                <h1 className="break-words text-3xl font-black leading-tight tracking-[-0.045em] text-foreground sm:text-4xl">
                   {displayName}
                 </h1>
 
-                <div className="mt-2 flex items-start gap-2 break-all text-sm text-muted-foreground sm:mt-3 sm:items-center sm:text-base">
+                <div className="mt-3 flex items-start gap-2 break-all text-sm font-medium text-muted-foreground sm:items-center sm:text-base">
                   <Mail
                     size={16}
-                    className="mt-0.5 shrink-0 sm:mt-0"
+                    className="mt-0.5 shrink-0 text-primary sm:mt-0"
                   />
                   <span>{email}</span>
                 </div>
 
-                <div className="mt-3 flex items-start gap-2 text-xs text-muted-foreground sm:mt-4 sm:items-center sm:text-sm">
+                <div className="mt-3 flex items-start gap-2 text-xs font-medium text-muted-foreground sm:mt-4 sm:items-center sm:text-sm">
                   <CalendarDays
                     size={16}
-                    className="mt-0.5 shrink-0 sm:mt-0"
+                    className="mt-0.5 shrink-0 text-info sm:mt-0"
                   />
                   <span>
                     {t.profile.memberSince} {memberSince}
@@ -173,223 +276,146 @@ export default function ProfileContent({
           aria-label={t.profile.activitySummary}
           className="mt-6 grid grid-cols-2 gap-3 sm:mt-8 sm:gap-5 lg:grid-cols-4"
         >
-          <div className="ui-card-interactive min-w-0 p-4 sm:p-5 lg:p-6">
-            <div className="ui-icon-box ui-icon-primary h-10 w-10 rounded-xl sm:h-11 sm:w-11 sm:rounded-2xl">
-              <ListTodo size={20} />
-            </div>
+          <ProfileStat
+            icon={<ListTodo size={20} />}
+            iconClassName="ui-icon-primary text-primary"
+            label={t.profile.totalTasks}
+            value={totalTasks}
+            valueClassName="text-primary"
+          />
 
-            <p className="ui-kpi-label mt-4 text-xs sm:mt-5 sm:text-sm">
-              {t.profile.totalTasks}
-            </p>
+          <ProfileStat
+            icon={<CheckCircle size={20} />}
+            iconClassName="ui-icon-success text-success"
+            label={t.status.completedPlural}
+            value={completedTasks}
+            valueClassName="text-success"
+          />
 
-            <h2 className="mt-1 text-3xl font-bold tracking-tight text-foreground sm:mt-2 sm:text-4xl">
-              {totalTasks}
-            </h2>
-          </div>
+          <ProfileStat
+            icon={<Clock3 size={20} />}
+            iconClassName="ui-icon-warning text-warning"
+            label={t.status.pendingPlural}
+            value={pendingTasks}
+            valueClassName="text-warning"
+          />
 
-          <div className="ui-card-interactive min-w-0 p-4 sm:p-5 lg:p-6">
-            <div className="ui-icon-box ui-icon-success h-10 w-10 rounded-xl sm:h-11 sm:w-11 sm:rounded-2xl">
-              <CheckCircle size={20} />
-            </div>
-
-            <p className="ui-kpi-label mt-4 text-xs sm:mt-5 sm:text-sm">
-              {t.status.completedPlural}
-            </p>
-
-            <h2 className="mt-1 text-3xl font-bold tracking-tight text-foreground sm:mt-2 sm:text-4xl">
-              {completedTasks}
-            </h2>
-          </div>
-
-          <div className="ui-card-interactive min-w-0 p-4 sm:p-5 lg:p-6">
-            <div className="ui-icon-box ui-icon-warning h-10 w-10 rounded-xl sm:h-11 sm:w-11 sm:rounded-2xl">
-              <Clock3 size={20} />
-            </div>
-
-            <p className="ui-kpi-label mt-4 text-xs sm:mt-5 sm:text-sm">
-              {t.status.pendingPlural}
-            </p>
-
-            <h2 className="mt-1 text-3xl font-bold tracking-tight text-foreground sm:mt-2 sm:text-4xl">
-              {pendingTasks}
-            </h2>
-          </div>
-
-          <div className="ui-card-interactive min-w-0 p-4 sm:p-5 lg:p-6">
-            <div className="ui-icon-box ui-icon-violet h-10 w-10 rounded-xl sm:h-11 sm:w-11 sm:rounded-2xl">
-              <CheckCircle size={20} />
-            </div>
-
-            <p className="ui-kpi-label mt-4 text-xs sm:mt-5 sm:text-sm">
-              {t.profile.productivity}
-            </p>
-
-            <h2 className="mt-1 text-3xl font-bold tracking-tight text-foreground sm:mt-2 sm:text-4xl">
-              {productivity}%
-            </h2>
-          </div>
+          <ProfileStat
+            icon={<TrendingUp size={20} />}
+            iconClassName="ui-icon-violet text-violet"
+            label={t.profile.productivity}
+            value={`${safeProductivity}%`}
+            valueClassName="text-violet"
+          />
         </section>
 
         {/* INFORMACIÓN Y ACTIVIDAD */}
         <section className="mt-6 grid gap-6 sm:mt-8 sm:gap-8 lg:grid-cols-2">
           {/* INFORMACIÓN PERSONAL */}
           <article className="ui-card-main p-5 sm:p-6 md:p-7">
-            <div className="mb-5 sm:mb-6">
+            <div className="mb-5 border-b border-border pb-5 sm:mb-6 sm:pb-6">
               <h2 className="ui-section-title text-lg sm:text-xl">
                 {t.profile.information}
               </h2>
 
-          
+              <p className="ui-section-description text-xs sm:text-sm">
+                {t.profile.title}
+              </p>
             </div>
 
             <div className="space-y-3 sm:space-y-4">
-              <div className="ui-card-subtle p-3.5 sm:p-4">
-                <div className="flex items-start gap-3 sm:items-center">
-                  <div className="ui-icon-box ui-icon-primary h-9 w-9 rounded-xl">
-                    <User size={18} />
-                  </div>
+              <ProfileInfoRow
+                icon={<User size={18} />}
+                label={t.profile.name}
+                value={name || t.profile.noName}
+              />
 
-                  <div className="min-w-0">
-                    <p className="ui-caption">
-                      {t.profile.name}
-                    </p>
+              <ProfileInfoRow
+                icon={<Mail size={18} />}
+                label={t.profile.email}
+                value={email}
+              />
 
-                    <p className="mt-1 break-words text-sm font-semibold text-foreground sm:text-base">
-                      {name || t.profile.noName}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="ui-card-subtle p-3.5 sm:p-4">
-                <div className="flex items-start gap-3 sm:items-center">
-                  <div className="ui-icon-box ui-icon-primary h-9 w-9 rounded-xl">
-                    <Mail size={18} />
-                  </div>
-
-                  <div className="min-w-0">
-                    <p className="ui-caption">
-                      {t.profile.email}
-                    </p>
-
-                    <p className="mt-1 break-all text-sm font-semibold text-foreground sm:text-base">
-                      {email}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="ui-card-subtle p-3.5 sm:p-4">
-                <div className="flex items-start gap-3 sm:items-center">
-                  <div className="ui-icon-box ui-icon-primary h-9 w-9 rounded-xl">
-                    <CalendarDays size={18} />
-                  </div>
-
-                  <div className="min-w-0">
-                    <p className="ui-caption">
-                      {t.profile.accountCreated}
-                    </p>
-
-                    <p className="mt-1 break-words text-sm font-semibold text-foreground sm:text-base">
-                      {memberSince}
-                    </p>
-                  </div>
-                </div>
-              </div>
+              <ProfileInfoRow
+                icon={<CalendarDays size={18} />}
+                label={t.profile.accountCreated}
+                value={memberSince}
+              />
             </div>
           </article>
 
           {/* RESUMEN DE ACTIVIDAD */}
           <article className="ui-card-main p-5 sm:p-6 md:p-7">
-            <div className="mb-5 sm:mb-6">
-              <h2 className="ui-section-title text-lg sm:text-xl">
-                {t.profile.activitySummary}
-              </h2>
+            <div className="mb-5 border-b border-border pb-5 sm:mb-6 sm:pb-6">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h2 className="ui-section-title text-lg sm:text-xl">
+                    {t.profile.activitySummary}
+                  </h2>
 
-              <p className="ui-section-description text-xs sm:text-sm">
-                {t.profile.activitySummaryDescription}
-              </p>
+                  <p className="ui-section-description text-xs sm:text-sm">
+                    {t.profile.activitySummaryDescription}
+                  </p>
+                </div>
+
+                <div className="ui-badge ui-badge-primary shrink-0">
+                  <TrendingUp size={14} />
+                  {safeProductivity}%
+                </div>
+              </div>
             </div>
 
             <div className="space-y-4 sm:space-y-5">
               {/* PROGRESO */}
-              <div>
-                <div className="mb-2 flex items-center justify-between gap-3">
-                  <span className="text-xs font-medium text-muted-foreground sm:text-sm">
+              <div className="rounded-2xl border border-border/70 bg-secondary/35 p-4">
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <span className="text-sm font-semibold text-foreground">
                     {t.profile.overallProgress}
                   </span>
 
                   <span className="shrink-0 text-sm font-bold text-primary">
-                    {productivity}%
+                    {safeProductivity}%
                   </span>
                 </div>
 
                 <div
-                  className="h-2.5 overflow-hidden rounded-full bg-secondary sm:h-3"
+                  className="h-2.5 overflow-hidden rounded-full bg-card/80 ring-1 ring-inset ring-border"
                   role="progressbar"
                   aria-label={t.profile.overallProgress}
                   aria-valuemin={0}
                   aria-valuemax={100}
-                  aria-valuenow={productivity}
+                  aria-valuenow={safeProductivity}
                 >
                   <div
-                    className="h-full rounded-full bg-gradient-to-r from-primary to-info transition-all duration-500"
+                    className="h-full rounded-full bg-gradient-to-r from-primary via-info to-violet transition-all duration-500 ease-out"
                     style={{
-                      width: `${Math.min(
-                        Math.max(productivity, 0),
-                        100
-                      )}%`,
+                      width: `${safeProductivity}%`,
                     }}
                   />
                 </div>
               </div>
 
-              <div className="ui-card-subtle flex items-center justify-between gap-3 px-3.5 py-3 sm:px-4 sm:py-3.5">
-                <div className="flex min-w-0 items-center gap-3">
-                  <div className="ui-icon-box ui-icon-info h-9 w-9 rounded-xl">
-                    <Clock3 size={18} />
-                  </div>
+              <div className="space-y-3">
+                <ActivityRow
+                  icon={<Clock3 size={18} />}
+                  iconClassName="ui-icon-info"
+                  label={t.status.inProgressPlural}
+                  value={inProgressTasks}
+                />
 
-                  <span className="truncate text-sm font-medium text-foreground sm:text-base">
-                    {t.status.inProgressPlural}
-                  </span>
-                </div>
+                <ActivityRow
+                  icon={<CheckCircle size={18} />}
+                  iconClassName="ui-icon-success"
+                  label={t.profile.completedTasks}
+                  value={completedTasks}
+                />
 
-                <span className="shrink-0 text-lg font-bold text-foreground sm:text-xl">
-                  {inProgressTasks}
-                </span>
-              </div>
-
-              <div className="ui-card-subtle flex items-center justify-between gap-3 px-3.5 py-3 sm:px-4 sm:py-3.5">
-                <div className="flex min-w-0 items-center gap-3">
-                  <div className="ui-icon-box ui-icon-success h-9 w-9 rounded-xl">
-                    <CheckCircle size={18} />
-                  </div>
-
-                  <span className="truncate text-sm font-medium text-foreground sm:text-base">
-                    {t.profile.completedTasks}
-                  </span>
-                </div>
-
-                <span className="shrink-0 text-lg font-bold text-foreground sm:text-xl">
-                  {completedTasks}
-                </span>
-              </div>
-
-              <div className="ui-card-subtle flex items-center justify-between gap-3 px-3.5 py-3 sm:px-4 sm:py-3.5">
-                <div className="flex min-w-0 items-center gap-3">
-                  <div className="ui-icon-box ui-icon-warning h-9 w-9 rounded-xl">
-                    <ListTodo size={18} />
-                  </div>
-
-                  <span className="truncate text-sm font-medium text-foreground sm:text-base">
-                    {t.profile.pendingTasks}
-                  </span>
-                </div>
-
-                <span className="shrink-0 text-lg font-bold text-foreground sm:text-xl">
-                  {pendingTasks}
-                </span>
+                <ActivityRow
+                  icon={<ListTodo size={18} />}
+                  iconClassName="ui-icon-warning"
+                  label={t.profile.pendingTasks}
+                  value={pendingTasks}
+                />
               </div>
             </div>
           </article>
