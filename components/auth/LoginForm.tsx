@@ -3,12 +3,43 @@
 import type { FormEvent } from "react";
 
 import Link from "next/link";
+import {
+  Eye,
+  EyeOff,
+  LoaderCircle,
+  LockKeyhole,
+  Mail,
+} from "lucide-react";
 import { useState } from "react";
-import { LoaderCircle, LockKeyhole, Mail, Eye, EyeOff } from "lucide-react";
 
 import { loginUser } from "@/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+
+function isNextRedirectError(error: unknown) {
+  if (
+    typeof error !== "object" ||
+    error === null
+  ) {
+    return false;
+  }
+
+  /*
+   * En Next.js, redirect() lanza un objeto con digest
+   * que normalmente comienza por NEXT_REDIRECT.
+   */
+  const maybeError = error as {
+    digest?: unknown;
+    message?: unknown;
+  };
+
+  return (
+    (typeof maybeError.digest === "string" &&
+      maybeError.digest.startsWith("NEXT_REDIRECT")) ||
+    (typeof maybeError.message === "string" &&
+      maybeError.message.includes("NEXT_REDIRECT"))
+  );
+}
 
 export default function LoginForm() {
   const [loading, setLoading] = useState(false);
@@ -30,16 +61,29 @@ export default function LoginForm() {
     try {
       const result = await loginUser(formData);
 
+      /*
+       * Si loginUser devuelve error, es un fallo real:
+       * credenciales incorrectas, input vacío, etc.
+       */
       if (result?.error) {
         setError(result.error);
+        setLoading(false);
+        return;
       }
     } catch (error) {
+      /*
+       * No mostramos error cuando el login fue correcto.
+       * Next.js usa NEXT_REDIRECT internamente para ir a dashboard.
+       */
+      if (isNextRedirectError(error)) {
+        return;
+      }
+
       console.error("ERROR LOGIN:", error);
 
       setError(
         "No se pudo iniciar sesión. Inténtalo de nuevo."
       );
-    } finally {
       setLoading(false);
     }
   }
@@ -51,13 +95,12 @@ export default function LoginForm() {
           Bienvenido de nuevo
         </p>
 
-        <h2 className="mt-3 text-3xl font-black tracking-[-0.05em] text-white sm:text-4xl">
+        <h1 className="mt-3 text-3xl font-black tracking-[-0.05em] text-white sm:text-4xl">
           Inicia sesión
-        </h2>
+        </h1>
 
         <p className="mt-3 text-sm leading-6 text-slate-400">
-          Accede a tu espacio personal y continúa donde lo
-          dejaste.
+          Accede a tu espacio personal y continúa donde lo dejaste.
         </p>
       </div>
 
@@ -66,7 +109,7 @@ export default function LoginForm() {
           role="alert"
           className="mb-5 flex items-start gap-3 rounded-xl border border-red-400/25 bg-red-500/10 px-4 py-3 text-sm font-medium leading-6 text-red-200"
         >
-          <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-red-400/15 text-xs">
+          <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-red-400/15 text-xs font-bold">
             !
           </span>
 
@@ -102,7 +145,10 @@ export default function LoginForm() {
               htmlFor="login-password"
               className="flex items-center gap-2 text-sm font-semibold text-slate-200"
             >
-              <LockKeyhole size={16} className="text-cyan-300" />
+              <LockKeyhole
+                size={16}
+                className="text-cyan-300"
+              />
               Contraseña
             </label>
 
@@ -164,13 +210,7 @@ export default function LoginForm() {
         )}
       </Button>
 
-      <div className="my-7 flex items-center gap-3">
-        <div className="h-px flex-1 bg-white/10" />
-        <span className="text-xs text-slate-500">o</span>
-        <div className="h-px flex-1 bg-white/10" />
-      </div>
-
-      <p className="text-center text-sm text-slate-400">
+      <p className="mt-6 text-center text-sm text-slate-400">
         ¿Aún no tienes una cuenta?{" "}
         <Link
           href="/register"

@@ -29,6 +29,7 @@ export default function RegisterForm() {
   const [showConfirmPassword, setShowConfirmPassword] =
     useState(false);
   const [passwordError, setPasswordError] = useState("");
+  const [emailError, setEmailError] = useState("");
 
   const [form, setForm] = useState({
     name: "",
@@ -76,6 +77,10 @@ export default function RegisterForm() {
 
     setForm(nextForm);
 
+    if (name === "email") {
+      setEmailError("");
+    }
+
     if (name === "password" || name === "confirmPassword") {
       const passwordsAreComparable =
         nextForm.password.length > 0 &&
@@ -99,6 +104,8 @@ export default function RegisterForm() {
     const email = form.email.trim().toLowerCase();
     const password = form.password;
     const confirmPassword = form.confirmPassword;
+
+    setEmailError("");
 
     if (!name) {
       toast.error("Introduce tu nombre.");
@@ -136,7 +143,22 @@ export default function RegisterForm() {
       formData.set("email", email);
       formData.set("password", password);
 
-      await registerUser(formData);
+      const result = await registerUser(formData);
+
+      /*
+       * Si el registro funciona, registerUser redirige a /login.
+       * Si devuelve un error, lo mostramos y devolvemos el botón
+       * a su estado normal.
+       */
+      if (result?.error) {
+        if (result.field === "email") {
+          setEmailError(result.error);
+        }
+
+        toast.error(result.error);
+        setLoading(false);
+        return;
+      }
     } catch (error) {
       console.error("ERROR REGISTRANDO USUARIO:", error);
 
@@ -209,9 +231,28 @@ export default function RegisterForm() {
             placeholder="tu@email.com"
             autoComplete="email"
             disabled={loading}
-            className="h-12 border-white/10 !bg-white/[0.045] text-white placeholder:text-slate-500 focus:border-cyan-400 focus:ring-4 focus:ring-cyan-400/10"
             required
+            aria-invalid={Boolean(emailError)}
+            aria-describedby={
+              emailError ? "register-email-error" : undefined
+            }
+            className={`h-12 border-white/10 !bg-white/[0.045] text-white placeholder:text-slate-500 focus:border-cyan-400 focus:ring-4 focus:ring-cyan-400/10 ${
+              emailError
+                ? "border-red-400/70 focus:border-red-400 focus:ring-red-400/10"
+                : ""
+            }`}
           />
+
+          {emailError && (
+            <p
+              id="register-email-error"
+              role="alert"
+              className="mt-2 flex items-start gap-2 text-sm font-medium leading-5 text-red-300"
+            >
+              <AlertCircle size={16} className="mt-0.5 shrink-0" />
+              <span>{emailError}</span>
+            </p>
+          )}
         </div>
 
         <div>

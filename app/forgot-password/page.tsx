@@ -2,6 +2,7 @@
 
 import type { FormEvent } from "react";
 
+import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -13,9 +14,34 @@ import {
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { requestPasswordReset } from "@/actions/requestPasswordReset";
+import { requestPasswordReset } from "@/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+
+function FlowDeskLogo({
+  size = 44,
+}: {
+  size?: number;
+}) {
+  return (
+    <div
+      className="flex shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white shadow-lg shadow-cyan-500/25"
+      style={{
+        width: size,
+        height: size,
+      }}
+    >
+      <Image
+        src="/flowdesk_logo.png"
+        alt="FlowDesk"
+        width={size}
+        height={size}
+        priority
+        className="h-full w-full object-contain"
+      />
+    </div>
+  );
+}
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -29,7 +55,9 @@ export default function ForgotPasswordPage() {
       return;
     }
 
-    if (!email.trim()) {
+    const normalizedEmail = email.trim().toLowerCase();
+
+    if (!normalizedEmail) {
       toast.error("Introduce tu correo electrónico.");
       return;
     }
@@ -37,7 +65,10 @@ export default function ForgotPasswordPage() {
     setLoading(true);
 
     try {
-      const result = await requestPasswordReset(email);
+      const formData = new FormData();
+      formData.set("email", normalizedEmail);
+
+      const result = await requestPasswordReset(formData);
 
       setSubmitted(true);
       setEmail("");
@@ -50,6 +81,7 @@ export default function ForgotPasswordPage() {
 
       setSubmitted(true);
       setEmail("");
+
       toast.success(
         "Si existe una cuenta con ese correo, te hemos enviado un enlace para restablecer la contraseña."
       );
@@ -70,13 +102,10 @@ export default function ForgotPasswordPage() {
 
       <div className="relative mx-auto flex min-h-[calc(100vh-3rem)] w-full max-w-6xl items-center justify-center">
         <div className="grid w-full max-w-5xl overflow-hidden rounded-[2rem] border border-white/10 bg-[#13233a]/95 shadow-2xl shadow-black/40 backdrop-blur-xl lg:grid-cols-[1.05fr_0.95fr]">
-          {/* Panel de marca: solo escritorio */}
           <section className="relative hidden min-h-[620px] overflow-hidden border-r border-white/10 p-10 lg:flex lg:flex-col lg:justify-between">
             <div>
               <div className="flex items-center gap-3">
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-300 to-sky-500 text-lg font-black text-slate-950 shadow-lg shadow-cyan-500/25">
-                  F
-                </div>
+                <FlowDeskLogo size={44} />
 
                 <span className="text-2xl font-black tracking-[-0.04em] text-white">
                   Flow<span className="text-cyan-300">Desk</span>
@@ -126,14 +155,10 @@ export default function ForgotPasswordPage() {
             <div className="pointer-events-none absolute -bottom-32 -right-32 h-80 w-80 rounded-full bg-cyan-400/15 blur-3xl" />
           </section>
 
-          {/* Formulario */}
           <section className="flex min-h-[620px] items-center p-5 sm:p-8 lg:p-10">
             <div className="mx-auto w-full max-w-md">
-              {/* Marca en móvil */}
               <div className="mb-9 flex items-center justify-center gap-2.5 lg:hidden">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-300 to-sky-500 text-base font-black text-slate-950 shadow-lg shadow-cyan-500/25">
-                  F
-                </div>
+                <FlowDeskLogo size={40} />
 
                 <span className="text-xl font-black tracking-[-0.04em] text-white">
                   Flow<span className="text-cyan-300">Desk</span>

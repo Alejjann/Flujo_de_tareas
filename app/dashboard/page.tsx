@@ -1,8 +1,9 @@
-import { prisma } from "@/lib/prisma";
+import { redirect } from "next/navigation";
+
+import { auth } from "@/auth";
 import DashboardContent from "@/components/dashboard/DashboardContent";
 import Header from "@/components/layout/Header";
-import { auth } from "@/auth";
-import { redirect } from "next/navigation";
+import { prisma } from "@/lib/prisma";
 
 export default async function Home({
   searchParams,
@@ -14,12 +15,7 @@ export default async function Home({
     sort?: string;
   }>;
 }) {
-  const {
-    search,
-    status,
-    priority,
-    sort,
-  } = await searchParams;
+  const { search, status, priority, sort } = await searchParams;
 
   const session = await auth();
 
@@ -80,23 +76,25 @@ export default async function Home({
             priority: "desc",
           }
         : sort === "title"
-        ? {
-            title: "asc",
-          }
-        : sort === "due"
-        ? {
-            dueDate: "asc",
-          }
-        : {
-            createdAt: "desc",
-          },
+          ? {
+              title: "asc",
+            }
+          : sort === "due"
+            ? {
+                dueDate: "asc",
+              }
+            : {
+                createdAt: "desc",
+              },
   });
+
+  const totalTasks = tasks.length;
 
   const completed = tasks.filter(
     (task) => task.completed
   ).length;
 
-  const pending = tasks.length - completed;
+  const pending = totalTasks - completed;
 
   const high = tasks.filter(
     (task) => task.priority === "HIGH"
@@ -111,12 +109,14 @@ export default async function Home({
   ).length;
 
   const productivity =
-    tasks.length > 0
-      ? Math.round((completed / tasks.length) * 100)
+    totalTasks > 0
+      ? Math.round((completed / totalTasks) * 100)
       : 0;
 
+  const isFirstTask = totalTasks === 0;
+
   return (
-    <main className="ui-page">
+    <main className="ui-dashboard-page">
       <Header
         name={session.user.name}
         email={session.user.email}
@@ -141,6 +141,7 @@ export default async function Home({
           medium={medium}
           low={low}
           productivity={productivity}
+          isFirstTask={isFirstTask}
         />
       </div>
     </main>

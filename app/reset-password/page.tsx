@@ -2,6 +2,7 @@
 
 import type { ChangeEvent, FormEvent } from "react";
 
+import Image from "next/image";
 import Link from "next/link";
 import {
   AlertCircle,
@@ -24,6 +25,31 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 const PASSWORD_MIN_LENGTH = 8;
+
+function FlowDeskLogo({
+  size = 44,
+}: {
+  size?: number;
+}) {
+  return (
+    <div
+      className="flex shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white shadow-lg shadow-cyan-500/25"
+      style={{
+        width: size,
+        height: size,
+      }}
+    >
+      <Image
+        src="/flowdesk_logo.png"
+        alt="FlowDesk"
+        width={size}
+        height={size}
+        priority
+        className="h-full w-full object-contain"
+      />
+    </div>
+  );
+}
 
 export default function ResetPasswordPage() {
   const searchParams = useSearchParams();
@@ -153,7 +179,6 @@ export default function ResetPasswordPage() {
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#07101f] px-4 py-6 text-white sm:px-6 sm:py-10">
-      {/* Iluminación ambiental */}
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute -left-40 top-[-12rem] h-[31rem] w-[31rem] rounded-full bg-cyan-400/15 blur-3xl" />
 
@@ -164,13 +189,10 @@ export default function ResetPasswordPage() {
 
       <div className="relative mx-auto flex min-h-[calc(100vh-3rem)] w-full max-w-6xl items-center justify-center">
         <div className="grid w-full max-w-5xl overflow-hidden rounded-[2rem] border border-white/10 bg-[#13233a]/95 shadow-2xl shadow-black/40 backdrop-blur-xl lg:grid-cols-[1.05fr_0.95fr]">
-          {/* Panel de marca: visible desde lg */}
           <section className="relative hidden min-h-[680px] overflow-hidden border-r border-white/10 p-10 lg:flex lg:flex-col lg:justify-between">
             <div>
               <div className="flex items-center gap-3">
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-300 to-sky-500 text-lg font-black text-slate-950 shadow-lg shadow-cyan-500/25">
-                  F
-                </div>
+                <FlowDeskLogo size={44} />
 
                 <span className="text-2xl font-black tracking-[-0.04em] text-white">
                   Flow<span className="text-cyan-300">Desk</span>
@@ -220,14 +242,10 @@ export default function ResetPasswordPage() {
             <div className="pointer-events-none absolute -bottom-32 -right-32 h-80 w-80 rounded-full bg-cyan-400/15 blur-3xl" />
           </section>
 
-          {/* Formulario */}
           <section className="flex min-h-[620px] items-center p-5 sm:p-8 lg:p-10">
             <div className="mx-auto w-full max-w-md">
-              {/* Marca en móvil */}
               <div className="mb-9 flex items-center justify-center gap-2.5 lg:hidden">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-300 to-sky-500 text-base font-black text-slate-950 shadow-lg shadow-cyan-500/25">
-                  F
-                </div>
+                <FlowDeskLogo size={40} />
 
                 <span className="text-xl font-black tracking-[-0.04em] text-white">
                   Flow<span className="text-cyan-300">Desk</span>
@@ -267,6 +285,7 @@ export default function ResetPasswordPage() {
                   className="mb-5 flex items-start gap-2 rounded-xl border border-red-400/25 bg-red-500/10 px-4 py-3 text-sm font-medium leading-6 text-red-200"
                 >
                   <AlertCircle size={17} className="mt-0.5 shrink-0" />
+
                   <span>
                     Este enlace no es válido o ha caducado. Solicita
                     uno nuevo desde la pantalla de recuperación.

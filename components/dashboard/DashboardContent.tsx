@@ -2,24 +2,27 @@
 
 import type { ReactNode } from "react";
 
-import AddTaskButton from "@/components/tasks/AddTaskButton";
-import SearchBar from "@/components/SearchBar";
-import TaskFilters from "@/components/tasks/TaskFilters";
-import PriorityFilters from "@/components/tasks/PriorityFilter";
-import SortTasks from "@/components/tasks/SortTasks";
-import CalendarView from "@/components/tasks/CalendarView";
-import DashboardCharts from "@/components/dashboard/DashboardCharts";
-import TaskBoard from "@/components/tasks/TaskBoard";
-
 import {
   AlertCircle,
+  ArrowRight,
   CalendarDays,
   CheckCircle2,
   Clock3,
+  ListPlus,
   ListTodo,
+  Sparkles,
+  Target,
   TrendingUp,
 } from "lucide-react";
 
+import AddTaskButton from "@/components/tasks/AddTaskButton";
+import CalendarView from "@/components/tasks/CalendarView";
+import DashboardCharts from "@/components/dashboard/DashboardCharts";
+import PriorityFilters from "@/components/tasks/PriorityFilter";
+import SearchBar from "@/components/SearchBar";
+import SortTasks from "@/components/tasks/SortTasks";
+import TaskBoard from "@/components/tasks/TaskBoard";
+import TaskFilters from "@/components/tasks/TaskFilters";
 import { useLanguage } from "@/components/providers/LanguageProvider";
 
 interface DashboardContentProps {
@@ -39,6 +42,7 @@ interface DashboardContentProps {
   medium: number;
   low: number;
   productivity: number;
+  isFirstTask: boolean;
 }
 
 function StatCard({
@@ -129,6 +133,7 @@ export default function DashboardContent({
   medium,
   low,
   productivity,
+  isFirstTask,
 }: DashboardContentProps) {
   const { t } = useLanguage();
 
@@ -137,7 +142,8 @@ export default function DashboardContent({
     100
   );
 
-  const totalTasksLabel = t.dashboard.totalTasks.toLowerCase();
+  const totalTasksLabel =
+    t.dashboard.totalTasks.toLowerCase();
 
   return (
     <>
@@ -157,6 +163,66 @@ export default function DashboardContent({
           <AddTaskButton />
         </div>
       </header>
+
+      {/* ONBOARDING: SOLO CUANDO LA CUENTA AÚN NO TIENE TAREAS */}
+      {isFirstTask && (
+        <section className="ui-glow-card relative mb-6 overflow-hidden p-5 sm:mb-8 sm:p-7 lg:p-8">
+          <div className="relative z-10 grid gap-7 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+            <div className="max-w-2xl">
+              <span className="ui-badge ui-badge-primary">
+                <Sparkles size={14} />
+                Tu primer paso
+              </span>
+
+              <h2 className="mt-5 text-3xl font-black tracking-[-0.05em] text-foreground sm:text-4xl">
+                ¡Empieza a organizar tu día!
+              </h2>
+
+              <p className="mt-3 max-w-xl text-sm font-medium leading-6 text-muted-foreground sm:text-base sm:leading-7">
+                Aún no tienes tareas. Crea la primera, añade una fecha
+                o prioridad y convierte FlowDesk en tu espacio de
+                trabajo.
+              </p>
+
+              <div className="mt-6 w-full sm:w-auto">
+                <AddTaskButton />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-2.5 sm:gap-3 lg:w-[310px]">
+              <div className="rounded-2xl border border-white/10 bg-slate-950/15 p-3 text-center backdrop-blur-sm sm:p-4">
+                <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-primary/15 text-primary">
+                  <ListPlus size={19} />
+                </div>
+
+                <p className="mt-3 text-xs font-bold text-foreground">
+                  Añade tareas
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-white/10 bg-slate-950/15 p-3 text-center backdrop-blur-sm sm:p-4">
+                <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-violet/15 text-violet">
+                  <Target size={19} />
+                </div>
+
+                <p className="mt-3 text-xs font-bold text-foreground">
+                  Define prioridades
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-white/10 bg-slate-950/15 p-3 text-center backdrop-blur-sm sm:p-4">
+                <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-success/15 text-success">
+                  <CheckCircle2 size={19} />
+                </div>
+
+                <p className="mt-3 text-xs font-bold text-foreground">
+                  Completa objetivos
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* RESUMEN PRINCIPAL */}
       <section className="relative mb-6 overflow-hidden rounded-3xl border border-primary/20 bg-card p-5 shadow-lg shadow-primary/[0.06] sm:mb-8 sm:p-7 lg:p-8">
@@ -187,6 +253,7 @@ export default function DashboardContent({
               >
                 <ListTodo size={16} />
                 {t.dashboard.myTasks}
+                <ArrowRight size={16} />
               </a>
 
               <span className="inline-flex h-10 items-center rounded-xl border border-border bg-card/75 px-4 text-sm font-semibold text-muted-foreground shadow-sm backdrop-blur-sm">
@@ -307,70 +374,72 @@ export default function DashboardContent({
         </StatCard>
       </section>
 
-      {/* ACTIVIDAD Y RESUMEN */}
-      <section className="mb-6 grid gap-6 sm:mb-8 lg:grid-cols-[minmax(0,1.55fr)_minmax(290px,1fr)]">
-        <article className="ui-card-main overflow-hidden p-5 sm:p-6">
-          <div className="mb-5 flex flex-col gap-3 border-b border-border pb-5 sm:mb-6 sm:flex-row sm:items-start sm:justify-between sm:pb-6">
-            <div>
+      {/* ACTIVIDAD Y RESUMEN: no se muestran hasta crear la primera tarea */}
+      {!isFirstTask && (
+        <section className="mb-6 grid gap-6 sm:mb-8 lg:grid-cols-[minmax(0,1.55fr)_minmax(290px,1fr)]">
+          <article className="ui-card-main overflow-hidden p-5 sm:p-6">
+            <div className="mb-5 flex flex-col gap-3 border-b border-border pb-5 sm:mb-6 sm:flex-row sm:items-start sm:justify-between sm:pb-6">
+              <div>
+                <h2 className="ui-section-title">
+                  {t.dashboard.activity}
+                </h2>
+
+                <p className="ui-section-description">
+                  {t.dashboard.activityDescription}
+                </p>
+              </div>
+
+              <div className="ui-badge ui-badge-primary w-fit">
+                <TrendingUp size={14} />
+                {safeProductivity}%
+              </div>
+            </div>
+
+            <DashboardCharts
+              completed={completed}
+              pending={pending}
+              high={high}
+              medium={medium}
+              low={low}
+            />
+          </article>
+
+          <article className="ui-card-main p-5 sm:p-6">
+            <div className="mb-5 border-b border-border pb-5 sm:mb-6 sm:pb-6">
               <h2 className="ui-section-title">
-                {t.dashboard.activity}
+                {t.dashboard.summary}
               </h2>
 
               <p className="ui-section-description">
-                {t.dashboard.activityDescription}
+                {t.dashboard.summaryDescription}
               </p>
             </div>
 
-            <div className="ui-badge ui-badge-primary w-fit">
-              <TrendingUp size={14} />
-              {safeProductivity}%
+            <div className="space-y-3">
+              <SummaryRow
+                icon={<CheckCircle2 size={18} />}
+                iconClassName="ui-icon-success"
+                label={t.dashboard.completed}
+                value={completed}
+              />
+
+              <SummaryRow
+                icon={<Clock3 size={18} />}
+                iconClassName="ui-icon-warning"
+                label={t.dashboard.pending}
+                value={pending}
+              />
+
+              <SummaryRow
+                icon={<AlertCircle size={18} />}
+                iconClassName="ui-icon-danger"
+                label={t.dashboard.highPriority}
+                value={high}
+              />
             </div>
-          </div>
-
-          <DashboardCharts
-            completed={completed}
-            pending={pending}
-            high={high}
-            medium={medium}
-            low={low}
-          />
-        </article>
-
-        <article className="ui-card-main p-5 sm:p-6">
-          <div className="mb-5 border-b border-border pb-5 sm:mb-6 sm:pb-6">
-            <h2 className="ui-section-title">
-              {t.dashboard.summary}
-            </h2>
-
-            <p className="ui-section-description">
-              {t.dashboard.summaryDescription}
-            </p>
-          </div>
-
-          <div className="space-y-3">
-            <SummaryRow
-              icon={<CheckCircle2 size={18} />}
-              iconClassName="ui-icon-success"
-              label={t.dashboard.completed}
-              value={completed}
-            />
-
-            <SummaryRow
-              icon={<Clock3 size={18} />}
-              iconClassName="ui-icon-warning"
-              label={t.dashboard.pending}
-              value={pending}
-            />
-
-            <SummaryRow
-              icon={<AlertCircle size={18} />}
-              iconClassName="ui-icon-danger"
-              label={t.dashboard.highPriority}
-              value={high}
-            />
-          </div>
-        </article>
-      </section>
+          </article>
+        </section>
+      )}
 
       {/* FILTROS */}
       <section
@@ -426,6 +495,7 @@ export default function DashboardContent({
           {tasks.length === 0 ? (
             <div className="relative flex min-h-[360px] flex-col items-center justify-center overflow-hidden rounded-3xl border border-dashed border-primary/35 bg-card p-7 text-center shadow-sm sm:min-h-[420px] sm:p-12">
               <div className="pointer-events-none absolute -left-16 -top-16 h-48 w-48 rounded-full bg-primary/10 blur-3xl" />
+
               <div className="pointer-events-none absolute -bottom-16 -right-16 h-48 w-48 rounded-full bg-info/10 blur-3xl" />
 
               <div className="relative">

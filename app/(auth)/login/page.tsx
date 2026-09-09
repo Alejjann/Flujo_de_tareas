@@ -21,7 +21,7 @@ export default function LoginPage() {
               <div className="flex items-center gap-3">
                 <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-xl bg-white shadow-lg shadow-cyan-500/20">
                   <Image
-                    src="/taskflow_logo.png"
+                    src="/flowdesk_logo.png"
                     alt=""
                     width={44}
                     height={44}
@@ -76,7 +76,7 @@ export default function LoginPage() {
               <div className="mb-10 flex items-center justify-center gap-2.5 lg:hidden">
                 <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-white shadow-lg shadow-cyan-500/20">
                   <Image
-                    src="/taskflow_logo.png"
+                    src="/flowdesk_logo.png"
                     alt=""
                     width={40}
                     height={40}

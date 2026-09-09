@@ -15,6 +15,9 @@ const RESET_TOKEN_TTL_MS = 30 * 60 * 1000;
 const GENERIC_RESET_MESSAGE =
   "Si existe una cuenta con ese correo, te hemos enviado un enlace para restablecer la contraseña.";
 
+const EMAIL_ALREADY_REGISTERED_MESSAGE =
+  "Ya existe una cuenta con este correo electrónico. Inicia sesión o utiliza otro correo.";
+
 function hashResetToken(token: string) {
   return crypto
     .createHash("sha256")
@@ -42,6 +45,15 @@ function escapeHtml(value: string) {
         '"': "&quot;",
         "'": "&#039;",
       })[character] ?? character
+  );
+}
+
+function isPrismaUniqueConstraintError(error: unknown) {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    error.code === "P2002"
   );
 }
 
@@ -75,10 +87,6 @@ export async function loginUser(formData: FormData) {
     };
   }
 
-  /*
-   * No se valida complejidad en login porque se permite el acceso
-   * a cuentas antiguas creadas antes de la nueva política.
-   */
   try {
     await signIn("credentials", {
       email,
@@ -86,6 +94,20 @@ export async function loginUser(formData: FormData) {
       redirectTo: "/dashboard",
     });
   } catch (error) {
+    /*
+     * Auth.js llama a redirect() tras un login correcto.
+     * Next.js implementa ese redirect lanzando internamente
+     * un error especial: NEXT_REDIRECT.
+     *
+     * Hay que relanzarlo; no es un fallo de autenticación.
+     */
+    if (
+      error instanceof Error &&
+      error.message.includes("NEXT_REDIRECT")
+    ) {
+      throw error;
+    }
+
     if (error instanceof AuthError) {
       if (error.type === "CredentialsSignin") {
         return {
@@ -98,7 +120,11 @@ export async function loginUser(formData: FormData) {
       };
     }
 
-    throw error;
+    console.error("ERROR INICIANDO SESIÓN:", error);
+
+    return {
+      error: "No se pudo iniciar sesión. Inténtalo de nuevo.",
+    };
   }
 
   return {
@@ -148,25 +174,49 @@ export async function registerUser(formData: FormData) {
     where: {
       email,
     },
+    select: {
+      id: true,
+    },
   });
 
   if (exists) {
     return {
-      error: "Ese correo ya está registrado.",
+      error: EMAIL_ALREADY_REGISTERED_MESSAGE,
+      field: "email",
     };
   }
 
   const hashedPassword = await bcrypt.hash(password, 12);
 
-  await prisma.user.create({
-    data: {
-      name,
-      email,
-      password: hashedPassword,
-    },
-  });
+  try {
+    await prisma.user.create({
+      data: {
+        name,
+        email,
+        password: hashedPassword,
+      },
+    });
+  } catch (error) {
+    /*
+     * La base de datos sigue siendo la protección real contra
+     * duplicados. Esto cubre el caso de dos registros simultáneos.
+     */
+    if (isPrismaUniqueConstraintError(error)) {
+      return {
+        error: EMAIL_ALREADY_REGISTERED_MESSAGE,
+        field: "email",
+      };
+    }
 
-  redirect("/login");
+    console.error("ERROR CREANDO USUARIO:", error);
+
+    return {
+      error:
+        "No se pudo crear la cuenta. Inténtalo de nuevo más tarde.",
+    };
+  }
+
+  redirect("/login?registered=1");
 }
 
 /* =========================
@@ -182,8 +232,8 @@ export async function requestPasswordReset(formData: FormData) {
       : "";
 
   /*
-   * La respuesta es idéntica si el email existe o no.
-   * Esto evita revelar cuentas registradas.
+   * La respuesta es la misma para correos válidos, inexistentes
+   * o vacíos; así no revelamos si existe una cuenta.
    */
   if (!email) {
     return {
@@ -211,8 +261,8 @@ export async function requestPasswordReset(formData: FormData) {
   }
 
   /*
-   * rawToken se manda al email.
-   * tokenHash se guarda en la base de datos.
+   * rawToken va dentro del enlace enviado por email.
+   * tokenHash es el único valor persistido en la base de datos.
    */
   const rawToken = crypto.randomBytes(32).toString("hex");
   const tokenHash = hashResetToken(rawToken);
@@ -295,10 +345,6 @@ Si no solicitaste este cambio, puedes ignorar este correo.
       `,
     });
 
-    /*
-     * Resend devuelve errores dentro de la respuesta; no siempre
-     * los lanza como excepción.
-     */
     if (error) {
       throw new Error(error.message);
     }
@@ -309,7 +355,8 @@ Si no solicitaste este cambio, puedes ignorar este correo.
     );
 
     /*
-     * Si no se envió el email, anulamos el token nuevo.
+     * Si Resend no puede entregar el correo, invalidamos el token
+     * recién creado para no dejarlo activo.
      */
     await prisma.user.update({
       where: {
