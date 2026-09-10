@@ -1,15 +1,15 @@
 "use server";
 
+import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { auth } from "@/auth";
+
+type TaskStatus = "PENDING" | "IN_PROGRESS" | "COMPLETED";
 
 export async function updateTaskStatus(
   id: string,
-  status:
-    | "PENDING"
-    | "IN_PROGRESS"
-    | "COMPLETED"
+  status: TaskStatus,
+  position?: number
 ) {
   const session = await auth();
 
@@ -17,16 +17,32 @@ export async function updateTaskStatus(
     throw new Error("No autenticado");
   }
 
-  await prisma.task.update({
+  const task = await prisma.task.findFirst({
     where: {
       id,
       userId: session.user.id,
     },
+    select: {
+      id: true,
+    },
+  });
+
+  if (!task) {
+    throw new Error("Tarea no encontrada o no autorizada");
+  }
+
+  await prisma.task.update({
+    where: {
+      id: task.id,
+    },
     data: {
       status,
       completed: status === "COMPLETED",
+
+      ...(typeof position === "number" ? { position } : {}),
     },
   });
 
   revalidatePath("/");
+  revalidatePath("/dashboard");
 }

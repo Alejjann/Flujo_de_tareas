@@ -318,9 +318,9 @@ export default function ProfileContent({
                 {t.profile.information}
               </h2>
 
-              <p className="ui-section-description text-xs sm:text-sm">
-                {t.profile.title}
-              </p>
+            <p className="ui-section-description text-xs sm:text-sm">
+              {t.profile.information}
+            </p>
             </div>
 
             <div className="space-y-3 sm:space-y-4">

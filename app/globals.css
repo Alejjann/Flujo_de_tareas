@@ -188,11 +188,14 @@
 
   html {
     @apply font-sans antialiased;
+    min-width: 320px;
     background-color: var(--background);
+    scroll-behavior: smooth;
   }
 
   body {
-    @apply min-h-screen bg-background text-foreground;
+    @apply min-h-screen overflow-x-hidden bg-background text-foreground;
+    min-width: 320px;
     background-color: var(--background);
     background-image:
       radial-gradient(
@@ -215,6 +218,13 @@
         color-mix(in srgb, var(--primary) 5%, transparent),
         transparent 28rem
       );
+  }
+
+  img,
+  svg,
+  video,
+  canvas {
+    max-width: 100%;
   }
 
   button,
@@ -259,11 +269,11 @@
      ========================= */
 
   .ui-page {
-    @apply min-h-screen bg-background text-foreground;
+    @apply min-h-screen overflow-x-hidden bg-background text-foreground;
   }
 
   .ui-dashboard-page {
-    @apply min-h-screen bg-background text-foreground;
+    @apply min-h-screen overflow-x-hidden bg-background text-foreground;
     background-image:
       radial-gradient(
         circle at 12% 0%,
@@ -519,11 +529,11 @@
   }
 
   /* =========================
-     KANBAN
+     KANBAN RESPONSIVE
      ========================= */
 
   .ui-kanban-column {
-    @apply relative min-h-[330px] overflow-hidden rounded-3xl border border-border bg-card/85 p-4 shadow-lg shadow-slate-950/[0.06] backdrop-blur-sm transition-all duration-200 sm:p-5;
+    @apply relative min-h-[330px] snap-start overflow-hidden rounded-3xl border border-border bg-card/85 p-4 shadow-lg shadow-slate-950/[0.06] backdrop-blur-sm transition-all duration-200 sm:p-5;
   }
 
   .dark .ui-kanban-column {
@@ -554,7 +564,7 @@
   }
 
   .ui-task-card {
-    @apply relative rounded-2xl border border-border bg-card p-4 shadow-md shadow-slate-950/[0.07] transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-primary/55 hover:shadow-xl hover:shadow-primary/[0.12];
+    @apply relative min-w-0 rounded-2xl border border-border bg-card p-4 shadow-md shadow-slate-950/[0.07] transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-primary/55 hover:shadow-xl hover:shadow-primary/[0.12];
   }
 
   .ui-task-card::after {
@@ -594,10 +604,33 @@
   }
 
   /* =========================
+     MÓVIL
+     ========================= */
+
+  @media (max-width: 639px) {
+    .ui-card-main,
+    .ui-glow-card {
+      border-radius: 1.25rem;
+    }
+
+    .ui-kanban-column {
+      min-height: 300px;
+    }
+
+    .ui-task-card {
+      border-radius: 1rem;
+    }
+  }
+
+  /* =========================
      ANIMACIONES RESPETUOSAS
      ========================= */
 
   @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
     *,
     *::before,
     *::after {
@@ -613,7 +646,6 @@
      ========================= */
 
   @media (pointer: fine) {
-    /* Enlaces, botones y controles que realizan una acción */
     button:not(:disabled),
     a[href],
     select:not(:disabled),
@@ -635,7 +667,6 @@
       cursor: pointer;
     }
 
-    /* Campos donde la persona puede escribir */
     input:not([type="checkbox"]):not([type="radio"]):not(
         [type="range"]
       ):not(:disabled),
@@ -644,14 +675,12 @@
       cursor: text;
     }
 
-    /* Inputs que se activan con clic */
     input[type="checkbox"]:not(:disabled),
     input[type="radio"]:not(:disabled),
     input[type="range"]:not(:disabled) {
       cursor: pointer;
     }
 
-    /* Elementos que no pueden utilizarse */
     button:disabled,
     input:disabled,
     textarea:disabled,
@@ -662,28 +691,14 @@
       cursor: not-allowed;
     }
 
-    /*
-      Para tareas arrastrables, añade data-drag-handle en el botón
-      o elemento que se use para arrastrar:
-      <button data-drag-handle ... />
-    */
-    [data-drag-handle],
-    .ui-task-card button[title*="Mover"],
-    .ui-task-card button[aria-label*="Mover"],
-    .ui-task-card button[title*="Move"],
-    .ui-task-card button[aria-label*="Move"] {
+    .ui-task-card {
       cursor: grab;
     }
 
-    [data-drag-handle]:active,
-    .ui-task-card button[title*="Mover"]:active,
-    .ui-task-card button[aria-label*="Mover"]:active,
-    .ui-task-card button[title*="Move"]:active,
-    .ui-task-card button[aria-label*="Move"]:active {
+    .ui-task-card:active {
       cursor: grabbing;
     }
 
-    /* Elementos decorativos que no deben aparentar ser clicables */
     [aria-hidden="true"],
     [data-decorative="true"] {
       cursor: default;

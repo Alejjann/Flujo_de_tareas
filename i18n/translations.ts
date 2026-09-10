@@ -187,99 +187,113 @@ export const translations = {
     ==========================================
     */
 
-    tasks: {
-      title: "Tareas",
+   tasks: {
+  title: "Tareas",
 
-      newTask: "Nueva tarea",
+  newTask: "Nueva tarea",
 
-      createTask: "Crear tarea",
+  createTask: "Crear tarea",
 
-      editTask: "Editar tarea",
+  editTask: "Editar tarea",
 
-      deleteTask: "Eliminar tarea",
+  deleteTask: "Eliminar tarea",
 
-      saveTask: "Guardar tarea",
+  saveTask: "Guardar tarea",
 
-      cancel: "Cancelar",
+  cancel: "Cancelar",
 
-      deleteTitle: 
-        "Eliminar tarea",
-        
-      deleteDescription:
-        "¿Seguro que quieres eliminar esta tarea? Esta acción no se puede deshacer.",
+  deleteTitle: "Eliminar tarea",
 
-      deleting: 
-        "Eliminando...",
+  deleteDescription:
+    "¿Seguro que quieres eliminar esta tarea? Esta acción no se puede deshacer.",
 
-      move: "Mover",
+  deleting: "Eliminando...",
 
-      moveTask: "Mover tarea",
+  move: "Mover",
 
-      viewTask: "Ver tarea",
+  moveTask: "Mover tarea",
 
-      taskDetails: "Detalles de la tarea",
+  viewTask: "Ver tarea",
 
-      noTasks: "No hay tareas",
+  taskDetails: "Detalles de la tarea",
 
-      noTasksDescription:
-        "No tienes tareas en esta sección.",
+  noTasks: "No hay tareas",
 
-      searchPlaceholder: "Buscar tareas...",
+  noTasksDescription:
+    "No tienes tareas en esta sección.",
 
-      titleLabel: "Título",
+  searchPlaceholder: "Buscar tareas...",
 
-      titlePlaceholder:
-        "Escribe el título de la tarea...",
+  titleLabel: "Título",
 
-      descriptionLabel: "Descripción",
+  titlePlaceholder:
+    "Escribe el título de la tarea...",
 
-      descriptionPlaceholder:
-        "Describe la tarea...",
+  descriptionLabel: "Descripción",
 
-      priorityLabel: "Prioridad",
+  descriptionPlaceholder:
+    "Describe la tarea...",
 
-      statusLabel: "Estado",
+  priorityLabel: "Prioridad",
 
-      dueDateLabel: "Fecha límite",
+  statusLabel: "Estado",
 
-      tagLabel: "Etiqueta",
+  dueDateLabel: "Fecha límite",
 
-      tagPlaceholder: "Ej. Personal",
+  tagLabel: "Etiqueta",
 
-      createdAt: "Creada el",
+  tagPlaceholder: "Ej. Personal",
 
-      updatedAt: "Actualizada el",
+  createdAt: "Creada el",
 
-      overdue: "Vencida",
+  updatedAt: "Actualizada el",
 
-      complete: "Completar tarea",
+  overdue: "Vencida",
 
-      markPending: "Marcar como pendiente",
+  complete: "Completar tarea",
 
-      edit: "Editar tarea",
+  markPending: "Marcar como pendiente",
 
-      delete: "Eliminar tarea",
+  edit: "Editar tarea",
 
-      confirmDelete:
-        "¿Estás seguro de que quieres eliminar esta tarea?",
+  delete: "Eliminar tarea",
 
-      deleteWarning:
-        "Esta acción no se puede deshacer.",
+  confirmDelete:
+    "¿Estás seguro de que quieres eliminar esta tarea?",
 
-      emptyBoard:
-        "No hay tareas en este estado.",
+  deleteWarning:
+    "Esta acción no se puede deshacer.",
 
-      dragAndDrop:
-        "Arrastra las tareas para moverlas.",
+  emptyBoard:
+    "No hay tareas en este estado.",
 
-      dragHere:
-        "Arrastra una tarea aquí",
+  dragAndDrop:
+    "Arrastra las tareas para moverlas.",
 
-      taskSingular: "tarea",
+  dragHere:
+    "Arrastra una tarea aquí",
 
-      taskPlural: "tareas",
-    },
+  taskSingular: "tarea",
 
+  taskPlural: "tareas",
+
+  details: {
+    title: "Detalles de la tarea",
+    description: "Descripción",
+    noDescription: "Esta tarea no tiene una descripción.",
+    priority: "Prioridad",
+    status: "Estado",
+    dueDate: "Fecha límite",
+    close: "Cerrar",
+    editTask: "Editar tarea",
+    deleteTask: "Eliminar tarea",
+    pending: "Pendiente",
+    inProgress: "En progreso",
+    completed: "Completada",
+    completeTask: "Completar tarea",
+    markPending: "Marcar como pendiente",
+  },
+},
     /*
     ==========================================
     ESTADOS
@@ -375,42 +389,49 @@ export const translations = {
     */
 
     board: {
-      title: "Tablero",
+  title: "Tablero",
 
-      pending: "Pendientes",
+  pending: "Pendientes",
 
-      inProgress: "En progreso",
+  inProgress: "En progreso",
 
-      completed: "Completadas",
+  completed: "Completadas",
 
-      moveHere: "Mover aquí",
+  moveHere: "Mover aquí",
 
-      empty: "No hay tareas aquí.",
+  empty: "No hay tareas aquí.",
 
-      dragTask:
-        "Arrastra una tarea para moverla.",
+  dragTask:
+    "Arrastra una tarea para moverla.",
 
-      tasks: "tareas",
+  tasks: "tareas",
 
-      task: "tarea",
+  task: "tarea",
 
-      drag: "Arrastrar tarea",
+  drag: "Arrastrar tarea",
 
-      moved: "Tarea movida correctamente",
+  moved: "Tarea movida correctamente",
 
-      movedError:
-        "No se pudo mover la tarea",
+  movedError:
+    "No se pudo mover la tarea",
 
-      completedMessage:
-        "Tarea completada ✅",
+  completedMessage:
+    "Tarea completada ✅",
 
-      inProgressMessage:
-        "Tarea en progreso 🔵",
+  inProgressMessage:
+    "Tarea en progreso 🔵",
 
-      pendingMessage:
-        "Tarea pendiente 🟡",
-    },
+  pendingMessage:
+    "Tarea pendiente 🟡",
 
+  orderUpdated: "Orden actualizado",
+
+  undo: "Deshacer",
+
+  undoSuccess: "Movimiento deshecho",
+
+  undoError: "No se pudo deshacer el movimiento",
+},
     /*
     ==========================================
     CREAR TAREA
@@ -726,7 +747,56 @@ export const translations = {
       backToLogin:
         "Volver al inicio de sesión",
     },
+    authPage: {
+  backToHome: "Volver a la página principal",
 
+  registerEyebrow: "Empieza ahora",
+  registerTitle: "Crea tu cuenta",
+  registerDescription:
+    "Organiza tu trabajo, sigue tu progreso y mantén el foco desde un solo lugar.",
+
+  loginEyebrow: "Bienvenido de nuevo",
+  loginTitle: "Inicia sesión",
+  loginDescription:
+    "Accede a tu espacio personal y continúa donde lo dejaste.",
+
+  name: "Nombre",
+  namePlaceholder: "Tu nombre",
+  emailPlaceholder: "tu@email.com",
+
+  passwordPlaceholder: "Crea una contraseña segura",
+  confirmPasswordPlaceholder: "Repite tu contraseña",
+  loginPasswordPlaceholder: "Introduce tu contraseña",
+
+  showPassword: "Mostrar contraseña",
+  hidePassword: "Ocultar contraseña",
+
+  passwordRequirements: "Tu contraseña debe incluir:",
+  minCharacters: "Mínimo 8 caracteres",
+  uppercase: "Una mayúscula",
+  lowercase: "Una minúscula",
+  number: "Un número",
+  specialCharacter: "Un carácter especial",
+
+  creatingAccount: "Creando cuenta...",
+  signingIn: "Iniciando sesión...",
+
+  alreadyHaveAccount: "¿Ya tienes una cuenta?",
+  signInLink: "Inicia sesión",
+
+  dontHaveAccount: "¿Aún no tienes una cuenta?",
+  createAccountLink: "Crea una cuenta",
+
+  missingName: "Introduce tu nombre.",
+  missingEmail: "Introduce tu correo electrónico.",
+  missingPassword: "Introduce una contraseña.",
+  passwordRequirementsError:
+    "La contraseña no cumple todos los requisitos.",
+  passwordMismatch: "Las contraseñas no coinciden.",
+  registerError: "No se pudo crear la cuenta.",
+  loginError:
+    "No se pudo iniciar sesión. Inténtalo de nuevo.",
+},
     /*
     ==========================================
     TEMA
@@ -1098,6 +1168,7 @@ export const translations = {
       delete:
         "Delete task",
 
+
       confirmDelete:
         "Are you sure you want to delete this task?",
 
@@ -1113,22 +1184,35 @@ export const translations = {
       dragHere:
         "Drag a task here",
 
-      taskSingular:
-        "task",
+    taskSingular: "task",
 
-      taskPlural:
-        "tasks",
+      taskPlural: "tasks",
 
-      deleteTitle: 
-         "Delete task",
+      details: {
+        title: "Task details",
+        description: "Description",
+        noDescription: "This task has no description.",
+        priority: "Priority",
+        status: "Status",
+        dueDate: "Due date",
+        close: "Close",
+        editTask: "Edit task",
+        deleteTask: "Delete task",
+        pending: "Pending",
+        inProgress: "In progress",
+        completed: "Completed",
+        completeTask: "Complete task",
+        markPending: "Mark as pending",
+      },
+
+      deleteTitle: "Delete task",
 
       deleteDescription:
-         "Are you sure you want to delete this task? This action cannot be undone.",
+        "Are you sure you want to delete this task? This action cannot be undone.",
 
-      deleting:
-         "Deleting...",
+      deleting: "Deleting...",
+
     },
-
     /*
     ==========================================
     STATUS
@@ -1327,6 +1411,14 @@ export const translations = {
 
       pendingMessage:
         "Task pending 🟡",
+        
+      orderUpdated: "Order updated",
+
+      undo: "Undo",
+
+      undoSuccess: "Movement undone",
+
+      undoError: "The movement could not be undone",
     },
 
     /*
@@ -1687,6 +1779,56 @@ export const translations = {
       backToLogin:
         "Back to login",
     },
+    authPage: {
+  backToHome: "Back to home",
+
+  registerEyebrow: "Get started",
+  registerTitle: "Create your account",
+  registerDescription:
+    "Organize your work, track your progress, and stay focused in one place.",
+
+  loginEyebrow: "Welcome back",
+  loginTitle: "Log in",
+  loginDescription:
+    "Access your personal workspace and continue where you left off.",
+
+  name: "Name",
+  namePlaceholder: "Your name",
+  emailPlaceholder: "you@email.com",
+
+  passwordPlaceholder: "Create a secure password",
+  confirmPasswordPlaceholder: "Repeat your password",
+  loginPasswordPlaceholder: "Enter your password",
+
+  showPassword: "Show password",
+  hidePassword: "Hide password",
+
+  passwordRequirements: "Your password must include:",
+  minCharacters: "At least 8 characters",
+  uppercase: "An uppercase letter",
+  lowercase: "A lowercase letter",
+  number: "A number",
+  specialCharacter: "A special character",
+
+  creatingAccount: "Creating account...",
+  signingIn: "Signing in...",
+
+  alreadyHaveAccount: "Already have an account?",
+  signInLink: "Log in",
+
+  dontHaveAccount: "Don't have an account yet?",
+  createAccountLink: "Create an account",
+
+  missingName: "Enter your name.",
+  missingEmail: "Enter your email address.",
+  missingPassword: "Enter a password.",
+  passwordRequirementsError:
+    "The password does not meet all requirements.",
+  passwordMismatch: "Passwords do not match.",
+  registerError: "Could not create the account.",
+  loginError:
+    "Could not sign in. Please try again.",
+},
 
     /*
     ==========================================

@@ -1,45 +1,45 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { Moon, Sun } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useTheme } from "next-themes";
 
 export default function ThemeToggle() {
-  const [dark, setDark] = useState(true);
+  const [mounted, setMounted] = useState(false);
+  const { resolvedTheme, setTheme } = useTheme();
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem("theme");
-
-    const isDark = savedTheme !== "light";
-
-    document.documentElement.classList.toggle("dark", isDark);
-    setDark(isDark);
+    setMounted(true);
   }, []);
 
-  function toggleTheme() {
-    const nextDark = !dark;
-
-    document.documentElement.classList.toggle("dark", nextDark);
-    localStorage.setItem("theme", nextDark ? "dark" : "light");
-    setDark(nextDark);
+  if (!mounted) {
+    return (
+      <span
+        className="inline-flex h-10 w-10 rounded-xl"
+        aria-hidden="true"
+      />
+    );
   }
+
+  const isDark = resolvedTheme === "dark";
 
   return (
     <button
       type="button"
-      onClick={toggleTheme}
+      onClick={() => setTheme(isDark ? "light" : "dark")}
       aria-label={
-        dark
+        isDark
           ? "Cambiar a modo claro"
           : "Cambiar a modo oscuro"
       }
       title={
-        dark
+        isDark
           ? "Cambiar a modo claro"
           : "Cambiar a modo oscuro"
       }
-      className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-card text-muted-foreground transition hover:border-primary/60 hover:bg-secondary hover:text-primary"
+      className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-card text-foreground transition hover:border-primary/60 hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
-      {dark ? (
+      {isDark ? (
         <Sun size={18} className="text-warning" />
       ) : (
         <Moon size={18} className="text-primary" />

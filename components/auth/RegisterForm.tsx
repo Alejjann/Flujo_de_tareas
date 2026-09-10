@@ -18,12 +18,16 @@ import {
 import { toast } from "sonner";
 
 import { registerUser } from "@/actions/auth";
+import AuthControls from "@/components/auth/AuthPageControls";
+import { useLanguage } from "@/components/providers/LanguageProvider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 const PASSWORD_MIN_LENGTH = 8;
 
 export default function RegisterForm() {
+  const { language } = useLanguage();
+
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] =
@@ -38,25 +42,96 @@ export default function RegisterForm() {
     confirmPassword: "",
   });
 
+  const copy =
+    language === "es"
+      ? {
+          eyebrow: "Empieza ahora",
+          title: "Crea tu cuenta",
+          description:
+            "Organiza tu trabajo, sigue tu progreso y mantén el foco desde un solo lugar.",
+          name: "Nombre",
+          namePlaceholder: "Tu nombre",
+          email: "Correo electrónico",
+          emailPlaceholder: "tu@email.com",
+          password: "Contraseña",
+          passwordPlaceholder: "Crea una contraseña segura",
+          confirmPassword: "Confirmar contraseña",
+          confirmPasswordPlaceholder: "Repite tu contraseña",
+          showPassword: "Mostrar contraseña",
+          hidePassword: "Ocultar contraseña",
+          passwordRequirements:
+            "Tu contraseña debe incluir:",
+          minCharacters: `Mínimo ${PASSWORD_MIN_LENGTH} caracteres`,
+          uppercase: "Una mayúscula",
+          lowercase: "Una minúscula",
+          number: "Un número",
+          specialCharacter: "Un carácter especial",
+          creating: "Creando cuenta...",
+          createAccount: "Crear cuenta",
+          alreadyHaveAccount: "¿Ya tienes una cuenta?",
+          signIn: "Inicia sesión",
+          missingName: "Introduce tu nombre.",
+          missingEmail: "Introduce tu correo electrónico.",
+          missingPassword: "Introduce una contraseña.",
+          passwordRequirementsError:
+            "La contraseña no cumple todos los requisitos.",
+          passwordMismatch: "Las contraseñas no coinciden.",
+          registerError: "No se pudo crear la cuenta.",
+        }
+      : {
+          eyebrow: "Get started",
+          title: "Create your account",
+          description:
+            "Organize your work, track your progress, and stay focused in one place.",
+          name: "Name",
+          namePlaceholder: "Your name",
+          email: "Email",
+          emailPlaceholder: "you@email.com",
+          password: "Password",
+          passwordPlaceholder: "Create a secure password",
+          confirmPassword: "Confirm password",
+          confirmPasswordPlaceholder: "Repeat your password",
+          showPassword: "Show password",
+          hidePassword: "Hide password",
+          passwordRequirements:
+            "Your password must include:",
+          minCharacters: `At least ${PASSWORD_MIN_LENGTH} characters`,
+          uppercase: "An uppercase letter",
+          lowercase: "A lowercase letter",
+          number: "A number",
+          specialCharacter: "A special character",
+          creating: "Creating account...",
+          createAccount: "Create account",
+          alreadyHaveAccount: "Already have an account?",
+          signIn: "Log in",
+          missingName: "Enter your name.",
+          missingEmail: "Enter your email address.",
+          missingPassword: "Enter a password.",
+          passwordRequirementsError:
+            "The password does not meet all requirements.",
+          passwordMismatch: "Passwords do not match.",
+          registerError: "Could not create the account.",
+        };
+
   const passwordRules = [
     {
-      label: `Mínimo ${PASSWORD_MIN_LENGTH} caracteres`,
+      label: copy.minCharacters,
       valid: form.password.length >= PASSWORD_MIN_LENGTH,
     },
     {
-      label: "Una mayúscula",
+      label: copy.uppercase,
       valid: /[A-Z]/.test(form.password),
     },
     {
-      label: "Una minúscula",
+      label: copy.lowercase,
       valid: /[a-z]/.test(form.password),
     },
     {
-      label: "Un número",
+      label: copy.number,
       valid: /\d/.test(form.password),
     },
     {
-      label: "Un carácter especial",
+      label: copy.specialCharacter,
       valid: /[^A-Za-z0-9]/.test(form.password),
     },
   ];
@@ -89,7 +164,7 @@ export default function RegisterForm() {
       setPasswordError(
         passwordsAreComparable &&
           nextForm.password !== nextForm.confirmPassword
-          ? "Las contraseñas no coinciden."
+          ? copy.passwordMismatch
           : ""
       );
     }
@@ -108,30 +183,28 @@ export default function RegisterForm() {
     setEmailError("");
 
     if (!name) {
-      toast.error("Introduce tu nombre.");
+      toast.error(copy.missingName);
       return;
     }
 
     if (!email) {
-      toast.error("Introduce tu correo electrónico.");
+      toast.error(copy.missingEmail);
       return;
     }
 
     if (!password) {
-      toast.error("Introduce una contraseña.");
+      toast.error(copy.missingPassword);
       return;
     }
 
     if (!isPasswordValid) {
-      toast.error(
-        "La contraseña no cumple todos los requisitos."
-      );
+      toast.error(copy.passwordRequirementsError);
       return;
     }
 
     if (password !== confirmPassword) {
-      setPasswordError("Las contraseñas no coinciden.");
-      toast.error("Las contraseñas no coinciden.");
+      setPasswordError(copy.passwordMismatch);
+      toast.error(copy.passwordMismatch);
       return;
     }
 
@@ -145,11 +218,6 @@ export default function RegisterForm() {
 
       const result = await registerUser(formData);
 
-      /*
-       * Si el registro funciona, registerUser redirige a /login.
-       * Si devuelve un error, lo mostramos y devolvemos el botón
-       * a su estado normal.
-       */
       if (result?.error) {
         if (result.field === "email") {
           setEmailError(result.error);
@@ -165,7 +233,7 @@ export default function RegisterForm() {
       toast.error(
         error instanceof Error
           ? error.message
-          : "No se pudo crear la cuenta."
+          : copy.registerError
       );
 
       setLoading(false);
@@ -174,18 +242,19 @@ export default function RegisterForm() {
 
   return (
     <form action={handleSubmit} className="w-full">
+      <AuthControls />
+
       <div className="mb-7">
         <p className="text-xs font-bold uppercase tracking-[0.18em] text-cyan-300">
-          Empieza ahora
+          {copy.eyebrow}
         </p>
 
         <h1 className="mt-3 text-3xl font-black tracking-[-0.05em] text-white sm:text-4xl">
-          Crea tu cuenta
+          {copy.title}
         </h1>
 
         <p className="mt-3 text-sm leading-6 text-slate-400">
-          Organiza tu trabajo, sigue tu progreso y mantén el foco
-          desde un solo lugar.
+          {copy.description}
         </p>
       </div>
 
@@ -196,7 +265,7 @@ export default function RegisterForm() {
             className="mb-2 flex items-center gap-2 text-sm font-semibold text-slate-200"
           >
             <UserRound size={16} className="text-cyan-300" />
-            Nombre
+            {copy.name}
           </label>
 
           <Input
@@ -205,7 +274,7 @@ export default function RegisterForm() {
             name="name"
             value={form.name}
             onChange={handleChange}
-            placeholder="Tu nombre"
+            placeholder={copy.namePlaceholder}
             autoComplete="name"
             disabled={loading}
             className="h-12 border-white/10 !bg-white/[0.045] text-white placeholder:text-slate-500 focus:border-cyan-400 focus:ring-4 focus:ring-cyan-400/10"
@@ -219,7 +288,7 @@ export default function RegisterForm() {
             className="mb-2 flex items-center gap-2 text-sm font-semibold text-slate-200"
           >
             <Mail size={16} className="text-cyan-300" />
-            Correo electrónico
+            {copy.email}
           </label>
 
           <Input
@@ -228,7 +297,7 @@ export default function RegisterForm() {
             name="email"
             value={form.email}
             onChange={handleChange}
-            placeholder="tu@email.com"
+            placeholder={copy.emailPlaceholder}
             autoComplete="email"
             disabled={loading}
             required
@@ -261,7 +330,7 @@ export default function RegisterForm() {
             className="mb-2 flex items-center gap-2 text-sm font-semibold text-slate-200"
           >
             <LockKeyhole size={16} className="text-cyan-300" />
-            Contraseña
+            {copy.password}
           </label>
 
           <div className="relative">
@@ -271,7 +340,7 @@ export default function RegisterForm() {
               name="password"
               value={form.password}
               onChange={handleChange}
-              placeholder="Crea una contraseña segura"
+              placeholder={copy.passwordPlaceholder}
               autoComplete="new-password"
               disabled={loading}
               aria-invalid={hasPasswordMismatch}
@@ -297,8 +366,8 @@ export default function RegisterForm() {
               className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1 text-slate-400 transition hover:bg-white/10 hover:text-white disabled:opacity-50"
               aria-label={
                 showPassword
-                  ? "Ocultar contraseña"
-                  : "Mostrar contraseña"
+                  ? copy.hidePassword
+                  : copy.showPassword
               }
             >
               {showPassword ? (
@@ -315,7 +384,7 @@ export default function RegisterForm() {
               className="mt-3 rounded-xl border border-white/10 bg-white/[0.035] p-3.5"
             >
               <p className="mb-2.5 text-xs font-bold text-slate-200">
-                Tu contraseña debe incluir:
+                {copy.passwordRequirements}
               </p>
 
               <ul className="grid gap-2 sm:grid-cols-2">
@@ -348,7 +417,7 @@ export default function RegisterForm() {
             className="mb-2 flex items-center gap-2 text-sm font-semibold text-slate-200"
           >
             <LockKeyhole size={16} className="text-cyan-300" />
-            Confirmar contraseña
+            {copy.confirmPassword}
           </label>
 
           <div className="relative">
@@ -358,7 +427,7 @@ export default function RegisterForm() {
               name="confirmPassword"
               value={form.confirmPassword}
               onChange={handleChange}
-              placeholder="Repite tu contraseña"
+              placeholder={copy.confirmPasswordPlaceholder}
               autoComplete="new-password"
               disabled={loading}
               aria-invalid={hasPasswordMismatch}
@@ -384,8 +453,8 @@ export default function RegisterForm() {
               className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1 text-slate-400 transition hover:bg-white/10 hover:text-white disabled:opacity-50"
               aria-label={
                 showConfirmPassword
-                  ? "Ocultar contraseña"
-                  : "Mostrar contraseña"
+                  ? copy.hidePassword
+                  : copy.showPassword
               }
             >
               {showConfirmPassword ? (
@@ -417,20 +486,20 @@ export default function RegisterForm() {
         {loading ? (
           <>
             <LoaderCircle size={18} className="animate-spin" />
-            Creando cuenta...
+            {copy.creating}
           </>
         ) : (
-          "Crear cuenta"
+          copy.createAccount
         )}
       </Button>
 
       <p className="mt-6 text-center text-sm text-slate-400">
-        ¿Ya tienes una cuenta?{" "}
+        {copy.alreadyHaveAccount}{" "}
         <Link
           href="/login"
           className="font-semibold text-cyan-300 transition hover:text-cyan-200 hover:underline"
         >
-          Inicia sesión
+          {copy.signIn}
         </Link>
       </p>
     </form>

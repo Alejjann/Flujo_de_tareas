@@ -13,6 +13,8 @@ import {
 import { useState } from "react";
 
 import { loginUser } from "@/actions/auth";
+import AuthControls from "@/components/auth/AuthPageControls";
+import { useLanguage } from "@/components/providers/LanguageProvider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -24,10 +26,6 @@ function isNextRedirectError(error: unknown) {
     return false;
   }
 
-  /*
-   * En Next.js, redirect() lanza un objeto con digest
-   * que normalmente comienza por NEXT_REDIRECT.
-   */
   const maybeError = error as {
     digest?: unknown;
     message?: unknown;
@@ -42,9 +40,56 @@ function isNextRedirectError(error: unknown) {
 }
 
 export default function LoginForm() {
+  const { language } = useLanguage();
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+
+  const copy =
+    language === "es"
+      ? {
+          eyebrow: "Bienvenido de nuevo",
+          title: "Inicia sesión",
+          description:
+            "Accede a tu espacio personal y continúa donde lo dejaste.",
+          email: "Correo electrónico",
+          emailPlaceholder: "tu@email.com",
+          password: "Contraseña",
+          passwordPlaceholder:
+            "Introduce tu contraseña",
+          forgotPassword:
+            "¿Olvidaste tu contraseña?",
+          showPassword: "Mostrar contraseña",
+          hidePassword: "Ocultar contraseña",
+          signingIn: "Iniciando sesión...",
+          signIn: "Iniciar sesión",
+          dontHaveAccount:
+            "¿Aún no tienes una cuenta?",
+          createAccount: "Crea una cuenta",
+          loginError:
+            "No se pudo iniciar sesión. Inténtalo de nuevo.",
+        }
+      : {
+          eyebrow: "Welcome back",
+          title: "Log in",
+          description:
+            "Access your personal workspace and continue where you left off.",
+          email: "Email",
+          emailPlaceholder: "you@email.com",
+          password: "Password",
+          passwordPlaceholder: "Enter your password",
+          forgotPassword: "Forgot your password?",
+          showPassword: "Show password",
+          hidePassword: "Hide password",
+          signingIn: "Signing in...",
+          signIn: "Log in",
+          dontHaveAccount:
+            "Don't have an account yet?",
+          createAccount: "Create an account",
+          loginError:
+            "Could not sign in. Please try again.",
+        };
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -61,46 +106,38 @@ export default function LoginForm() {
     try {
       const result = await loginUser(formData);
 
-      /*
-       * Si loginUser devuelve error, es un fallo real:
-       * credenciales incorrectas, input vacío, etc.
-       */
       if (result?.error) {
         setError(result.error);
         setLoading(false);
         return;
       }
     } catch (error) {
-      /*
-       * No mostramos error cuando el login fue correcto.
-       * Next.js usa NEXT_REDIRECT internamente para ir a dashboard.
-       */
       if (isNextRedirectError(error)) {
         return;
       }
 
       console.error("ERROR LOGIN:", error);
 
-      setError(
-        "No se pudo iniciar sesión. Inténtalo de nuevo."
-      );
+      setError(copy.loginError);
       setLoading(false);
     }
   }
 
   return (
     <form onSubmit={handleSubmit} className="w-full">
+      <AuthControls />
+
       <div className="mb-8">
         <p className="text-xs font-bold uppercase tracking-[0.18em] text-cyan-300">
-          Bienvenido de nuevo
+          {copy.eyebrow}
         </p>
 
         <h1 className="mt-3 text-3xl font-black tracking-[-0.05em] text-white sm:text-4xl">
-          Inicia sesión
+          {copy.title}
         </h1>
 
         <p className="mt-3 text-sm leading-6 text-slate-400">
-          Accede a tu espacio personal y continúa donde lo dejaste.
+          {copy.description}
         </p>
       </div>
 
@@ -124,14 +161,14 @@ export default function LoginForm() {
             className="mb-2 flex items-center gap-2 text-sm font-semibold text-slate-200"
           >
             <Mail size={16} className="text-cyan-300" />
-            Correo electrónico
+            {copy.email}
           </label>
 
           <Input
             id="login-email"
             type="email"
             name="email"
-            placeholder="tu@email.com"
+            placeholder={copy.emailPlaceholder}
             autoComplete="email"
             required
             disabled={loading}
@@ -149,14 +186,14 @@ export default function LoginForm() {
                 size={16}
                 className="text-cyan-300"
               />
-              Contraseña
+              {copy.password}
             </label>
 
             <Link
               href="/forgot-password"
               className="text-xs font-semibold text-cyan-300 transition hover:text-cyan-200 hover:underline"
             >
-              ¿Olvidaste tu contraseña?
+              {copy.forgotPassword}
             </Link>
           </div>
 
@@ -165,7 +202,7 @@ export default function LoginForm() {
               id="login-password"
               type={showPassword ? "text" : "password"}
               name="password"
-              placeholder="Introduce tu contraseña"
+              placeholder={copy.passwordPlaceholder}
               autoComplete="current-password"
               required
               disabled={loading}
@@ -181,8 +218,8 @@ export default function LoginForm() {
               className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1 text-slate-400 transition hover:bg-white/10 hover:text-white disabled:opacity-50"
               aria-label={
                 showPassword
-                  ? "Ocultar contraseña"
-                  : "Mostrar contraseña"
+                  ? copy.hidePassword
+                  : copy.showPassword
               }
             >
               {showPassword ? (
@@ -203,20 +240,20 @@ export default function LoginForm() {
         {loading ? (
           <>
             <LoaderCircle size={18} className="animate-spin" />
-            Iniciando sesión...
+            {copy.signingIn}
           </>
         ) : (
-          "Iniciar sesión"
+          copy.signIn
         )}
       </Button>
 
       <p className="mt-6 text-center text-sm text-slate-400">
-        ¿Aún no tienes una cuenta?{" "}
+        {copy.dontHaveAccount}{" "}
         <Link
           href="/register"
           className="font-semibold text-cyan-300 transition hover:text-cyan-200 hover:underline"
         >
-          Crea una cuenta
+          {copy.createAccount}
         </Link>
       </p>
     </form>

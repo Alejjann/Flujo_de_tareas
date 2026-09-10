@@ -6,9 +6,13 @@ import {
   Trash2,
 } from "lucide-react";
 import { useState } from "react";
-import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
+import { deleteTask } from "@/actions/deleteTasks";
+import { useGuestTasks } from "@/components/providers/GuestTasksProvider";
+import { useLanguage } from "@/components/providers/LanguageProvider";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -16,10 +20,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-
-import { deleteTask } from "@/actions/deleteTasks";
-import { useLanguage } from "@/components/providers/LanguageProvider";
 
 interface DeleteTaskDialogProps {
   open: boolean;
@@ -27,6 +27,7 @@ interface DeleteTaskDialogProps {
   taskId: string;
   taskTitle: string;
   onDeleted?: () => void;
+  guestMode?: boolean;
 }
 
 export default function DeleteTaskDialog({
@@ -35,9 +36,17 @@ export default function DeleteTaskDialog({
   taskId,
   taskTitle,
   onDeleted,
+  guestMode = false,
 }: DeleteTaskDialogProps) {
   const { t } = useLanguage();
   const router = useRouter();
+
+  /*
+   * En /guest contiene deleteTask().
+   * En /dashboard es null y no se usa porque guestMode es false.
+   */
+  const guestTasks = useGuestTasks();
+
   const [isDeleting, setIsDeleting] = useState(false);
 
   function handleOpenChange(nextOpen: boolean) {
@@ -56,6 +65,27 @@ export default function DeleteTaskDialog({
     setIsDeleting(true);
 
     try {
+      if (guestMode) {
+        if (!guestTasks) {
+          throw new Error(
+            "GuestTasksProvider no está disponible en modo invitado."
+          );
+        }
+
+        guestTasks.deleteTask(taskId);
+
+        toast.success(t.messages.deleteSuccess);
+
+        onDeleted?.();
+        onOpenChange(false);
+
+        /*
+         * No se usa router.refresh() aquí:
+         * al actualizar el provider, React redibuja el dashboard invitado.
+         */
+        return;
+      }
+
       await deleteTask(taskId);
 
       toast.success(t.messages.deleteSuccess);

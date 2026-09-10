@@ -1,14 +1,17 @@
 "use client";
 
 import { Languages } from "lucide-react";
-import { useLanguage } from "@/components/providers/LanguageProvider";
+
+import {
+  useLanguage,
+} from "@/components/providers/LanguageProvider";
 
 export default function LanguageToggle() {
   const { language, setLanguage } = useLanguage();
 
-  function handleToggleLanguage() {
-    const nextLanguage = language === "es" ? "en" : "es";
+  const nextLanguage = language === "es" ? "en" : "es";
 
+  function handleToggleLanguage() {
     setLanguage(nextLanguage);
   }
 
@@ -30,8 +33,7 @@ export default function LanguageToggle() {
     >
       <Languages size={17} className="text-primary" />
 
-      {/* Muestra el idioma al que se cambiará al hacer clic */}
-      <span>{language === "es" ? "EN" : "ES"}</span>
+      <span>{nextLanguage.toUpperCase()}</span>
     </button>
   );
 }

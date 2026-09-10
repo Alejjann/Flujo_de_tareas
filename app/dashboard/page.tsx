@@ -5,7 +5,7 @@ import DashboardContent from "@/components/dashboard/DashboardContent";
 import Header from "@/components/layout/Header";
 import { prisma } from "@/lib/prisma";
 
-export default async function Home({
+export default async function DashboardPage({
   searchParams,
 }: {
   searchParams: Promise<{
@@ -134,6 +134,7 @@ export default async function Home({
             priority: task.priority,
             dueDate: task.dueDate,
             tag: task.tag,
+            position: task.position,
           }))}
           completed={completed}
           pending={pending}

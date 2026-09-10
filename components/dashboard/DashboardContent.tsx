@@ -1,3 +1,4 @@
+// components/dashboard/DashboardContent.tsx
 "use client";
 
 import type { ReactNode } from "react";
@@ -35,6 +36,7 @@ interface DashboardContentProps {
     priority: "LOW" | "MEDIUM" | "HIGH";
     dueDate: Date | null;
     tag: string | null;
+    position: number;
   }[];
   completed: number;
   pending: number;
@@ -43,6 +45,7 @@ interface DashboardContentProps {
   low: number;
   productivity: number;
   isFirstTask: boolean;
+  guestMode?: boolean;
 }
 
 function StatCard({
@@ -134,6 +137,7 @@ export default function DashboardContent({
   low,
   productivity,
   isFirstTask,
+  guestMode = false,
 }: DashboardContentProps) {
   const { t } = useLanguage();
 
@@ -142,13 +146,12 @@ export default function DashboardContent({
     100
   );
 
-  const totalTasksLabel =
-    t.dashboard.totalTasks.toLowerCase();
+  const totalTasksLabel = t.dashboard.totalTasks.toLowerCase();
 
   return (
     <>
       {/* CABECERA */}
-      <header className="mb-8 flex flex-col gap-5 border-b border-border/80 pb-8 sm:mb-10 sm:flex-row sm:items-end sm:justify-between sm:gap-6 sm:pb-9">
+      <header className="mb-8 border-b border-border/80 pb-8 sm:mb-10 sm:pb-9">
         <div className="max-w-2xl">
           <h1 className="text-4xl font-black leading-[0.98] tracking-[-0.065em] text-foreground sm:text-5xl lg:text-6xl">
             {t.dashboard.title}
@@ -158,13 +161,9 @@ export default function DashboardContent({
             {t.dashboard.description}
           </p>
         </div>
-
-        <div className="w-full shrink-0 sm:w-auto">
-          <AddTaskButton />
-        </div>
       </header>
 
-      {/* ONBOARDING: SOLO CUANDO LA CUENTA AÚN NO TIENE TAREAS */}
+      {/* ONBOARDING */}
       {isFirstTask && (
         <section className="ui-glow-card relative mb-6 overflow-hidden p-5 sm:mb-8 sm:p-7 lg:p-8">
           <div className="relative z-10 grid gap-7 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
@@ -184,9 +183,9 @@ export default function DashboardContent({
                 trabajo.
               </p>
 
-              <div className="mt-6 w-full sm:w-auto">
-                <AddTaskButton />
-              </div>
+              <p className="mt-6 text-sm font-semibold text-primary">
+                Pulsa el botón "Nueva tarea" situado abajo a la derecha.
+              </p>
             </div>
 
             <div className="grid grid-cols-3 gap-2.5 sm:gap-3 lg:w-[310px]">
@@ -227,9 +226,7 @@ export default function DashboardContent({
       {/* RESUMEN PRINCIPAL */}
       <section className="relative mb-6 overflow-hidden rounded-3xl border border-primary/20 bg-card p-5 shadow-lg shadow-primary/[0.06] sm:mb-8 sm:p-7 lg:p-8">
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/[0.13] via-transparent to-info/[0.08]" />
-
         <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-primary/15 blur-3xl" />
-
         <div className="pointer-events-none absolute -bottom-24 left-[28%] h-56 w-56 rounded-full bg-info/10 blur-3xl" />
 
         <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
@@ -374,7 +371,7 @@ export default function DashboardContent({
         </StatCard>
       </section>
 
-      {/* ACTIVIDAD Y RESUMEN: no se muestran hasta crear la primera tarea */}
+      {/* ACTIVIDAD Y RESUMEN */}
       {!isFirstTask && (
         <section className="mb-6 grid gap-6 sm:mb-8 lg:grid-cols-[minmax(0,1.55fr)_minmax(290px,1fr)]">
           <article className="ui-card-main overflow-hidden p-5 sm:p-6">
@@ -470,7 +467,7 @@ export default function DashboardContent({
       </section>
 
       {/* CALENDARIO Y TABLERO */}
-      <section className="grid gap-6 xl:grid-cols-[280px_minmax(0,1fr)]">
+      <section className="grid gap-6 pb-24 xl:grid-cols-[280px_minmax(0,1fr)]">
         <aside className="ui-card-main h-fit overflow-hidden p-4 sm:p-5 xl:sticky xl:top-24">
           <div className="mb-4 flex items-center gap-3 border-b border-border pb-4">
             <div className="ui-icon-box ui-icon-primary h-9 w-9 rounded-xl">
@@ -511,16 +508,20 @@ export default function DashboardContent({
                   {t.dashboard.noTasksDescription}
                 </p>
 
-                <div className="mt-6 flex justify-center">
-                  <AddTaskButton />
-                </div>
+                <p className="mx-auto mt-5 max-w-sm text-sm font-semibold text-primary">
+                  Usa el botón "Nueva tarea" que permanece abajo a la
+                  derecha.
+                </p>
               </div>
             </div>
           ) : (
-            <TaskBoard tasks={tasks} />
+            <TaskBoard tasks={tasks} guestMode={guestMode} />
           )}
         </div>
       </section>
+
+      {/* BOTÓN FLOTANTE */}
+      <AddTaskButton variant="floating" guestMode={guestMode} />
     </>
   );
 }

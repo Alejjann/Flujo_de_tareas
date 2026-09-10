@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Inter, Geist_Mono } from "next/font/google";
+
 import LanguageProvider from "@/components/providers/LanguageProvider";
+import ThemeProvider from "@/components/providers/ThemeProvider";
+
 import "./globals.css";
 
 const inter = Inter({
@@ -26,10 +29,13 @@ export default function RootLayout({
   return (
     <html
       lang="es"
+      suppressHydrationWarning
       className={`${inter.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-screen bg-background text-foreground">
-        <LanguageProvider>{children}</LanguageProvider>
+        <ThemeProvider>
+          <LanguageProvider>{children}</LanguageProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
