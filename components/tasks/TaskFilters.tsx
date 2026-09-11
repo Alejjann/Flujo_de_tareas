@@ -7,6 +7,7 @@ import {
 } from "next/navigation";
 
 import { Check, ListFilter } from "lucide-react";
+
 import { useLanguage } from "@/components/providers/LanguageProvider";
 
 export default function TaskFilters() {
@@ -31,8 +32,11 @@ export default function TaskFilters() {
 
     const query = params.toString();
 
-    router.push(
-      query ? `${pathname}?${query}` : pathname
+    router.replace(
+      query ? `${pathname}?${query}` : pathname,
+      {
+        scroll: false,
+      }
     );
   }
 

@@ -189,12 +189,7 @@ export default function LoginForm() {
               {copy.password}
             </label>
 
-            <Link
-              href="/forgot-password"
-              className="text-xs font-semibold text-cyan-300 transition hover:text-cyan-200 hover:underline"
-            >
-              {copy.forgotPassword}
-            </Link>
+            
           </div>
 
           <div className="relative">

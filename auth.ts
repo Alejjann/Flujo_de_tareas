@@ -1,5 +1,6 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
+
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 
@@ -20,7 +21,6 @@ export const {
           label: "Correo",
           type: "email",
         },
-
         password: {
           label: "Contraseña",
           type: "password",
@@ -28,24 +28,30 @@ export const {
       },
 
       async authorize(credentials) {
-        if (
-          !credentials?.email ||
-          !credentials?.password
-        ) {
+        const email =
+          typeof credentials?.email === "string"
+            ? credentials.email.trim().toLowerCase()
+            : "";
+
+        const password =
+          typeof credentials?.password === "string"
+            ? credentials.password
+            : "";
+
+        if (!email || !password) {
           return null;
         }
-
-        const email = String(credentials.email)
-          .trim()
-          .toLowerCase();
-
-        const password = String(
-          credentials.password
-        );
 
         const user = await prisma.user.findUnique({
           where: {
             email,
+          },
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            password: true,
+            avatarUrl: true,
           },
         });
 
@@ -53,17 +59,15 @@ export const {
           return null;
         }
 
-        const valid = await bcrypt.compare(
+        const validPassword = await bcrypt.compare(
           password,
           user.password
         );
 
-        if (!valid) {
+        if (!validPassword) {
           return null;
         }
 
-        // 👇 Convertimos avatarUrl de Prisma
-        // en image para NextAuth
         return {
           id: user.id,
           name: user.name,
@@ -75,10 +79,6 @@ export const {
   ],
 
   callbacks: {
-    // =========================
-    // JWT
-    // =========================
-
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
@@ -88,20 +88,18 @@ export const {
       return token;
     },
 
-    // =========================
-    // SESSION
-    // =========================
-
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id as string;
-
         session.user.image =
-          (token.image as string | null | undefined) ??
-          null;
+          (token.image as string | null | undefined) ?? null;
       }
 
       return session;
     },
+  },
+
+  pages: {
+    signIn: "/login",
   },
 });

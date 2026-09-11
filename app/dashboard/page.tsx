@@ -1,20 +1,30 @@
 import { redirect } from "next/navigation";
 
+import type { Prisma, Priority, TaskStatus } from "@prisma/client";
+
 import { auth } from "@/auth";
 import DashboardContent from "@/components/dashboard/DashboardContent";
 import Header from "@/components/layout/Header";
 import { prisma } from "@/lib/prisma";
 
-export default async function DashboardPage({
-  searchParams,
-}: {
+type DashboardPageProps = {
   searchParams: Promise<{
     search?: string;
     status?: string;
     priority?: string;
     sort?: string;
   }>;
-}) {
+};
+
+const VALID_PRIORITIES: Priority[] = [
+  "LOW",
+  "MEDIUM",
+  "HIGH",
+];
+
+export default async function DashboardPage({
+  searchParams,
+}: DashboardPageProps) {
   const { search, status, priority, sort } = await searchParams;
 
   const session = await auth();
@@ -23,69 +33,69 @@ export default async function DashboardPage({
     redirect("/login");
   }
 
-  const tasks = await prisma.task.findMany({
-    where: {
-      userId: session.user.id,
+  const normalizedSearch = search?.trim();
 
-      ...(search
-        ? {
-            OR: [
-              {
-                title: {
-                  contains: search,
-                  mode: "insensitive",
-                },
-              },
-              {
-                description: {
-                  contains: search,
-                  mode: "insensitive",
-                },
-              },
-            ],
-          }
-        : {}),
+  const selectedPriority = VALID_PRIORITIES.includes(
+    priority as Priority
+  )
+    ? (priority as Priority)
+    : undefined;
 
-      ...(status === "completed"
-        ? {
-            status: "COMPLETED" as const,
-          }
-        : {}),
+  const where: Prisma.TaskWhereInput = {
+    userId: session.user.id,
+  };
 
-      ...(status === "pending"
-        ? {
-            status: {
-              in: ["PENDING", "IN_PROGRESS"] as const,
-            },
-          }
-        : {}),
+  if (normalizedSearch) {
+    where.OR = [
+      {
+        title: {
+          contains: normalizedSearch,
+          mode: "insensitive",
+        },
+      },
+      {
+        description: {
+          contains: normalizedSearch,
+          mode: "insensitive",
+        },
+      },
+    ];
+  }
 
-      ...(priority
-        ? {
-            priority: priority as
-              | "LOW"
-              | "MEDIUM"
-              | "HIGH",
-          }
-        : {}),
-    },
+  if (status === "completed") {
+    where.status = "COMPLETED";
+  }
 
-    orderBy:
-      sort === "priority"
+  if (status === "pending") {
+    where.status = {
+      in: ["PENDING", "IN_PROGRESS"] as TaskStatus[],
+    };
+  }
+
+  if (selectedPriority) {
+    where.priority = selectedPriority;
+  }
+
+  const orderBy: Prisma.TaskOrderByWithRelationInput =
+    sort === "priority"
+      ? {
+          priority: "desc",
+        }
+      : sort === "title"
         ? {
-            priority: "desc",
+            title: "asc",
           }
-        : sort === "title"
+        : sort === "due"
           ? {
-              title: "asc",
+              dueDate: "asc",
             }
-          : sort === "due"
-            ? {
-                dueDate: "asc",
-              }
-            : {
-                createdAt: "desc",
-              },
+          : {
+              createdAt: "desc",
+            };
+
+  const tasks = await prisma.task.findMany({
+    where,
+    orderBy,
   });
 
   const totalTasks = tasks.length;
@@ -118,9 +128,9 @@ export default async function DashboardPage({
   return (
     <main className="ui-dashboard-page">
       <Header
-        name={session.user.name}
-        email={session.user.email}
-        avatarUrl={session.user.image}
+        name={session.user.name ?? null}
+        email={session.user.email ?? null}
+        avatarUrl={session.user.image ?? null}
       />
 
       <div className="ui-container max-w-[1440px]">

@@ -21,20 +21,16 @@ enum TaskStatus {
 }
 
 model User {
-  id         String   @id @default(cuid())
-  name       String?
-  email      String   @unique
-  password   String
-
-  avatarUrl  String?
-  bannerUrl  String?
-
+  id               String   @id @default(cuid())
+  name             String?
+  email            String   @unique
+  password         String
+  avatarUrl        String?
+  bannerUrl        String?
   resetToken       String?
   resetTokenExpiry DateTime?
-
-  tasks      Task[]
-
-  createdAt DateTime @default(now())
+  tasks            Task[]
+  createdAt        DateTime @default(now())
 
   @@index([resetTokenExpiry])
 }
@@ -48,17 +44,12 @@ model Task {
   priority    Priority   @default(MEDIUM)
   dueDate     DateTime?
   tag         String?    @default("Personal")
-
-  // Orden de la tarjeta dentro de una columna del tablero.
-  // Un número menor aparece antes que uno mayor.
   position    Int        @default(0)
-
   userId      String
   user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
-  // Optimiza la consulta de tareas por usuario, columna y posición.
   @@index([userId, status, position])
+  @@index([userId, createdAt])
 }

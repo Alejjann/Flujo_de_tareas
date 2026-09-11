@@ -1,5 +1,4 @@
 export const PASSWORD_MIN_LENGTH = 8;
-export const PASSWORD_MAX_LENGTH = 72;
 
 export function getPasswordErrors(password: string) {
   const errors: string[] = [];
@@ -7,12 +6,6 @@ export function getPasswordErrors(password: string) {
   if (password.length < PASSWORD_MIN_LENGTH) {
     errors.push(
       `La contraseña debe tener al menos ${PASSWORD_MIN_LENGTH} caracteres.`
-    );
-  }
-
-  if (password.length > PASSWORD_MAX_LENGTH) {
-    errors.push(
-      `La contraseña no puede superar los ${PASSWORD_MAX_LENGTH} caracteres.`
     );
   }
 
@@ -29,9 +22,7 @@ export function getPasswordErrors(password: string) {
   }
 
   if (!/\d/.test(password)) {
-    errors.push(
-      "La contraseña debe incluir un número."
-    );
+    errors.push("La contraseña debe incluir un número.");
   }
 
   if (!/[^A-Za-z0-9]/.test(password)) {

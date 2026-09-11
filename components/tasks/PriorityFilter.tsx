@@ -5,6 +5,7 @@ import {
   useRouter,
   useSearchParams,
 } from "next/navigation";
+
 import { useLanguage } from "@/components/providers/LanguageProvider";
 
 export default function PriorityFilter() {
@@ -29,7 +30,12 @@ export default function PriorityFilter() {
 
     const query = params.toString();
 
-    router.push(query ? `${pathname}?${query}` : pathname);
+    router.replace(
+      query ? `${pathname}?${query}` : pathname,
+      {
+        scroll: false,
+      }
+    );
   }
 
   const buttonClass =

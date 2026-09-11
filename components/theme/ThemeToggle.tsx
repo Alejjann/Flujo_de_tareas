@@ -1,32 +1,20 @@
 "use client";
 
 import { Moon, Sun } from "lucide-react";
-import { useEffect, useState } from "react";
-import { useTheme } from "next-themes";
+
+import {
+  useAppTheme,
+} from "@/components/providers/ThemeProvider";
 
 export default function ThemeToggle() {
-  const [mounted, setMounted] = useState(false);
-  const { resolvedTheme, setTheme } = useTheme();
+  const { theme, toggleTheme } = useAppTheme();
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
-    return (
-      <span
-        className="inline-flex h-10 w-10 rounded-xl"
-        aria-hidden="true"
-      />
-    );
-  }
-
-  const isDark = resolvedTheme === "dark";
+  const isDark = theme === "dark";
 
   return (
     <button
       type="button"
-      onClick={() => setTheme(isDark ? "light" : "dark")}
+      onClick={toggleTheme}
       aria-label={
         isDark
           ? "Cambiar a modo claro"

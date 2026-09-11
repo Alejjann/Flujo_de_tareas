@@ -2,15 +2,17 @@
 
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
-import { AuthError } from "next-auth";
 import { redirect } from "next/navigation";
 
 import { signIn, signOut } from "@/auth";
 import { resend } from "@/lib/mail";
-import { getPasswordErrors } from "@/lib/password";
 import { prisma } from "@/lib/prisma";
+import { getPasswordErrors } from "@/lib/validation/password";
 
 const RESET_TOKEN_TTL_MS = 30 * 60 * 1000;
+const NAME_MIN_LENGTH = 2;
+const NAME_MAX_LENGTH = 80;
+const EMAIL_MAX_LENGTH = 255;
 
 const GENERIC_RESET_MESSAGE =
   "Si existe una cuenta con ese correo, te hemos enviado un enlace para restablecer la contraseña.";
@@ -32,6 +34,10 @@ function getAppUrl() {
     "http://localhost:3000";
 
   return appUrl.replace(/\/$/, "");
+}
+
+function isValidEmail(email: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
 function escapeHtml(value: string) {
@@ -57,6 +63,38 @@ function isPrismaUniqueConstraintError(error: unknown) {
   );
 }
 
+function isNextRedirectError(error: unknown) {
+  return (
+    error instanceof Error &&
+    error.message.includes("NEXT_REDIRECT")
+  );
+}
+
+function isInvalidCredentialsError(error: unknown) {
+  if (
+    typeof error !== "object" ||
+    error === null
+  ) {
+    return false;
+  }
+
+  const authError = error as {
+    type?: string;
+    cause?: {
+      err?: {
+        code?: string;
+        type?: string;
+      };
+    };
+  };
+
+  return (
+    authError.type === "CredentialsSignin" ||
+    authError.cause?.err?.code === "credentials" ||
+    authError.cause?.err?.type === "CredentialsSignin"
+  );
+}
+
 /* =========================
    LOGIN
 ========================= */
@@ -75,15 +113,13 @@ export async function loginUser(formData: FormData) {
       ? passwordValue
       : "";
 
-  if (!email) {
+  /*
+   * Usamos el mismo mensaje para campos incompletos o credenciales
+   * incorrectas para no revelar si un correo está registrado.
+   */
+  if (!email || !password) {
     return {
-      error: "Introduce el correo electrónico.",
-    };
-  }
-
-  if (!password) {
-    return {
-      error: "Introduce la contraseña.",
+      error: "Correo o contraseña incorrectos.",
     };
   }
 
@@ -95,32 +131,21 @@ export async function loginUser(formData: FormData) {
     });
   } catch (error) {
     /*
-     * Auth.js llama a redirect() tras un login correcto.
-     * Next.js implementa ese redirect lanzando internamente
-     * un error especial: NEXT_REDIRECT.
-     *
-     * Hay que relanzarlo; no es un fallo de autenticación.
+     * Tras un login correcto Auth.js ejecuta un redirect interno.
+     * Next.js representa ese redirect como un error especial que
+     * debe relanzarse para que la navegación funcione.
      */
-    if (
-      error instanceof Error &&
-      error.message.includes("NEXT_REDIRECT")
-    ) {
+    if (isNextRedirectError(error)) {
       throw error;
     }
 
-    if (error instanceof AuthError) {
-      if (error.type === "CredentialsSignin") {
-        return {
-          error: "Correo o contraseña incorrectos.",
-        };
-      }
-
+    if (isInvalidCredentialsError(error)) {
       return {
-        error: "No se pudo iniciar sesión. Inténtalo de nuevo.",
+        error: "Correo o contraseña incorrectos.",
       };
     }
 
-    console.error("ERROR INICIANDO SESIÓN:", error);
+    console.error("ERROR_INICIANDO_SESION", error);
 
     return {
       error: "No se pudo iniciar sesión. Inténtalo de nuevo.",
@@ -162,33 +187,39 @@ export async function registerUser(formData: FormData) {
     };
   }
 
+  if (name.length < NAME_MIN_LENGTH) {
+    return {
+      error: "El nombre debe tener al menos 2 caracteres.",
+      field: "name",
+    };
+  }
+
+  if (name.length > NAME_MAX_LENGTH) {
+    return {
+      error: "El nombre no puede superar los 80 caracteres.",
+      field: "name",
+    };
+  }
+
+  if (email.length > EMAIL_MAX_LENGTH || !isValidEmail(email)) {
+    return {
+      error: "Introduce un correo electrónico válido.",
+      field: "email",
+    };
+  }
+
   const passwordErrors = getPasswordErrors(password);
 
   if (passwordErrors.length > 0) {
     return {
       error: passwordErrors[0],
+      field: "password",
     };
   }
-
-  const exists = await prisma.user.findUnique({
-    where: {
-      email,
-    },
-    select: {
-      id: true,
-    },
-  });
-
-  if (exists) {
-    return {
-      error: EMAIL_ALREADY_REGISTERED_MESSAGE,
-      field: "email",
-    };
-  }
-
-  const hashedPassword = await bcrypt.hash(password, 12);
 
   try {
+    const hashedPassword = await bcrypt.hash(password, 12);
+
     await prisma.user.create({
       data: {
         name,
@@ -198,8 +229,8 @@ export async function registerUser(formData: FormData) {
     });
   } catch (error) {
     /*
-     * La base de datos sigue siendo la protección real contra
-     * duplicados. Esto cubre el caso de dos registros simultáneos.
+     * El índice @unique en Prisma es la protección real frente
+     * a registros concurrentes con el mismo correo.
      */
     if (isPrismaUniqueConstraintError(error)) {
       return {
@@ -208,7 +239,7 @@ export async function registerUser(formData: FormData) {
       };
     }
 
-    console.error("ERROR CREANDO USUARIO:", error);
+    console.error("ERROR_CREANDO_USUARIO", error);
 
     return {
       error:
@@ -232,10 +263,10 @@ export async function requestPasswordReset(formData: FormData) {
       : "";
 
   /*
-   * La respuesta es la misma para correos válidos, inexistentes
-   * o vacíos; así no revelamos si existe una cuenta.
+   * Siempre devolvemos la misma respuesta: evita revelar si existe
+   * una cuenta asociada al correo introducido.
    */
-  if (!email) {
+  if (!email || !isValidEmail(email)) {
     return {
       success: true,
       message: GENERIC_RESET_MESSAGE,
@@ -261,8 +292,8 @@ export async function requestPasswordReset(formData: FormData) {
   }
 
   /*
-   * rawToken va dentro del enlace enviado por email.
-   * tokenHash es el único valor persistido en la base de datos.
+   * Solo almacenamos el hash del token en la base de datos.
+   * El token original solo existe en el enlace enviado por correo.
    */
   const rawToken = crypto.randomBytes(32).toString("hex");
   const tokenHash = hashResetToken(rawToken);
@@ -279,7 +310,11 @@ export async function requestPasswordReset(formData: FormData) {
     },
   });
 
-  const resetUrl = new URL("/reset-password", getAppUrl());
+  const resetUrl = new URL(
+    "/reset-password",
+    getAppUrl()
+  );
+
   resetUrl.searchParams.set("token", rawToken);
 
   const safeName = user.name
@@ -350,13 +385,12 @@ Si no solicitaste este cambio, puedes ignorar este correo.
     }
   } catch (error) {
     console.error(
-      "ERROR ENVIANDO EMAIL DE RECUPERACIÓN:",
+      "ERROR_ENVIANDO_EMAIL_RECUPERACION",
       error
     );
 
     /*
-     * Si Resend no puede entregar el correo, invalidamos el token
-     * recién creado para no dejarlo activo.
+     * Si el envío falla, anulamos el token que acabamos de crear.
      */
     await prisma.user.update({
       where: {

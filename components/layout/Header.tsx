@@ -15,7 +15,6 @@ import {
 } from "lucide-react";
 
 import LanguageToggle from "@/components/language/LanguageToggle";
-import { useLanguage } from "@/components/providers/LanguageProvider";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 
 interface HeaderProps {
@@ -41,6 +40,20 @@ function getInitials(name: string) {
   return `${words[0].charAt(0)}${words[1].charAt(0)}`.toUpperCase();
 }
 
+function getLanguageFromStorage(): "es" | "en" {
+  if (typeof window === "undefined") {
+    return "es";
+  }
+
+  const saved = window.localStorage.getItem("flowdesk-language");
+
+  if (saved === "es" || saved === "en") {
+    return saved;
+  }
+
+  return "es";
+}
+
 export default function Header({
   name,
   email,
@@ -53,7 +66,6 @@ export default function Header({
   const lastScrollY = useRef(0);
 
   const pathname = usePathname();
-  const { t } = useLanguage();
 
   const displayName = name?.trim() || "Usuario";
   const initials = getInitials(displayName);
@@ -64,20 +76,41 @@ export default function Header({
 
   const isProfileActive = pathname.startsWith("/profile");
 
+  const language = getLanguageFromStorage();
+
   const navigation = [
     {
       href: "/dashboard",
-      label: t.navigation.tasks,
+      label: language === "es" ? "Tareas" : "Tasks",
       icon: CheckSquare,
       active: isDashboardActive,
     },
     {
       href: "/profile",
-      label: t.navigation.profile,
+      label: language === "es" ? "Perfil" : "Profile",
       icon: User,
       active: isProfileActive,
     },
   ];
+
+  const userMenuLabels = {
+    profile: language === "es" ? "Perfil" : "Profile",
+    profileDescription:
+      language === "es"
+        ? "Gestiona tu cuenta"
+        : "Manage your account",
+    editProfile:
+      language === "es" ? "Editar perfil" : "Edit profile",
+    editProfileDescription:
+      language === "es"
+        ? "Cambia tu nombre o contraseña"
+        : "Change your name or password",
+    logout: language === "es" ? "Cerrar sesión" : "Log out",
+    logoutDescription:
+      language === "es"
+        ? "Salir de tu cuenta"
+        : "Sign out of your account",
+  };
 
   useEffect(() => {
     lastScrollY.current = window.scrollY;
@@ -323,11 +356,11 @@ export default function Header({
 
                     <div>
                       <p className="text-sm font-semibold">
-                        {t.userMenu.profile}
+                        {userMenuLabels.profile}
                       </p>
 
                       <p className="text-xs text-muted-foreground">
-                        {t.userMenu.profileDescription}
+                        {userMenuLabels.profileDescription}
                       </p>
                     </div>
                   </Link>
@@ -342,11 +375,11 @@ export default function Header({
 
                     <div>
                       <p className="text-sm font-semibold">
-                        {t.userMenu.editProfile}
+                        {userMenuLabels.editProfile}
                       </p>
 
                       <p className="text-xs text-muted-foreground">
-                        {t.userMenu.editProfileDescription}
+                        {userMenuLabels.editProfileDescription}
                       </p>
                     </div>
                   </Link>
@@ -367,11 +400,11 @@ export default function Header({
 
                     <div className="text-left">
                       <p className="text-sm font-semibold">
-                        {t.userMenu.logout}
+                        {userMenuLabels.logout}
                       </p>
 
                       <p className="text-xs text-destructive/70">
-                        {t.userMenu.logoutDescription}
+                        {userMenuLabels.logoutDescription}
                       </p>
                     </div>
                   </button>

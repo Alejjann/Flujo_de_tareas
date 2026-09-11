@@ -143,6 +143,22 @@ export const translations = {
 
       search: "Buscar tareas...",
       newTask: "Nueva tarea",
+
+      firstStep: "Tu primer paso",
+
+      firstTaskTitle: "¡Empieza a organizar tu día!",
+
+      firstTaskDescription:
+        "Aún no tienes tareas. Crea la primera, añade una fecha o prioridad y convierte FlowDesk en tu espacio de trabajo.",
+
+      firstTaskHint:
+        "Pulsa el botón “Nueva tarea” situado abajo a la derecha.",
+
+      firstTaskFeature: "Añade tareas",
+
+      firstPriorityFeature: "Define prioridades",
+
+      firstCompleteFeature: "Completa objetivos",
     },
 
     /*
@@ -708,6 +724,9 @@ export const translations = {
 
   bannerUpdateSuccess: "Banner actualizado correctamente.",
   bannerUpdateError: "No se pudo actualizar el banner.",
+
+  changePasswordDescription:
+  "Cambia la contraseña de forma segura",
 },
     /*
     ==========================================
@@ -1007,6 +1026,22 @@ export const translations = {
 
       newTask:
         "New task",
+
+      firstStep: "Your first step",
+
+      firstTaskTitle: "Start organizing your day!",
+
+      firstTaskDescription:
+        "You do not have any tasks yet. Create your first one, add a date or priority, and make FlowDesk your personal workspace.",
+
+      firstTaskHint:
+        "Click the “New task” button at the bottom right.",
+
+      firstTaskFeature: "Add tasks",
+
+      firstPriorityFeature: "Set priorities",
+
+      firstCompleteFeature: "Complete goals",
     },
 
     /*
@@ -1735,6 +1770,9 @@ export const translations = {
 
   bannerUpdateSuccess: "Banner updated successfully.",
   bannerUpdateError: "The banner could not be updated.",
+
+  changePasswordDescription:
+  "Change your password securely",
 },
     /*
     ==========================================

@@ -1,32 +1,50 @@
-import { auth } from "@/auth";
-import { prisma } from "@/lib/prisma";
+"use client";
+
 import { redirect } from "next/navigation";
+import { useEffect, useState } from "react";
+
 import Header from "@/components/layout/Header";
 
-export default async function ProfileLayout({
+export default function ProfileLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const session = await auth();
+  const [user, setUser] = useState<{
+    name: string | null;
+    email: string;
+    avatarUrl: string | null;
+  } | null>(null);
 
-  if (!session?.user?.id) {
-    redirect("/login");
-  }
+  useEffect(() => {
+    async function loadUser() {
+      try {
+        const res = await fetch("/api/me");
 
-  const user = await prisma.user.findUnique({
-    where: {
-      id: session.user.id,
-    },
-    select: {
-      name: true,
-      email: true,
-      avatarUrl: true,
-    },
-  });
+        if (!res.ok) {
+          redirect("/login");
+          return;
+        }
+
+        const data = await res.json();
+
+        setUser(data);
+      } catch {
+        redirect("/login");
+      }
+    }
+
+    loadUser();
+  }, []);
 
   if (!user) {
-    redirect("/login");
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <p className="text-muted-foreground">
+          Loading...
+        </p>
+      </div>
+    );
   }
 
   return (

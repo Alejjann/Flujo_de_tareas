@@ -1,14 +1,19 @@
 "use client";
 
 import { Search } from "lucide-react";
-import { Input } from "@/components/ui/input";
 import {
+  usePathname,
   useRouter,
   useSearchParams,
-  usePathname,
 } from "next/navigation";
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useState,
+  useTransition,
+} from "react";
+
 import { useLanguage } from "@/components/providers/LanguageProvider";
+import { Input } from "@/components/ui/input";
 
 export default function SearchBar() {
   const router = useRouter();
@@ -19,6 +24,8 @@ export default function SearchBar() {
   const [value, setValue] = useState(
     searchParams.get("search") ?? ""
   );
+
+  const [, startTransition] = useTransition();
 
   useEffect(() => {
     setValue(searchParams.get("search") ?? "");
@@ -31,15 +38,24 @@ export default function SearchBar() {
       searchParams.toString()
     );
 
-    if (newValue.trim()) {
-      params.set("search", newValue);
+    const normalizedValue = newValue.trim();
+
+    if (normalizedValue) {
+      params.set("search", normalizedValue);
     } else {
       params.delete("search");
     }
 
     const query = params.toString();
+    const nextUrl = query
+      ? `${pathname}?${query}`
+      : pathname;
 
-    router.push(query ? `${pathname}?${query}` : pathname);
+    startTransition(() => {
+      router.replace(nextUrl, {
+        scroll: false,
+      });
+    });
   }
 
   return (
@@ -52,7 +68,9 @@ export default function SearchBar() {
       <Input
         value={value}
         placeholder={t.dashboard.search}
-        onChange={(e) => handleSearch(e.target.value)}
+        onChange={(event) =>
+          handleSearch(event.target.value)
+        }
         className="h-11 border-border bg-secondary/50 pl-10 text-foreground placeholder:text-muted-foreground transition focus:border-primary focus:ring-1 focus:ring-primary"
       />
     </div>

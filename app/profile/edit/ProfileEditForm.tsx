@@ -21,6 +21,11 @@ import {
 } from "lucide-react";
 
 import { updateProfile } from "@/actions/updateProfile";
+import {
+  getPasswordErrors,
+  isPasswordValid,
+  PASSWORD_MIN_LENGTH,
+} from "@/lib/validation/password";
 import { useLanguage } from "@/components/providers/LanguageProvider";
 
 interface ProfileEditFormProps {
@@ -28,14 +33,12 @@ interface ProfileEditFormProps {
   email: string;
 }
 
-const PASSWORD_MIN_LENGTH = 8;
-
 export default function ProfileEditForm({
   name,
   email,
 }: ProfileEditFormProps) {
   const router = useRouter();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -52,30 +55,46 @@ export default function ProfileEditForm({
 
   const passwordRules = [
     {
-      label: `Al menos ${PASSWORD_MIN_LENGTH} caracteres`,
+      label:
+        language === "es"
+          ? `Al menos ${PASSWORD_MIN_LENGTH} caracteres`
+          : `At least ${PASSWORD_MIN_LENGTH} characters`,
       valid: form.password.length >= PASSWORD_MIN_LENGTH,
     },
     {
-      label: "Una letra mayúscula",
+      label:
+        language === "es"
+          ? "Una letra mayúscula"
+          : "One uppercase letter",
       valid: /[A-Z]/.test(form.password),
     },
     {
-      label: "Una letra minúscula",
+      label:
+        language === "es"
+          ? "Una letra minúscula"
+          : "One lowercase letter",
       valid: /[a-z]/.test(form.password),
     },
     {
-      label: "Un número",
+      label:
+        language === "es"
+          ? "Un número"
+          : "One number",
       valid: /\d/.test(form.password),
     },
     {
-      label: "Un carácter especial (_, !, @, #)",
+      label:
+        language === "es"
+          ? "Un carácter especial (_, !, @, #)"
+          : "One special character (_, !, @, #)",
       valid: /[^A-Za-z0-9]/.test(form.password),
     },
   ];
 
-  const isPasswordValid = passwordRules.every(
-    (rule) => rule.valid
-  );
+  const passwordRequirementsTitle =
+    language === "es"
+      ? "Requisitos de la contraseña"
+      : "Password requirements";
 
   const hasPasswordMismatch = Boolean(passwordError);
 
@@ -93,15 +112,14 @@ export default function ProfileEditForm({
       fieldName === "password" ||
       fieldName === "confirmPassword"
     ) {
-      if (
+      const passwordsMatch =
         !nextForm.password ||
         !nextForm.confirmPassword ||
-        nextForm.password === nextForm.confirmPassword
-      ) {
-        setPasswordError("");
-      } else {
-        setPasswordError(t.profile.passwordMismatch);
-      }
+        nextForm.password === nextForm.confirmPassword;
+
+      setPasswordError(
+        passwordsMatch ? "" : t.profile.passwordMismatch
+      );
     }
   }
 
@@ -125,11 +143,13 @@ export default function ProfileEditForm({
       return;
     }
 
-    if (password && !isPasswordValid) {
-      toast.error(
-        "La contraseña no cumple todos los requisitos."
-      );
-      return;
+    if (password) {
+      const errors = getPasswordErrors(password);
+
+      if (errors.length > 0 || !isPasswordValid(password)) {
+        toast.error(errors[0] ?? "La contraseña no es válida.");
+        return;
+      }
     }
 
     if (password !== confirmPassword) {
@@ -238,6 +258,7 @@ export default function ProfileEditForm({
                     placeholder={t.profile.name}
                     disabled={loading}
                     autoComplete="name"
+                    maxLength={80}
                     className="ui-input"
                   />
                 </div>
@@ -260,6 +281,7 @@ export default function ProfileEditForm({
                     placeholder={t.profile.emailPlaceholder}
                     disabled={loading}
                     autoComplete="email"
+                    maxLength={255}
                     className="ui-input"
                   />
                 </div>
@@ -277,7 +299,7 @@ export default function ProfileEditForm({
                 </h2>
 
                 <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                  Crea una contraseña segura para proteger tu cuenta.
+                  {t.profile.changePasswordDescription}
                 </p>
               </div>
 
@@ -300,6 +322,7 @@ export default function ProfileEditForm({
                       placeholder={t.profile.newPassword}
                       disabled={loading}
                       autoComplete="new-password"
+                      maxLength={72}
                       aria-invalid={hasPasswordMismatch}
                       aria-describedby={
                         hasPasswordMismatch
@@ -342,7 +365,7 @@ export default function ProfileEditForm({
                       className="mt-3 rounded-xl border border-border bg-secondary/35 p-3.5"
                     >
                       <p className="mb-2.5 text-xs font-bold text-foreground">
-                        Requisitos de la contraseña
+                        {passwordRequirementsTitle}
                       </p>
 
                       <ul className="grid gap-2 sm:grid-cols-2">
@@ -397,6 +420,7 @@ export default function ProfileEditForm({
                       placeholder={t.profile.repeatNewPassword}
                       disabled={loading}
                       autoComplete="new-password"
+                      maxLength={72}
                       aria-invalid={hasPasswordMismatch}
                       aria-describedby={
                         hasPasswordMismatch
@@ -465,6 +489,7 @@ export default function ProfileEditForm({
                 className="ui-button-primary w-full sm:w-auto"
               >
                 <Save size={18} />
+
                 {loading
                   ? t.profile.saving
                   : t.profile.saveChanges}

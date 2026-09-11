@@ -1,4 +1,3 @@
-// components/dashboard/DashboardContent.tsx
 "use client";
 
 import type { ReactNode } from "react";
@@ -21,10 +20,10 @@ import CalendarView from "@/components/tasks/CalendarView";
 import DashboardCharts from "@/components/dashboard/DashboardCharts";
 import PriorityFilters from "@/components/tasks/PriorityFilter";
 import SearchBar from "@/components/SearchBar";
-import SortTasks from "@/components/tasks/SortTasks";
 import TaskBoard from "@/components/tasks/TaskBoard";
 import TaskFilters from "@/components/tasks/TaskFilters";
 import { useLanguage } from "@/components/providers/LanguageProvider";
+import { useSearchParams } from "next/navigation";
 
 interface DashboardContentProps {
   tasks: {
@@ -139,7 +138,8 @@ export default function DashboardContent({
   isFirstTask,
   guestMode = false,
 }: DashboardContentProps) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const searchParams = useSearchParams();
 
   const safeProductivity = Math.min(
     Math.max(productivity, 0),
@@ -147,6 +147,96 @@ export default function DashboardContent({
   );
 
   const totalTasksLabel = t.dashboard.totalTasks.toLowerCase();
+
+  const search = searchParams.get("search")?.trim() ?? "";
+  const status = searchParams.get("status") ?? "all";
+  const priority = searchParams.get("priority") ?? "all";
+
+  type TaskPriority = "LOW" | "MEDIUM" | "HIGH";
+
+  const VALID_PRIORITIES: TaskPriority[] = [
+    "LOW",
+    "MEDIUM",
+    "HIGH",
+  ];
+
+  const selectedPriority = VALID_PRIORITIES.includes(
+    priority as TaskPriority
+  )
+    ? (priority as TaskPriority)
+    : null;
+
+  const filteredTasks = tasks
+    .filter((task) => {
+      if (!search) {
+        return true;
+      }
+
+      const normalizedSearch = search.toLocaleLowerCase();
+
+      return (
+        task.title.toLocaleLowerCase().includes(normalizedSearch) ||
+        task.description
+          ?.toLocaleLowerCase()
+          .includes(normalizedSearch) ||
+        task.tag?.toLocaleLowerCase().includes(normalizedSearch)
+      );
+    })
+    .filter((task) => {
+      if (status === "completed") {
+        return task.status === "COMPLETED";
+      }
+
+      if (status === "pending") {
+        return (
+          task.status === "PENDING" ||
+          task.status === "IN_PROGRESS"
+        );
+      }
+
+      return true;
+    })
+    .filter((task) => {
+      if (!selectedPriority) {
+        return true;
+      }
+
+      return task.priority === selectedPriority;
+    });
+
+  /*
+   * Textos que antes estaban escritos directamente en español.
+   * Se mantienen aquí de momento para que no tengas que cambiar
+   * el enorme archivo translations.ts.
+   */
+  const onboarding =
+    language === "es"
+      ? {
+          badge: "Tu primer paso",
+          title: "¡Empieza a organizar tu día!",
+          description:
+            "Aún no tienes tareas. Crea la primera, añade una fecha o prioridad y convierte FlowDesk en tu espacio de trabajo.",
+          hint:
+            "Pulsa el botón “Nueva tarea” situado abajo a la derecha.",
+          addTasks: "Añade tareas",
+          setPriorities: "Define prioridades",
+          completeGoals: "Completa objetivos",
+          emptyHint:
+            "Usa el botón “Nueva tarea” que permanece abajo a la derecha.",
+        }
+      : {
+          badge: "Your first step",
+          title: "Start organizing your day!",
+          description:
+            "You do not have any tasks yet. Create your first one, add a due date or priority, and make FlowDesk your personal workspace.",
+          hint:
+            "Click the “New task” button at the bottom right.",
+          addTasks: "Add tasks",
+          setPriorities: "Set priorities",
+          completeGoals: "Complete goals",
+          emptyHint:
+            "Use the “New task” button at the bottom right.",
+      };
 
   return (
     <>
@@ -163,28 +253,26 @@ export default function DashboardContent({
         </div>
       </header>
 
-      {/* ONBOARDING */}
+      {/* ONBOARDING: solo al no tener tareas */}
       {isFirstTask && (
         <section className="ui-glow-card relative mb-6 overflow-hidden p-5 sm:mb-8 sm:p-7 lg:p-8">
           <div className="relative z-10 grid gap-7 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
             <div className="max-w-2xl">
               <span className="ui-badge ui-badge-primary">
                 <Sparkles size={14} />
-                Tu primer paso
+                {onboarding.badge}
               </span>
 
               <h2 className="mt-5 text-3xl font-black tracking-[-0.05em] text-foreground sm:text-4xl">
-                ¡Empieza a organizar tu día!
+                {onboarding.title}
               </h2>
 
               <p className="mt-3 max-w-xl text-sm font-medium leading-6 text-muted-foreground sm:text-base sm:leading-7">
-                Aún no tienes tareas. Crea la primera, añade una fecha
-                o prioridad y convierte FlowDesk en tu espacio de
-                trabajo.
+                {onboarding.description}
               </p>
 
               <p className="mt-6 text-sm font-semibold text-primary">
-                Pulsa el botón "Nueva tarea" situado abajo a la derecha.
+                {onboarding.hint}
               </p>
             </div>
 
@@ -195,7 +283,7 @@ export default function DashboardContent({
                 </div>
 
                 <p className="mt-3 text-xs font-bold text-foreground">
-                  Añade tareas
+                  {onboarding.addTasks}
                 </p>
               </div>
 
@@ -205,7 +293,7 @@ export default function DashboardContent({
                 </div>
 
                 <p className="mt-3 text-xs font-bold text-foreground">
-                  Define prioridades
+                  {onboarding.setPriorities}
                 </p>
               </div>
 
@@ -215,7 +303,7 @@ export default function DashboardContent({
                 </div>
 
                 <p className="mt-3 text-xs font-bold text-foreground">
-                  Completa objetivos
+                  {onboarding.completeGoals}
                 </p>
               </div>
             </div>
@@ -461,7 +549,6 @@ export default function DashboardContent({
           <div className="flex flex-wrap items-center gap-2 lg:justify-end">
             <TaskFilters />
             <PriorityFilters />
-            <SortTasks />
           </div>
         </div>
       </section>
@@ -480,16 +567,16 @@ export default function DashboardContent({
               </h2>
 
               <p className="mt-0.5 text-xs text-muted-foreground">
-                {tasks.length} {totalTasksLabel}
+                {filteredTasks.length} {totalTasksLabel}
               </p>
             </div>
           </div>
 
-          <CalendarView tasks={tasks} />
+          <CalendarView tasks={filteredTasks} />
         </aside>
 
         <div className="min-w-0">
-          {tasks.length === 0 ? (
+          {filteredTasks.length === 0 ? (
             <div className="relative flex min-h-[360px] flex-col items-center justify-center overflow-hidden rounded-3xl border border-dashed border-primary/35 bg-card p-7 text-center shadow-sm sm:min-h-[420px] sm:p-12">
               <div className="pointer-events-none absolute -left-16 -top-16 h-48 w-48 rounded-full bg-primary/10 blur-3xl" />
 
@@ -509,13 +596,12 @@ export default function DashboardContent({
                 </p>
 
                 <p className="mx-auto mt-5 max-w-sm text-sm font-semibold text-primary">
-                  Usa el botón "Nueva tarea" que permanece abajo a la
-                  derecha.
+                  {onboarding.emptyHint}
                 </p>
               </div>
             </div>
           ) : (
-            <TaskBoard tasks={tasks} guestMode={guestMode} />
+            <TaskBoard tasks={filteredTasks} guestMode={guestMode} />
           )}
         </div>
       </section>

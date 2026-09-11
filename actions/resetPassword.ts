@@ -3,7 +3,7 @@
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 
-import { getPasswordErrors } from "@/lib/password";
+import { getPasswordErrors } from "@/lib/validation/password";
 import { prisma } from "@/lib/prisma";
 
 function hashResetToken(token: string) {
