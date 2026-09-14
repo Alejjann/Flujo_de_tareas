@@ -4,6 +4,7 @@ import {
   createContext,
   type ReactNode,
   useContext,
+  useEffect,
   useState,
 } from "react";
 
@@ -21,27 +22,30 @@ const LanguageContext = createContext<
   LanguageContextValue | undefined
 >(undefined);
 
-const LANGUAGE_STORAGE_KEY = "flowdesk-language";
+const LANGUAGE_COOKIE_KEY = "flowdesk-language";
 
-function getInitialLanguage(): Language {
-  if (typeof window === "undefined") {
+function readLanguageCookie(): Language {
+  if (typeof document === "undefined") {
     return "es";
   }
 
-  const saved = window.localStorage.getItem(
-    LANGUAGE_STORAGE_KEY
-  );
+  const cookieValue = document.cookie
+    .split("; ")
+    .find((item) =>
+      item.startsWith(`${LANGUAGE_COOKIE_KEY}=`)
+    )
+    ?.split("=")[1];
 
-  console.log(
-    "[LanguageProvider] saved language:",
-    saved
-  );
+  return cookieValue === "en" ? "en" : "es";
+}
 
-  if (saved === "es" || saved === "en") {
-    return saved;
-  }
-
-  return "es";
+function saveLanguageCookie(language: Language) {
+  document.cookie = [
+    `${LANGUAGE_COOKIE_KEY}=${language}`,
+    "Path=/",
+    "Max-Age=31536000",
+    "SameSite=Lax",
+  ].join("; ");
 }
 
 export default function LanguageProvider({
@@ -50,21 +54,21 @@ export default function LanguageProvider({
   children: ReactNode;
 }) {
   const [language, setLanguageState] =
-    useState<Language>(getInitialLanguage);
+    useState<Language>("es");
+
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    const initialLanguage = readLanguageCookie();
+
+    setLanguageState(initialLanguage);
+    document.documentElement.lang = initialLanguage;
+    setReady(true);
+  }, []);
 
   function setLanguage(nextLanguage: Language) {
-    console.log(
-      "[LanguageProvider] setting language:",
-      nextLanguage
-    );
-
     setLanguageState(nextLanguage);
-
-    window.localStorage.setItem(
-      LANGUAGE_STORAGE_KEY,
-      nextLanguage
-    );
-
+    saveLanguageCookie(nextLanguage);
     document.documentElement.lang = nextLanguage;
   }
 
@@ -76,6 +80,15 @@ export default function LanguageProvider({
         ? translations.es
         : translations.en,
   };
+
+  if (!ready) {
+    return (
+      <div
+        className="min-h-screen bg-background"
+        aria-hidden="true"
+      />
+    );
+  }
 
   return (
     <LanguageContext.Provider value={value}>

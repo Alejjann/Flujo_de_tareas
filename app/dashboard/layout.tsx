@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import LanguageProvider from "@/components/providers/LanguageProvider";
 
 export const metadata: Metadata = {
   title: "FlowDesk",
@@ -11,5 +10,5 @@ export default function DashboardLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return <LanguageProvider>{children}</LanguageProvider>;
+  return <>{children}</>;
 }

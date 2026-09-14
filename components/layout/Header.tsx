@@ -15,6 +15,9 @@ import {
 } from "lucide-react";
 
 import LanguageToggle from "@/components/language/LanguageToggle";
+import {
+  useLanguage,
+} from "@/components/providers/LanguageProvider";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 
 interface HeaderProps {
@@ -37,21 +40,9 @@ function getInitials(name: string) {
     return words[0].charAt(0).toUpperCase();
   }
 
-  return `${words[0].charAt(0)}${words[1].charAt(0)}`.toUpperCase();
-}
-
-function getLanguageFromStorage(): "es" | "en" {
-  if (typeof window === "undefined") {
-    return "es";
-  }
-
-  const saved = window.localStorage.getItem("flowdesk-language");
-
-  if (saved === "es" || saved === "en") {
-    return saved;
-  }
-
-  return "es";
+  return `${words[0].charAt(0)}${words[1].charAt(
+    0
+  )}`.toUpperCase();
 }
 
 export default function Header({
@@ -67,6 +58,12 @@ export default function Header({
 
   const pathname = usePathname();
 
+  /*
+   * El Header usa el mismo idioma global que Dashboard,
+   * ProfileContent y LanguageToggle.
+   */
+  const { language } = useLanguage();
+
   const displayName = name?.trim() || "Usuario";
   const initials = getInitials(displayName);
 
@@ -76,41 +73,53 @@ export default function Header({
 
   const isProfileActive = pathname.startsWith("/profile");
 
-  const language = getLanguageFromStorage();
+  const copy =
+    language === "es"
+      ? {
+          tasks: "Tareas",
+          profile: "Perfil",
+          openMenu: "Abrir menú de usuario",
+          closeMenu: "Cerrar menú de usuario",
+          userMenu: "Menú de usuario",
+          myProfile: "Mi perfil",
+          profileDescription: "Gestiona tu cuenta",
+          editProfile: "Editar perfil",
+          editProfileDescription:
+            "Cambia tu nombre o contraseña",
+          logout: "Cerrar sesión",
+          logoutDescription: "Salir de tu cuenta",
+          avatarOf: "Avatar de",
+        }
+      : {
+          tasks: "Tasks",
+          profile: "Profile",
+          openMenu: "Open user menu",
+          closeMenu: "Close user menu",
+          userMenu: "User menu",
+          myProfile: "My profile",
+          profileDescription: "Manage your account",
+          editProfile: "Edit profile",
+          editProfileDescription:
+            "Change your name or password",
+          logout: "Log out",
+          logoutDescription: "Sign out of your account",
+          avatarOf: "Avatar of",
+        };
 
   const navigation = [
     {
       href: "/dashboard",
-      label: language === "es" ? "Tareas" : "Tasks",
+      label: copy.tasks,
       icon: CheckSquare,
       active: isDashboardActive,
     },
     {
       href: "/profile",
-      label: language === "es" ? "Perfil" : "Profile",
+      label: copy.profile,
       icon: User,
       active: isProfileActive,
     },
   ];
-
-  const userMenuLabels = {
-    profile: language === "es" ? "Perfil" : "Profile",
-    profileDescription:
-      language === "es"
-        ? "Gestiona tu cuenta"
-        : "Manage your account",
-    editProfile:
-      language === "es" ? "Editar perfil" : "Edit profile",
-    editProfileDescription:
-      language === "es"
-        ? "Cambia tu nombre o contraseña"
-        : "Change your name or password",
-    logout: language === "es" ? "Cerrar sesión" : "Log out",
-    logoutDescription:
-      language === "es"
-        ? "Salir de tu cuenta"
-        : "Sign out of your account",
-  };
 
   useEffect(() => {
     lastScrollY.current = window.scrollY;
@@ -160,8 +169,15 @@ export default function Header({
     document.addEventListener("keydown", handleEscape);
 
     return () => {
-      document.removeEventListener("mousedown", handleOutsideClick);
-      document.removeEventListener("keydown", handleEscape);
+      document.removeEventListener(
+        "mousedown",
+        handleOutsideClick
+      );
+
+      document.removeEventListener(
+        "keydown",
+        handleEscape
+      );
     };
   }, []);
 
@@ -183,8 +199,8 @@ export default function Header({
         <div className="mx-auto flex h-[72px] max-w-[1440px] items-center justify-between gap-3 px-4 sm:px-6 md:px-8">
           <Link
             href="/dashboard"
-            aria-label="Ir al dashboard de Flowdesk"
-            title="Ir al dashboard"
+            aria-label="FlowDesk"
+            title="FlowDesk"
             className="group flex shrink-0 items-center gap-2 rounded-xl transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:gap-3"
           >
             <div className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl shadow-lg shadow-primary/20 transition-all duration-200 group-hover:-translate-y-0.5 group-hover:scale-[1.03] group-hover:shadow-primary/30">
@@ -204,7 +220,11 @@ export default function Header({
           </Link>
 
           <nav
-            aria-label="Navegación principal"
+            aria-label={
+              language === "es"
+                ? "Navegación principal"
+                : "Main navigation"
+            }
             className="hidden items-center gap-1 rounded-2xl border border-border bg-card/70 p-1 shadow-sm md:flex"
           >
             {navigation.map((item) => {
@@ -214,7 +234,9 @@ export default function Header({
                 <Link
                   key={item.href}
                   href={item.href}
-                  aria-current={item.active ? "page" : undefined}
+                  aria-current={
+                    item.active ? "page" : undefined
+                  }
                   className={`inline-flex items-center gap-2 rounded-xl px-3.5 py-2 text-sm font-semibold transition-all duration-200 ${
                     item.active
                       ? "bg-primary/10 text-primary shadow-sm ring-1 ring-inset ring-primary/15"
@@ -246,9 +268,7 @@ export default function Header({
                 aria-expanded={open}
                 aria-haspopup="menu"
                 aria-label={
-                  open
-                    ? "Cerrar menú de usuario"
-                    : "Abrir menú de usuario"
+                  open ? copy.closeMenu : copy.openMenu
                 }
                 className={`flex h-11 items-center gap-2 rounded-2xl border bg-card px-1.5 text-foreground shadow-sm transition-all duration-200 hover:border-primary/45 hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:px-2 ${
                   open
@@ -259,7 +279,7 @@ export default function Header({
                 {avatarUrl ? (
                   <img
                     src={avatarUrl}
-                    alt={`Avatar de ${displayName}`}
+                    alt={`${copy.avatarOf} ${displayName}`}
                     className="h-8 w-8 rounded-xl border border-border object-cover"
                   />
                 ) : (
@@ -291,7 +311,7 @@ export default function Header({
               {open && (
                 <div
                   role="menu"
-                  aria-label="Menú de usuario"
+                  aria-label={copy.userMenu}
                   className="absolute right-0 mt-3 w-[min(19rem,calc(100vw-2rem))] origin-top-right overflow-hidden rounded-2xl border border-border bg-popover p-2 text-popover-foreground shadow-2xl shadow-slate-950/20"
                 >
                   <div className="mb-2 flex items-center gap-3 rounded-xl bg-secondary/60 px-3 py-3">
@@ -330,7 +350,9 @@ export default function Header({
                           href={item.href}
                           role="menuitem"
                           aria-current={
-                            item.active ? "page" : undefined
+                            item.active
+                              ? "page"
+                              : undefined
                           }
                           onClick={() => setOpen(false)}
                           className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition ${
@@ -356,11 +378,11 @@ export default function Header({
 
                     <div>
                       <p className="text-sm font-semibold">
-                        {userMenuLabels.profile}
+                        {copy.myProfile}
                       </p>
 
                       <p className="text-xs text-muted-foreground">
-                        {userMenuLabels.profileDescription}
+                        {copy.profileDescription}
                       </p>
                     </div>
                   </Link>
@@ -375,11 +397,11 @@ export default function Header({
 
                     <div>
                       <p className="text-sm font-semibold">
-                        {userMenuLabels.editProfile}
+                        {copy.editProfile}
                       </p>
 
                       <p className="text-xs text-muted-foreground">
-                        {userMenuLabels.editProfileDescription}
+                        {copy.editProfileDescription}
                       </p>
                     </div>
                   </Link>
@@ -400,11 +422,11 @@ export default function Header({
 
                     <div className="text-left">
                       <p className="text-sm font-semibold">
-                        {userMenuLabels.logout}
+                        {copy.logout}
                       </p>
 
                       <p className="text-xs text-destructive/70">
-                        {userMenuLabels.logoutDescription}
+                        {copy.logoutDescription}
                       </p>
                     </div>
                   </button>

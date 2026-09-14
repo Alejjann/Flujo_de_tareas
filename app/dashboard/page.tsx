@@ -1,6 +1,10 @@
 import { redirect } from "next/navigation";
 
-import type { Prisma, Priority, TaskStatus } from "@prisma/client";
+import type {
+  Prisma,
+  Priority,
+  TaskStatus,
+} from "@prisma/client";
 
 import { auth } from "@/auth";
 import DashboardContent from "@/components/dashboard/DashboardContent";
@@ -25,7 +29,8 @@ const VALID_PRIORITIES: Priority[] = [
 export default async function DashboardPage({
   searchParams,
 }: DashboardPageProps) {
-  const { search, status, priority, sort } = await searchParams;
+  const { search, status, priority, sort } =
+    await searchParams;
 
   const session = await auth();
 

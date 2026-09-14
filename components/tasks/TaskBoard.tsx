@@ -1,4 +1,3 @@
-// components/tasks/TaskBoard.tsx
 "use client";
 
 import {
@@ -30,21 +29,25 @@ import {
   FileText,
   ListTodo,
   Pencil,
-  RotateCcw,
   Trash2,
   X,
 } from "lucide-react";
 
 import { reorderTasks } from "@/actions/reorderTasks";
-import { useLanguage } from "@/components/providers/LanguageProvider";
+import { useGuestTasks } from "@/components/providers/GuestTasksProvider";
+import {
+  useLanguage,
+} from "@/components/providers/LanguageProvider";
 import { Button } from "@/components/ui/button";
 import { formatTaskDate } from "@/lib/formatTaskDate";
-import { useGuestTasks } from "@/components/providers/GuestTasksProvider";
 
 import DeleteTaskDialog from "./DeleteTaskDialog";
 import EditTaskDialog from "./EditTaskDialog";
 
-type TaskStatus = "PENDING" | "IN_PROGRESS" | "COMPLETED";
+type TaskStatus =
+  | "PENDING"
+  | "IN_PROGRESS"
+  | "COMPLETED";
 
 interface Task {
   id: string;
@@ -124,12 +127,17 @@ const priorityStyles = {
 
 const tagStyles: Record<string, string> = {
   Trabajo: "border-blue-400/20 bg-blue-400/10 text-blue-300",
-  Estudios: "border-violet-400/20 bg-violet-400/10 text-violet-300",
-  Personal: "border-pink-400/20 bg-pink-400/10 text-pink-300",
-  Casa: "border-orange-400/20 bg-orange-400/10 text-orange-300",
   Work: "border-blue-400/20 bg-blue-400/10 text-blue-300",
-  Studies: "border-violet-400/20 bg-violet-400/10 text-violet-300",
-  Home: "border-orange-400/20 bg-orange-400/10 text-orange-300",
+  Estudios:
+    "border-violet-400/20 bg-violet-400/10 text-violet-300",
+  Studies:
+    "border-violet-400/20 bg-violet-400/10 text-violet-300",
+  Personal:
+    "border-pink-400/20 bg-pink-400/10 text-pink-300",
+  Casa:
+    "border-orange-400/20 bg-orange-400/10 text-orange-300",
+  Home:
+    "border-orange-400/20 bg-orange-400/10 text-orange-300",
 };
 
 function getTagStyle(tag: string | null) {
@@ -141,6 +149,64 @@ function getTagStyle(tag: string | null) {
     tagStyles[tag] ??
     "border-cyan-400/20 bg-cyan-400/10 text-cyan-300"
   );
+}
+
+function getTranslatedTag(
+  tag: string | null,
+  language: "es" | "en"
+): string {
+  if (!tag) {
+    return "";
+  }
+
+  const tags: Record<
+    string,
+    {
+      es: string;
+      en: string;
+    }
+  > = {
+    Trabajo: {
+      es: "Trabajo",
+      en: "Work",
+    },
+    Work: {
+      es: "Trabajo",
+      en: "Work",
+    },
+    Estudios: {
+      es: "Estudios",
+      en: "Studies",
+    },
+    Studies: {
+      es: "Estudios",
+      en: "Studies",
+    },
+    Personal: {
+      es: "Personal",
+      en: "Personal",
+    },
+    Casa: {
+      es: "Casa",
+      en: "Home",
+    },
+    Home: {
+      es: "Casa",
+      en: "Home",
+    },
+  };
+
+  const translatedTag = tags[tag];
+
+  if (!translatedTag) {
+    return tag;
+  }
+
+  if (language === "en") {
+    return translatedTag.en;
+  }
+
+  return translatedTag.es;
 }
 
 function getPriorityLabel(
@@ -182,7 +248,9 @@ function isTaskStatus(value: unknown): value is TaskStatus {
 }
 
 function getTaskPosition(task: Task) {
-  return typeof task.position === "number" ? task.position : 0;
+  return typeof task.position === "number"
+    ? task.position
+    : 0;
 }
 
 function TaskDetailsModal({
@@ -296,7 +364,7 @@ function TaskDetailsModal({
                   task.tag
                 )}`}
               >
-                {task.tag}
+                {getTranslatedTag(task.tag, language)}
               </span>
             )}
           </div>
@@ -352,7 +420,9 @@ function TaskDetailsModal({
 
                 <p
                   className={`mt-0.5 truncate ${
-                    isOverdue ? "text-rose-300" : "text-slate-100"
+                    isOverdue
+                      ? "text-rose-300"
+                      : "text-slate-100"
                   }`}
                 >
                   {taskDate?.label}
@@ -453,7 +523,9 @@ function SortableTaskItem({
 
   const isOverdue = taskDate?.isOverdue ?? false;
 
-  function stopDrag(event: React.PointerEvent | React.MouseEvent) {
+  function stopDrag(
+    event: React.PointerEvent | React.MouseEvent
+  ) {
     event.stopPropagation();
   }
 
@@ -510,9 +582,9 @@ function SortableTaskItem({
               className={`max-w-[130px] truncate rounded-full border px-2.5 py-1 text-xs font-medium ${getTagStyle(
                 task.tag
               )}`}
-              title={task.tag}
+              title={getTranslatedTag(task.tag, language)}
             >
-              {task.tag}
+              {getTranslatedTag(task.tag, language)}
             </span>
           )}
 
@@ -551,7 +623,7 @@ function SortableTaskItem({
               aria-label={t.tasks.details.completeTask}
             >
               <Check size={15} strokeWidth={3} />
-              <span>Completar</span>
+              <span>{t.tasks.details.completeTask}</span>
             </Button>
           )}
         </div>
@@ -728,7 +800,6 @@ export default function TaskBoard({
   const { t: rawTranslations } = useLanguage();
   const t = rawTranslations as TranslationObject;
 
-  // Hook SOLO si guestMode
   const guestApi = guestMode ? useGuestTasks() : null;
 
   const columns = useMemo<BoardColumn[]>(
@@ -770,10 +841,14 @@ export default function TaskBoard({
   );
 
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
-  const [activeTask, setActiveTask] = useState<Task | null>(null);
-  const [viewingTask, setViewingTask] = useState<Task | null>(null);
-  const [editingTask, setEditingTask] = useState<Task | null>(null);
-  const [deletingTask, setDeletingTask] = useState<Task | null>(null);
+  const [activeTask, setActiveTask] =
+    useState<Task | null>(null);
+  const [viewingTask, setViewingTask] =
+    useState<Task | null>(null);
+  const [editingTask, setEditingTask] =
+    useState<Task | null>(null);
+  const [deletingTask, setDeletingTask] =
+    useState<Task | null>(null);
 
   useEffect(() => {
     setTasks(initialTasks);
@@ -787,7 +862,8 @@ export default function TaskBoard({
       .filter((task) => task.status === status)
       .sort(
         (firstTask, secondTask) =>
-          getTaskPosition(firstTask) - getTaskPosition(secondTask)
+          getTaskPosition(firstTask) -
+          getTaskPosition(secondTask)
       );
   }
 
@@ -797,7 +873,8 @@ export default function TaskBoard({
         .filter((task) => task.status === column.id)
         .sort(
           (firstTask, secondTask) =>
-            getTaskPosition(firstTask) - getTaskPosition(secondTask)
+            getTaskPosition(firstTask) -
+            getTaskPosition(secondTask)
         )
         .map((task, index) => ({
           ...task,
@@ -816,50 +893,51 @@ export default function TaskBoard({
           position: getTaskPosition(task),
         }))
       );
-    } else {
-      await reorderTasks(
-        updatedTasks.map((task) => ({
-          id: task.id,
-          status: task.status,
-          position: getTaskPosition(task),
-        }))
-      );
+
+      return;
     }
+
+    await reorderTasks(
+      updatedTasks.map((task) => ({
+        id: task.id,
+        status: task.status,
+        position: getTaskPosition(task),
+      }))
+    );
   }
 
-  async function restorePreviousOrder(previousTasks: Task[]) {
+  async function restorePreviousOrder(
+    previousTasks: Task[]
+  ) {
     const currentTasks = tasks;
 
     setTasks(previousTasks);
 
     setViewingTask((current) =>
       current
-        ? previousTasks.find((task) => task.id === current.id) ?? null
+        ? previousTasks.find(
+            (task) => task.id === current.id
+          ) ?? null
         : null
     );
 
     try {
-      if (guestMode && guestApi) {
-        guestApi.reorderTasks(
-          previousTasks.map((task) => ({
-            id: task.id,
-            status: task.status,
-            position: getTaskPosition(task),
-          }))
-        );
-      } else {
-        await saveOrder(previousTasks);
-      }
+      await saveOrder(previousTasks);
 
       toast.success(t.board.undoSuccess);
     } catch (error) {
-      console.error("ERROR DESHACIENDO EL MOVIMIENTO:", error);
+      console.error(
+        "ERROR DESHACIENDO EL MOVIMIENTO:",
+        error
+      );
 
       setTasks(currentTasks);
 
       setViewingTask((current) =>
         current
-          ? currentTasks.find((task) => task.id === current.id) ?? null
+          ? currentTasks.find(
+              (task) => task.id === current.id
+            ) ?? null
           : null
       );
 
@@ -872,7 +950,9 @@ export default function TaskBoard({
     destinationStatus: TaskStatus,
     insertIndex?: number
   ) {
-    const activeTask = tasks.find((task) => task.id === taskId);
+    const activeTask = tasks.find(
+      (task) => task.id === taskId
+    );
 
     if (!activeTask) {
       return;
@@ -905,7 +985,12 @@ export default function TaskBoard({
         : destinationTasks.length;
 
     const nextDestinationTasks = [...destinationTasks];
-    nextDestinationTasks.splice(safeInsertIndex, 0, movedTask);
+
+    nextDestinationTasks.splice(
+      safeInsertIndex,
+      0,
+      movedTask
+    );
 
     const untouchedTasks = tasks.filter(
       (task) =>
@@ -935,24 +1020,15 @@ export default function TaskBoard({
     setTasks(normalizedTasks);
 
     const updatedTask =
-      normalizedTasks.find((task) => task.id === taskId) ?? null;
+      normalizedTasks.find((task) => task.id === taskId) ??
+      null;
 
     setViewingTask((current) =>
       current?.id === taskId ? updatedTask : current
     );
 
     try {
-      if (guestMode && guestApi) {
-        guestApi.reorderTasks(
-          normalizedTasks.map((task) => ({
-            id: task.id,
-            status: task.status,
-            position: getTaskPosition(task),
-          }))
-        );
-      } else {
-        await saveOrder(normalizedTasks);
-      }
+      await saveOrder(normalizedTasks);
 
       const message =
         destinationStatus === "COMPLETED"
@@ -977,7 +1053,8 @@ export default function TaskBoard({
 
       setViewingTask((current) =>
         current?.id === taskId
-          ? oldTasks.find((task) => task.id === taskId) ?? null
+          ? oldTasks.find((task) => task.id === taskId) ??
+            null
           : current
       );
 
@@ -994,9 +1071,10 @@ export default function TaskBoard({
 
     if (guestMode && guestApi) {
       guestApi.toggleCompleted(taskId);
-    } else {
-      await moveTaskToStatus(taskId, "COMPLETED");
+      return;
     }
+
+    await moveTaskToStatus(taskId, "COMPLETED");
   }
 
   function handleDragStart(event: DragStartEvent) {
@@ -1031,7 +1109,9 @@ export default function TaskBoard({
       return;
     }
 
-    const overTask = tasks.find((task) => task.id === overId);
+    const overTask = tasks.find(
+      (task) => task.id === overId
+    );
 
     const destinationStatus = overTask
       ? overTask.status
@@ -1063,7 +1143,9 @@ export default function TaskBoard({
       );
 
       insertIndex =
-        foundIndex === -1 ? destinationTasks.length : foundIndex;
+        foundIndex === -1
+          ? destinationTasks.length
+          : foundIndex;
     }
 
     await moveTaskToStatus(
@@ -1183,7 +1265,9 @@ export default function TaskBoard({
             }
 
             setTasks((current) =>
-              current.filter((task) => task.id !== deletingTask.id)
+              current.filter(
+                (task) => task.id !== deletingTask.id
+              )
             );
 
             setViewingTask(null);

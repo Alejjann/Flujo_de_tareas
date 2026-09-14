@@ -28,14 +28,13 @@ export default function RootLayout({
 }>) {
   return (
     <html
+      lang="es"
       suppressHydrationWarning
       className={`${inter.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-screen bg-background text-foreground">
         <ThemeProvider>
-          <LanguageProvider key="language-provider">
-            {children}
-          </LanguageProvider>
+          <LanguageProvider>{children}</LanguageProvider>
         </ThemeProvider>
       </body>
     </html>

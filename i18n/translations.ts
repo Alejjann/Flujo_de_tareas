@@ -767,54 +767,73 @@ export const translations = {
         "Volver al inicio de sesión",
     },
     authPage: {
-  backToHome: "Volver a la página principal",
+        backToHome: "Volver a la página principal",
 
-  registerEyebrow: "Empieza ahora",
-  registerTitle: "Crea tu cuenta",
-  registerDescription:
-    "Organiza tu trabajo, sigue tu progreso y mantén el foco desde un solo lugar.",
+        registerEyebrow: "Empieza ahora",
+        registerTitle: "Crea tu cuenta",
+        registerDescription:
+          "Organiza tu trabajo, sigue tu progreso y mantén el foco desde un solo lugar.",
 
-  loginEyebrow: "Bienvenido de nuevo",
-  loginTitle: "Inicia sesión",
-  loginDescription:
-    "Accede a tu espacio personal y continúa donde lo dejaste.",
+        loginEyebrow: "Bienvenido de nuevo",
+        loginTitle: "Inicia sesión",
+        loginDescription:
+          "Accede a tu espacio personal y continúa donde lo dejaste.",
 
-  name: "Nombre",
-  namePlaceholder: "Tu nombre",
-  emailPlaceholder: "tu@email.com",
+        name: "Nombre",
+        namePlaceholder: "Tu nombre",
+        emailPlaceholder: "tu@email.com",
 
-  passwordPlaceholder: "Crea una contraseña segura",
-  confirmPasswordPlaceholder: "Repite tu contraseña",
-  loginPasswordPlaceholder: "Introduce tu contraseña",
+        passwordPlaceholder: "Crea una contraseña segura",
+        confirmPasswordPlaceholder: "Repite tu contraseña",
+        loginPasswordPlaceholder: "Introduce tu contraseña",
 
-  showPassword: "Mostrar contraseña",
-  hidePassword: "Ocultar contraseña",
+        showPassword: "Mostrar contraseña",
+        hidePassword: "Ocultar contraseña",
 
-  passwordRequirements: "Tu contraseña debe incluir:",
-  minCharacters: "Mínimo 8 caracteres",
-  uppercase: "Una mayúscula",
-  lowercase: "Una minúscula",
-  number: "Un número",
-  specialCharacter: "Un carácter especial",
+        passwordRequirements: "Tu contraseña debe incluir:",
+        minCharacters: "Mínimo 8 caracteres",
+        uppercase: "Una mayúscula",
+        lowercase: "Una minúscula",
+        number: "Un número",
+        specialCharacter: "Un carácter especial",
 
-  creatingAccount: "Creando cuenta...",
-  signingIn: "Iniciando sesión...",
+        creatingAccount: "Creando cuenta...",
+        signingIn: "Iniciando sesión...",
 
-  alreadyHaveAccount: "¿Ya tienes una cuenta?",
-  signInLink: "Inicia sesión",
+        alreadyHaveAccount: "¿Ya tienes una cuenta?",
+        signInLink: "Inicia sesión",
 
-  dontHaveAccount: "¿Aún no tienes una cuenta?",
-  createAccountLink: "Crea una cuenta",
+        dontHaveAccount: "¿Aún no tienes una cuenta?",
+        createAccountLink: "Crea una cuenta",
 
-  missingName: "Introduce tu nombre.",
-  missingEmail: "Introduce tu correo electrónico.",
-  missingPassword: "Introduce una contraseña.",
-  passwordRequirementsError:
-    "La contraseña no cumple todos los requisitos.",
-  passwordMismatch: "Las contraseñas no coinciden.",
-  registerError: "No se pudo crear la cuenta.",
-  loginError:
-    "No se pudo iniciar sesión. Inténtalo de nuevo.",
+        missingName: "Introduce tu nombre.",
+        missingEmail: "Introduce tu correo electrónico.",
+        missingPassword: "Introduce una contraseña.",
+        passwordRequirementsError:
+          "La contraseña no cumple todos los requisitos.",
+        passwordMismatch: "Las contraseñas no coinciden.",
+        registerError: "No se pudo crear la cuenta.",
+        loginError:
+          "No se pudo iniciar sesión. Inténtalo de nuevo.",
+        heroBadge: "Tu espacio de trabajo",
+
+        loginHeroTitleFirst: "Organiza hoy.",
+        loginHeroTitleAccent: "Avanza cada día.",
+        loginHeroDescription:
+          "Centraliza tus tareas, controla tu progreso y mantén el foco en lo que realmente importa.",
+
+        registerHeroTitleFirst: "Tu trabajo,",
+        registerHeroTitleAccent: "más claro y simple.",
+        registerHeroDescription:
+          "Crea tu cuenta y reúne tareas, objetivos y avances en un único espacio diseñado para ayudarte a concentrarte.",
+
+        heroFeatureOneTitle: "Todo en un mismo lugar.",
+        heroFeatureOneDescription:
+          "Planifica, organiza y sigue tu progreso con FlowDesk.",
+
+        heroStepOne: "Organiza tus tareas en segundos.",
+        heroStepTwo: "Visualiza tu progreso con claridad.",
+        heroStepThree: "Mantén el foco en lo importante.",
 },
     /*
     ==========================================
@@ -1697,88 +1716,78 @@ export const translations = {
         "The task could not be created",
     },
 
-    /*
-    ==========================================
-    PROFILE
-    ==========================================
-    */
 
   profile: {
-  title: "My profile",
+      title: "My profile",
 
-   noName: "No name",
-  of: "of",
+      noName: "No name",
+      of: "of",
 
-  backToDashboard: "Back to dashboard",
-  backToProfile: "Back to profile",
+      backToDashboard: "Back to dashboard",
+      backToProfile: "Back to profile",
 
-  information: "Personal information",
+      information: "Personal information",
 
-  name: "Name",
-  email: "Email",
-  emailPlaceholder: "email@example.com",
+      name: "Name",
+      email: "Email",
+      emailPlaceholder: "email@example.com",
 
-  nameRequired: "Name cannot be empty.",
-  emailRequired: "Email cannot be empty.",
+      nameRequired: "Name cannot be empty.",
+      emailRequired: "Email cannot be empty.",
 
-  avatar: "Avatar",
-  banner: "Banner",
+      avatar: "Avatar",
+      banner: "Banner",
 
-  changeAvatar: "Change avatar",
-  changeBanner: "Change banner",
+      changeAvatar: "Change avatar",
+      changeBanner: "Change banner",
 
-  editProfile: "Edit profile",
-  saveChanges: "Save changes",
-  saving: "Saving changes...",
+      editProfile: "Edit profile",
+      saveChanges: "Save changes",
+      saving: "Saving changes...",
 
-  accountCreated: "Account created",
-  memberSince: "Member since",
+      accountCreated: "Account created",
+      memberSince: "Member since",
 
-  password: "Password",
-  changePassword: "Change password",
+      password: "Password",
+      changePassword: "Change password",
 
-  newPassword: "New password",
-  confirmNewPassword: "Confirm new password",
-  repeatNewPassword: "Repeat your new password",
+      newPassword: "New password",
+      confirmNewPassword: "Confirm new password",
+      repeatNewPassword: "Repeat your new password",
 
-  showPassword: "Show password",
-  hidePassword: "Hide password",
+      showPassword: "Show password",
+      hidePassword: "Hide password",
 
-  passwordMismatch: "Passwords do not match.",
-  passwordTooShort: "The password must be at least 6 characters long.",
-  passwordUpdateSuccess: "Password updated successfully.",
-  passwordUpdateError: "The password could not be updated.",
+      passwordMismatch: "Passwords do not match.",
+      passwordTooShort: "The password must be at least 6 characters long.",
+      passwordUpdateSuccess: "Password updated successfully.",
+      passwordUpdateError: "The password could not be updated.",
 
-  activitySummary: "Activity summary",
-  activitySummaryDescription: "How your tasks are currently progressing.",
+      activitySummary: "Activity summary",
+      activitySummaryDescription: "How your tasks are currently progressing.",
 
-  totalTasks: "Total tasks",
-  completedTasks: "Completed tasks",
-  pendingTasks: "Pending tasks",
-  inProgressTasks: "Tasks in progress",
-  productivity: "Productivity",
-  overallProgress: "Overall progress",
+      totalTasks: "Total tasks",
+      completedTasks: "Completed tasks",
+      pendingTasks: "Pending tasks",
+      inProgressTasks: "Tasks in progress",
+      productivity: "Productivity",
+      overallProgress: "Overall progress",
 
-  noTasks: "You do not have any tasks yet.",
-  noActivity: "There is no activity yet.",
+      noTasks: "You do not have any tasks yet.",
+      noActivity: "There is no activity yet.",
 
-  updateSuccess: "Profile updated successfully.",
-  updateError: "The profile could not be updated.",
+      updateSuccess: "Profile updated successfully.",
+      updateError: "The profile could not be updated.",
 
-  avatarUpdateSuccess: "Avatar updated successfully.",
-  avatarUpdateError: "The avatar could not be updated.",
+      avatarUpdateSuccess: "Avatar updated successfully.",
+      avatarUpdateError: "The avatar could not be updated.",
 
-  bannerUpdateSuccess: "Banner updated successfully.",
-  bannerUpdateError: "The banner could not be updated.",
+      bannerUpdateSuccess: "Banner updated successfully.",
+      bannerUpdateError: "The banner could not be updated.",
 
-  changePasswordDescription:
-  "Change your password securely",
-},
-    /*
-    ==========================================
-    AUTHENTICATION
-    ==========================================
-    */
+      changePasswordDescription:
+      "Change your password securely",
+    },
 
     auth: {
       login:
@@ -1817,62 +1826,77 @@ export const translations = {
       backToLogin:
         "Back to login",
     },
+
     authPage: {
-  backToHome: "Back to home",
+        backToHome: "Back to home",
 
-  registerEyebrow: "Get started",
-  registerTitle: "Create your account",
-  registerDescription:
-    "Organize your work, track your progress, and stay focused in one place.",
+        registerEyebrow: "Get started",
+        registerTitle: "Create your account",
+        registerDescription:
+          "Organize your work, track your progress, and stay focused in one place.",
 
-  loginEyebrow: "Welcome back",
-  loginTitle: "Log in",
-  loginDescription:
-    "Access your personal workspace and continue where you left off.",
+        loginEyebrow: "Welcome back",
+        loginTitle: "Log in",
+        loginDescription:
+          "Access your personal workspace and continue where you left off.",
 
-  name: "Name",
-  namePlaceholder: "Your name",
-  emailPlaceholder: "you@email.com",
+        name: "Name",
+        namePlaceholder: "Your name",
+        emailPlaceholder: "you@email.com",
 
-  passwordPlaceholder: "Create a secure password",
-  confirmPasswordPlaceholder: "Repeat your password",
-  loginPasswordPlaceholder: "Enter your password",
+        passwordPlaceholder: "Create a secure password",
+        confirmPasswordPlaceholder: "Repeat your password",
+        loginPasswordPlaceholder: "Enter your password",
 
-  showPassword: "Show password",
-  hidePassword: "Hide password",
+        showPassword: "Show password",
+        hidePassword: "Hide password",
 
-  passwordRequirements: "Your password must include:",
-  minCharacters: "At least 8 characters",
-  uppercase: "An uppercase letter",
-  lowercase: "A lowercase letter",
-  number: "A number",
-  specialCharacter: "A special character",
+        passwordRequirements: "Your password must include:",
+        minCharacters: "At least 8 characters",
+        uppercase: "An uppercase letter",
+        lowercase: "A lowercase letter",
+        number: "A number",
+        specialCharacter: "A special character",
 
-  creatingAccount: "Creating account...",
-  signingIn: "Signing in...",
+        creatingAccount: "Creating account...",
+        signingIn: "Signing in...",
 
-  alreadyHaveAccount: "Already have an account?",
-  signInLink: "Log in",
+        alreadyHaveAccount: "Already have an account?",
+        signInLink: "Log in",
 
-  dontHaveAccount: "Don't have an account yet?",
-  createAccountLink: "Create an account",
+        dontHaveAccount: "Don't have an account yet?",
+        createAccountLink: "Create an account",
 
-  missingName: "Enter your name.",
-  missingEmail: "Enter your email address.",
-  missingPassword: "Enter a password.",
-  passwordRequirementsError:
-    "The password does not meet all requirements.",
-  passwordMismatch: "Passwords do not match.",
-  registerError: "Could not create the account.",
-  loginError:
-    "Could not sign in. Please try again.",
-},
+        missingName: "Enter your name.",
+        missingEmail: "Enter your email address.",
+        missingPassword: "Enter a password.",
+        passwordRequirementsError:
+          "The password does not meet all requirements.",
+        passwordMismatch: "Passwords do not match.",
+        registerError: "Could not create the account.",
+        loginError:
+          "Could not sign in. Please try again.",
 
-    /*
-    ==========================================
-    THEME
-    ==========================================
-    */
+        heroBadge: "Your workspace",
+
+          loginHeroTitleFirst: "Organize today.",
+          loginHeroTitleAccent: "Make progress every day.",
+          loginHeroDescription:
+            "Keep your tasks in one place, track your progress, and stay focused on what truly matters.",
+
+          registerHeroTitleFirst: "Your work,",
+          registerHeroTitleAccent: "clearer and simpler.",
+          registerHeroDescription:
+            "Create your account and keep tasks, goals, and progress together in one focused workspace designed to help you stay on track.",
+
+          heroFeatureOneTitle: "Everything in one place.",
+          heroFeatureOneDescription:
+            "Plan, organize, and track your progress with FlowDesk.",
+
+          heroStepOne: "Organize your tasks in seconds.",
+          heroStepTwo: "See your progress clearly.",
+          heroStepThree: "Stay focused on what matters.",
+    },
 
     theme: {
       light:
@@ -1888,11 +1912,7 @@ export const translations = {
         "Change theme",
     },
 
-    /*
-    ==========================================
-    LANGUAGE
-    ==========================================
-    */
+
 
     language: {
       spanish:
