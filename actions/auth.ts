@@ -113,10 +113,7 @@ export async function loginUser(formData: FormData) {
       ? passwordValue
       : "";
 
-  /*
-   * Usamos el mismo mensaje para campos incompletos o credenciales
-   * incorrectas para no revelar si un correo está registrado.
-   */
+ 
   if (!email || !password) {
     return {
       error: "Correo o contraseña incorrectos.",
@@ -130,11 +127,7 @@ export async function loginUser(formData: FormData) {
       redirectTo: "/dashboard",
     });
   } catch (error) {
-    /*
-     * Tras un login correcto Auth.js ejecuta un redirect interno.
-     * Next.js representa ese redirect como un error especial que
-     * debe relanzarse para que la navegación funcione.
-     */
+  
     if (isNextRedirectError(error)) {
       throw error;
     }
@@ -228,10 +221,7 @@ export async function registerUser(formData: FormData) {
       },
     });
   } catch (error) {
-    /*
-     * El índice @unique en Prisma es la protección real frente
-     * a registros concurrentes con el mismo correo.
-     */
+  
     if (isPrismaUniqueConstraintError(error)) {
       return {
         error: EMAIL_ALREADY_REGISTERED_MESSAGE,
@@ -262,10 +252,7 @@ export async function requestPasswordReset(formData: FormData) {
       ? emailValue.trim().toLowerCase()
       : "";
 
-  /*
-   * Siempre devolvemos la misma respuesta: evita revelar si existe
-   * una cuenta asociada al correo introducido.
-   */
+
   if (!email || !isValidEmail(email)) {
     return {
       success: true,
@@ -291,10 +278,7 @@ export async function requestPasswordReset(formData: FormData) {
     };
   }
 
-  /*
-   * Solo almacenamos el hash del token en la base de datos.
-   * El token original solo existe en el enlace enviado por correo.
-   */
+
   const rawToken = crypto.randomBytes(32).toString("hex");
   const tokenHash = hashResetToken(rawToken);
 
@@ -389,9 +373,7 @@ Si no solicitaste este cambio, puedes ignorar este correo.
       error
     );
 
-    /*
-     * Si el envío falla, anulamos el token que acabamos de crear.
-     */
+  
     await prisma.user.update({
       where: {
         id: user.id,

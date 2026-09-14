@@ -179,7 +179,6 @@ export default function TaskCard({
           </div>
 
           <div className="flex shrink-0 flex-col gap-1 opacity-100 transition sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100">
-            {/* Cursor grab / grabbing. Solo visual hasta conectar dnd-kit. */}
             <button
               type="button"
               data-drag-handle

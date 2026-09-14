@@ -204,11 +204,7 @@ export default function DashboardContent({
       return task.priority === selectedPriority;
     });
 
-  /*
-   * Textos que antes estaban escritos directamente en español.
-   * Se mantienen aquí de momento para que no tengas que cambiar
-   * el enorme archivo translations.ts.
-   */
+
   const onboarding =
     language === "es"
       ? {
@@ -253,7 +249,6 @@ export default function DashboardContent({
         </div>
       </header>
 
-      {/* ONBOARDING: solo al no tener tareas */}
       {isFirstTask && (
         <section className="ui-glow-card relative mb-6 overflow-hidden p-5 sm:mb-8 sm:p-7 lg:p-8">
           <div className="relative z-10 grid gap-7 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">

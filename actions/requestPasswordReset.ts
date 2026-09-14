@@ -43,10 +43,7 @@ function escapeHtml(value: string) {
 export async function requestPasswordReset(emailInput: string) {
   const email = emailInput.trim().toLowerCase();
 
-  /*
-   * Mismo mensaje si no existe usuario: evita que alguien compruebe
-   * qué correos tienen una cuenta creada.
-   */
+
   if (!email) {
     return {
       success: true,
@@ -100,56 +97,56 @@ export async function requestPasswordReset(emailInput: string) {
       to: [user.email],
       subject: "Restablece tu contraseña de FlowDesk",
       text: `
-Hola${user.name ? ` ${user.name}` : ""},
+    Hola${user.name ? ` ${user.name}` : ""},
 
-Hemos recibido una solicitud para restablecer la contraseña de tu cuenta de FlowDesk.
+    Hemos recibido una solicitud para restablecer la contraseña de tu cuenta de FlowDesk.
 
-Crea una contraseña nueva desde este enlace:
-${resetUrl.toString()}
+    Crea una contraseña nueva desde este enlace:
+    ${resetUrl.toString()}
 
-Este enlace caduca en 30 minutos y solo puede utilizarse una vez.
+    Este enlace caduca en 30 minutos y solo puede utilizarse una vez.
 
-Si no solicitaste este cambio, puedes ignorar este correo.
-      `.trim(),
-      html: `
-        <div style="margin:0; padding:32px 16px; background:#07101f; font-family:Arial, Helvetica, sans-serif;">
-          <div style="max-width:560px; margin:0 auto; padding:32px; border:1px solid #2b4564; border-radius:24px; background:#13233a; color:#f8fbff;">
-            <p style="margin:0 0 20px; color:#38bdf8; font-size:13px; font-weight:800; letter-spacing:1.4px; text-transform:uppercase;">
-              FlowDesk
-            </p>
+    Si no solicitaste este cambio, puedes ignorar este correo.
+          `.trim(),
+          html: `
+            <div style="margin:0; padding:32px 16px; background:#07101f; font-family:Arial, Helvetica, sans-serif;">
+              <div style="max-width:560px; margin:0 auto; padding:32px; border:1px solid #2b4564; border-radius:24px; background:#13233a; color:#f8fbff;">
+                <p style="margin:0 0 20px; color:#38bdf8; font-size:13px; font-weight:800; letter-spacing:1.4px; text-transform:uppercase;">
+                  FlowDesk
+                </p>
 
-            <h1 style="margin:0 0 16px; color:#ffffff; font-size:28px; line-height:1.2;">
-              Restablece tu contraseña
-            </h1>
+                <h1 style="margin:0 0 16px; color:#ffffff; font-size:28px; line-height:1.2;">
+                  Restablece tu contraseña
+                </h1>
 
-            <p style="margin:0 0 16px; color:#cbd5e1; font-size:16px; line-height:1.65;">
-              Hola${safeName ? ` ${safeName}` : ""},
-            </p>
+                <p style="margin:0 0 16px; color:#cbd5e1; font-size:16px; line-height:1.65;">
+                  Hola${safeName ? ` ${safeName}` : ""},
+                </p>
 
-            <p style="margin:0 0 16px; color:#cbd5e1; font-size:16px; line-height:1.65;">
-              Hemos recibido una solicitud para restablecer la contraseña de tu cuenta.
-            </p>
+                <p style="margin:0 0 16px; color:#cbd5e1; font-size:16px; line-height:1.65;">
+                  Hemos recibido una solicitud para restablecer la contraseña de tu cuenta.
+                </p>
 
-            <p style="margin:28px 0;">
-              <a
-                href="${resetUrl.toString()}"
-                style="display:inline-block; padding:14px 20px; border-radius:12px; background:#38bdf8; color:#06111f; font-size:15px; font-weight:800; text-decoration:none;"
-              >
-                Crear contraseña nueva
-              </a>
-            </p>
+                <p style="margin:28px 0;">
+                  <a
+                    href="${resetUrl.toString()}"
+                    style="display:inline-block; padding:14px 20px; border-radius:12px; background:#38bdf8; color:#06111f; font-size:15px; font-weight:800; text-decoration:none;"
+                  >
+                    Crear contraseña nueva
+                  </a>
+                </p>
 
-            <p style="margin:0 0 12px; color:#b5c5da; font-size:14px; line-height:1.6;">
-              Este enlace caduca en 30 minutos y solo puede utilizarse una vez.
-            </p>
+                <p style="margin:0 0 12px; color:#b5c5da; font-size:14px; line-height:1.6;">
+                  Este enlace caduca en 30 minutos y solo puede utilizarse una vez.
+                </p>
 
-            <p style="margin:0; color:#8ea3bd; font-size:13px; line-height:1.6;">
-              Si no solicitaste este cambio, puedes ignorar este mensaje.
-            </p>
-          </div>
-        </div>
-      `,
-    });
+                <p style="margin:0; color:#8ea3bd; font-size:13px; line-height:1.6;">
+                  Si no solicitaste este cambio, puedes ignorar este mensaje.
+                </p>
+              </div>
+            </div>
+          `,
+        });
 
     if (error) {
       throw new Error(error.message);
@@ -160,9 +157,7 @@ Si no solicitaste este cambio, puedes ignorar este correo.
       error
     );
 
-    /*
-     * Anula el token si Resend no ha podido enviar el mensaje.
-     */
+    
     await prisma.user.update({
       where: {
         id: user.id,

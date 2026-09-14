@@ -68,10 +68,7 @@ function formatDateForInput(date: Date | null) {
     return "";
   }
 
-  /*
-   * YYYY-MM-DD evita que el input de fecha cambie un día
-   * dependiendo de la zona horaria del navegador.
-   */
+
   const localDate = new Date(date);
 
   const year = localDate.getFullYear();
@@ -95,11 +92,7 @@ export default function EditTaskDialog({
   const router = useRouter();
   const { t } = useLanguage();
 
-  /*
-   * En /guest contiene updateTask().
-   * En /dashboard devuelve null y nunca se usa mientras
-   * guestMode sea false.
-   */
+ 
   const guestTasks = useGuestTasks();
 
   const [currentTag, setCurrentTag] = useState(
@@ -187,10 +180,7 @@ export default function EditTaskDialog({
 
         onOpenChange(false);
 
-        /*
-         * El provider ya actualiza el estado y localStorage.
-         * No se usa router.refresh() para no recargar /guest.
-         */
+      
         return;
       }
 

@@ -6,11 +6,7 @@ export const translations = {
   // ============================================================
 
   es: {
-    /*
-    ==========================================
-    COMÚN
-    ==========================================
-    */
+   
 
     common: {
       all: "Todas",
@@ -27,11 +23,7 @@ export const translations = {
       loading: "Cargando...",
     },
 
-    /*
-    ==========================================
-    NAVEGACIÓN
-    ==========================================
-    */
+
 
     navigation: {
       tasks: "Tareas",
@@ -42,11 +34,7 @@ export const translations = {
       logout: "Cerrar sesión",
     },
 
-    /*
-    ==========================================
-    MENÚ DE USUARIO
-    ==========================================
-    */
+  
 
     userMenu: {
       profile: "Mi perfil",
@@ -59,11 +47,7 @@ export const translations = {
       logoutDescription: "Salir de mi cuenta",
     },
 
-    /*
-    ==========================================
-    HEADER
-    ==========================================
-    */
+  
 
     header: {
       dashboard: "Dashboard",
@@ -78,12 +62,7 @@ export const translations = {
       english: "Inglés",
     },
 
-    /*
-    ==========================================
-    DASHBOARD
-    ==========================================
-    */
-
+ 
     dashboard: {
       taskflow: "TaskFlow",
       dashboard: "Dashboard",
@@ -161,11 +140,6 @@ export const translations = {
       firstCompleteFeature: "Completa objetivos",
     },
 
-    /*
-    ==========================================
-    FILTROS
-    ==========================================
-    */
 
     filters: {
       status: "Estado de tareas",
@@ -197,11 +171,6 @@ export const translations = {
       oldest: "Más antiguas",
     },
 
-    /*
-    ==========================================
-    TAREAS
-    ==========================================
-    */
 
    tasks: {
   title: "Tareas",
@@ -294,28 +263,23 @@ export const translations = {
   taskPlural: "tareas",
 
   details: {
-    title: "Detalles de la tarea",
-    description: "Descripción",
-    noDescription: "Esta tarea no tiene una descripción.",
-    priority: "Prioridad",
-    status: "Estado",
-    dueDate: "Fecha límite",
-    close: "Cerrar",
-    editTask: "Editar tarea",
-    deleteTask: "Eliminar tarea",
-    pending: "Pendiente",
-    inProgress: "En progreso",
-    completed: "Completada",
-    completeTask: "Completar tarea",
-    markPending: "Marcar como pendiente",
-  },
+      title: "Detalles de la tarea",
+      description: "Descripción",
+      noDescription: "Esta tarea no tiene una descripción.",
+      priority: "Prioridad",
+      status: "Estado",
+      dueDate: "Fecha límite",
+      close: "Cerrar",
+      editTask: "Editar tarea",
+      deleteTask: "Eliminar tarea",
+      pending: "Pendiente",
+      inProgress: "En progreso",
+      completed: "Completada",
+      completeTask: "Completar tarea",
+      markPending: "Marcar como pendiente",
+    },
 },
-    /*
-    ==========================================
-    ESTADOS
-    ==========================================
-    */
-
+  
     status: {
       pending: "Pendiente",
 
@@ -330,11 +294,7 @@ export const translations = {
       completedPlural: "Completadas",
     },
 
-    /*
-    ==========================================
-    PRIORIDADES
-    ==========================================
-    */
+   
 
     priority: {
       low: "Baja",
@@ -348,12 +308,7 @@ export const translations = {
       highDescription: "Prioridad alta",
     },
 
-    /*
-    ==========================================
-    CALENDARIO
-    ==========================================
-    */
-
+   
     calendar: {
       title: "Calendario",
 
@@ -398,61 +353,51 @@ export const translations = {
         "No hay tareas para este día.",
     },
 
-    /*
-    ==========================================
-    KANBAN / TABLERO
-    ==========================================
-    */
-
+   
     board: {
-  title: "Tablero",
+      title: "Tablero",
 
-  pending: "Pendientes",
+      pending: "Pendientes",
 
-  inProgress: "En progreso",
+      inProgress: "En progreso",
 
-  completed: "Completadas",
+      completed: "Completadas",
 
-  moveHere: "Mover aquí",
+      moveHere: "Mover aquí",
 
-  empty: "No hay tareas aquí.",
+      empty: "No hay tareas aquí.",
 
-  dragTask:
-    "Arrastra una tarea para moverla.",
+      dragTask:
+        "Arrastra una tarea para moverla.",
 
-  tasks: "tareas",
+      tasks: "tareas",
 
-  task: "tarea",
+      task: "tarea",
 
-  drag: "Arrastrar tarea",
+      drag: "Arrastrar tarea",
 
-  moved: "Tarea movida correctamente",
+      moved: "Tarea movida correctamente",
 
-  movedError:
-    "No se pudo mover la tarea",
+      movedError:
+        "No se pudo mover la tarea",
 
-  completedMessage:
-    "Tarea completada ✅",
+      completedMessage:
+        "Tarea completada ✅",
 
-  inProgressMessage:
-    "Tarea en progreso 🔵",
+      inProgressMessage:
+        "Tarea en progreso 🔵",
 
-  pendingMessage:
-    "Tarea pendiente 🟡",
+      pendingMessage:
+        "Tarea pendiente 🟡",
 
-  orderUpdated: "Orden actualizado",
+      orderUpdated: "Orden actualizado",
 
-  undo: "Deshacer",
+      undo: "Deshacer",
 
-  undoSuccess: "Movimiento deshecho",
+      undoSuccess: "Movimiento deshecho",
 
-  undoError: "No se pudo deshacer el movimiento",
+      undoError: "No se pudo deshacer el movimiento",
 },
-    /*
-    ==========================================
-    CREAR TAREA
-    ==========================================
-    */
 
     createTask: {
       title: "Nueva tarea",
@@ -491,12 +436,7 @@ export const translations = {
         "No se pudo crear la tarea",
     },
 
-    /*
-    ==========================================
-    EDITAR TAREA
-    ==========================================
-    */
-
+ 
     editTask: {
       title: "Editar tarea",
 
@@ -530,11 +470,7 @@ export const translations = {
         "No se pudieron guardar los cambios",
     },
 
-    /*
-    ==========================================
-    ETIQUETAS
-    ==========================================
-    */
+   
 
     tags: {
       work: "Trabajo",
@@ -548,11 +484,7 @@ export const translations = {
       custom: "Personalizada",
     },
 
-    /*
-    ==========================================
-    FORMULARIO
-    ==========================================
-    */
+
 
     form: {
       required:
@@ -583,11 +515,7 @@ export const translations = {
       updating: "Actualizando...",
     },
 
-    /*
-    ==========================================
-    MENSAJES
-    ==========================================
-    */
+   
 
     messages: {
       taskCreated:
@@ -651,89 +579,79 @@ export const translations = {
         "No se pudo crear la tarea",
     },
 
-    /*
-    ==========================================
-    PERFIL
-    ==========================================
-    */
 
- profile: {
-  title: "Mi perfil",
+      profile: {
+        title: "Mi perfil",
 
-  noName: "Sin nombre",
-  of: "de",
+        noName: "Sin nombre",
+        of: "de",
 
-  backToDashboard: "Volver al panel",
-  backToProfile: "Volver al perfil",
+        backToDashboard: "Volver al panel",
+        backToProfile: "Volver al perfil",
 
-  information: "Información personal",
+        information: "Información personal",
 
-  name: "Nombre",
-  email: "Correo electrónico",
-  emailPlaceholder: "correo@ejemplo.com",
+        name: "Nombre",
+        email: "Correo electrónico",
+        emailPlaceholder: "correo@ejemplo.com",
 
-  nameRequired: "El nombre no puede estar vacío.",
-  emailRequired: "El correo no puede estar vacío.",
+        nameRequired: "El nombre no puede estar vacío.",
+        emailRequired: "El correo no puede estar vacío.",
 
-  avatar: "Avatar",
-  banner: "Banner",
+        avatar: "Avatar",
+        banner: "Banner",
 
-  changeAvatar: "Cambiar avatar",
-  changeBanner: "Cambiar banner",
+        changeAvatar: "Cambiar avatar",
+        changeBanner: "Cambiar banner",
 
-  editProfile: "Editar perfil",
-  saveChanges: "Guardar cambios",
-  saving: "Guardando cambios...",
+        editProfile: "Editar perfil",
+        saveChanges: "Guardar cambios",
+        saving: "Guardando cambios...",
 
-  accountCreated: "Cuenta creada",
-  memberSince: "Miembro desde",
+        accountCreated: "Cuenta creada",
+        memberSince: "Miembro desde",
 
-  password: "Contraseña",
-  changePassword: "Cambiar contraseña",
+        password: "Contraseña",
+        changePassword: "Cambiar contraseña",
 
-  newPassword: "Nueva contraseña",
-  confirmNewPassword: "Confirmar nueva contraseña",
-  repeatNewPassword: "Repite la nueva contraseña",
+        newPassword: "Nueva contraseña",
+        confirmNewPassword: "Confirmar nueva contraseña",
+        repeatNewPassword: "Repite la nueva contraseña",
 
-  showPassword: "Mostrar contraseña",
-  hidePassword: "Ocultar contraseña",
+        showPassword: "Mostrar contraseña",
+        hidePassword: "Ocultar contraseña",
 
-  passwordMismatch: "Las contraseñas no coinciden.",
-  passwordTooShort: "La contraseña debe tener al menos 6 caracteres.",
-  passwordUpdateSuccess: "Contraseña actualizada correctamente.",
-  passwordUpdateError: "No se pudo actualizar la contraseña.",
+        passwordMismatch: "Las contraseñas no coinciden.",
+        passwordTooShort: "La contraseña debe tener al menos 6 caracteres.",
+        passwordUpdateSuccess: "Contraseña actualizada correctamente.",
+        passwordUpdateError: "No se pudo actualizar la contraseña.",
 
-  activitySummary: "Resumen de actividad",
-  activitySummaryDescription: "Cómo llevas tus tareas actualmente.",
+        activitySummary: "Resumen de actividad",
+        activitySummaryDescription: "Cómo llevas tus tareas actualmente.",
 
-  totalTasks: "Total de tareas",
-  completedTasks: "Tareas completadas",
-  pendingTasks: "Tareas pendientes",
-  inProgressTasks: "Tareas en progreso",
-  productivity: "Productividad",
-  overallProgress: "Progreso general",
+        totalTasks: "Total de tareas",
+        completedTasks: "Tareas completadas",
+        pendingTasks: "Tareas pendientes",
+        inProgressTasks: "Tareas en progreso",
+        productivity: "Productividad",
+        overallProgress: "Progreso general",
 
-  noTasks: "Aún no tienes tareas.",
-  noActivity: "Todavía no hay actividad.",
+        noTasks: "Aún no tienes tareas.",
+        noActivity: "Todavía no hay actividad.",
 
-  updateSuccess: "Perfil actualizado correctamente.",
-  updateError: "No se pudo actualizar el perfil.",
+        updateSuccess: "Perfil actualizado correctamente.",
+        updateError: "No se pudo actualizar el perfil.",
 
-  avatarUpdateSuccess: "Avatar actualizado correctamente.",
-  avatarUpdateError: "No se pudo actualizar el avatar.",
+        avatarUpdateSuccess: "Avatar actualizado correctamente.",
+        avatarUpdateError: "No se pudo actualizar el avatar.",
 
-  bannerUpdateSuccess: "Banner actualizado correctamente.",
-  bannerUpdateError: "No se pudo actualizar el banner.",
+        bannerUpdateSuccess: "Banner actualizado correctamente.",
+        bannerUpdateError: "No se pudo actualizar el banner.",
 
-  changePasswordDescription:
-  "Cambia la contraseña de forma segura",
-},
-    /*
-    ==========================================
-    AUTENTICACIÓN
-    ==========================================
-    */
-
+        changePasswordDescription:
+        "Cambia la contraseña de forma segura",
+      },
+   
     auth: {
       login: "Iniciar sesión",
 
@@ -766,6 +684,7 @@ export const translations = {
       backToLogin:
         "Volver al inicio de sesión",
     },
+
     authPage: {
         backToHome: "Volver a la página principal",
 
@@ -835,11 +754,7 @@ export const translations = {
         heroStepTwo: "Visualiza tu progreso con claridad.",
         heroStepThree: "Mantén el foco en lo importante.",
 },
-    /*
-    ==========================================
-    TEMA
-    ==========================================
-    */
+   
 
     theme: {
       light: "Claro",
@@ -852,11 +767,7 @@ export const translations = {
         "Cambiar tema",
     },
 
-    /*
-    ==========================================
-    IDIOMA
-    ==========================================
-    */
+ 
 
     language: {
       spanish: "Español",
@@ -873,11 +784,7 @@ export const translations = {
   // ============================================================
 
   en: {
-    /*
-    ==========================================
-    COMMON
-    ==========================================
-    */
+  
 
     common: {
       all: "All",
@@ -894,11 +801,7 @@ export const translations = {
       loading: "Loading...",
     },
 
-    /*
-    ==========================================
-    NAVIGATION
-    ==========================================
-    */
+   
 
     navigation: {
       tasks: "Tasks",
@@ -909,11 +812,7 @@ export const translations = {
       logout: "Log out",
     },
 
-    /*
-    ==========================================
-    USER MENU
-    ==========================================
-    */
+   
 
     userMenu: {
       profile: "My profile",
@@ -934,11 +833,6 @@ export const translations = {
         "Sign out of my account",
     },
 
-    /*
-    ==========================================
-    HEADER
-    ==========================================
-    */
 
     header: {
       dashboard: "Dashboard",
@@ -953,11 +847,6 @@ export const translations = {
       english: "English",
     },
 
-    /*
-    ==========================================
-    DASHBOARD
-    ==========================================
-    */
 
     dashboard: {
       taskflow: "TaskFlow",
@@ -1063,11 +952,6 @@ export const translations = {
       firstCompleteFeature: "Complete goals",
     },
 
-    /*
-    ==========================================
-    FILTERS
-    ==========================================
-    */
 
     filters: {
       status:
@@ -1125,11 +1009,6 @@ export const translations = {
         "Oldest",
     },
 
-    /*
-    ==========================================
-    TASKS
-    ==========================================
-    */
 
     tasks: {
       title:
@@ -1238,7 +1117,7 @@ export const translations = {
       dragHere:
         "Drag a task here",
 
-    taskSingular: "task",
+      taskSingular: "task",
 
       taskPlural: "tasks",
 
@@ -1267,11 +1146,7 @@ export const translations = {
       deleting: "Deleting...",
 
     },
-    /*
-    ==========================================
-    STATUS
-    ==========================================
-    */
+  
 
     status: {
       pending:
@@ -1293,11 +1168,7 @@ export const translations = {
         "Completed",
     },
 
-    /*
-    ==========================================
-    PRIORITY
-    ==========================================
-    */
+
 
     priority: {
       low:
@@ -1319,11 +1190,7 @@ export const translations = {
         "High priority",
     },
 
-    /*
-    ==========================================
-    CALENDAR
-    ==========================================
-    */
+ 
 
     calendar: {
       title:
@@ -1414,12 +1281,6 @@ export const translations = {
         "There are no tasks for this day.",
     },
 
-    /*
-    ==========================================
-    KANBAN / BOARD
-    ==========================================
-    */
-
     board: {
       title:
         "Board",
@@ -1475,12 +1336,7 @@ export const translations = {
       undoError: "The movement could not be undone",
     },
 
-    /*
-    ==========================================
-    CREATE TASK
-    ==========================================
-    */
-
+  
     createTask: {
       title:
         "New task",
@@ -1525,11 +1381,7 @@ export const translations = {
         "The task could not be created",
     },
 
-    /*
-    ==========================================
-    EDIT TASK
-    ==========================================
-    */
+ 
 
     editTask: {
       title:
@@ -1572,11 +1424,7 @@ export const translations = {
         "The changes could not be saved",
     },
 
-    /*
-    ==========================================
-    TAGS
-    ==========================================
-    */
+   
 
     tags: {
       work:
@@ -1595,11 +1443,7 @@ export const translations = {
         "Custom",
     },
 
-    /*
-    ==========================================
-    FORM
-    ==========================================
-    */
+
 
     form: {
       required:
@@ -1639,11 +1483,7 @@ export const translations = {
         "Updating...",
     },
 
-    /*
-    ==========================================
-    MESSAGES
-    ==========================================
-    */
+  
 
     messages: {
       taskCreated:

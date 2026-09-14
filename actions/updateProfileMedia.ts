@@ -47,7 +47,6 @@ export async function updateProfileMedia(
     extension = "jpg";
   }
 
-  // Nombre fijo para sobrescribir la imagen anterior
   const fileName = `${session.user.id}-${type}.${extension}`;
 
   const uploadDir = path.join(
@@ -97,7 +96,6 @@ export async function updateProfileMedia(
     });
   }
 
-  // Actualizar todas las páginas donde puede aparecer
   revalidatePath("/profile");
   revalidatePath("/profile/edit");
   revalidatePath("/dashboard");

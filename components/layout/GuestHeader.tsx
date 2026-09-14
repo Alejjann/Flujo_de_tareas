@@ -16,12 +16,10 @@ export default function GuestHeader() {
 
   return (
     <>
-      {/* Espacio para el header fijo */}
       <div aria-hidden="true" className="h-[72px]" />
 
       <header className="fixed inset-x-0 top-0 z-50 border-b border-border/60 bg-background/90 backdrop-blur-xl">
         <div className="mx-auto flex h-[72px] max-w-[1440px] items-center justify-between gap-3 px-4 sm:px-6 md:px-8">
-          {/* Logo: invitado vuelve a la página principal */}
           <Link
             href="/"
             aria-label="Ir a la página principal de Flowdesk"
@@ -44,7 +42,6 @@ export default function GuestHeader() {
             </span>
           </Link>
 
-          {/* Centro: acceso al login */}
           <nav
             aria-label="Navegación de invitado"
             className="hidden items-center rounded-2xl border border-border bg-card/70 p-1 shadow-sm md:flex"
@@ -63,7 +60,6 @@ export default function GuestHeader() {
             </Link>
           </nav>
 
-          {/* Tema, idioma y botón de login para móvil */}
           <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
             <div className="hidden items-center gap-1 rounded-xl border border-border bg-card/70 p-1 shadow-sm sm:flex">
               <ThemeToggle />

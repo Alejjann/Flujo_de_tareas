@@ -1,13 +1,19 @@
 "use server";
 
+import type { Prisma } from "@prisma/client";
+import { revalidatePath } from "next/cache";
+
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { revalidatePath } from "next/cache";
 
 type Priority = "LOW" | "MEDIUM" | "HIGH";
 
 function isPriority(value: string): value is Priority {
-  return value === "LOW" || value === "MEDIUM" || value === "HIGH";
+  return (
+    value === "LOW" ||
+    value === "MEDIUM" ||
+    value === "HIGH"
+  );
 }
 
 function parseDueDate(value: string) {
@@ -32,23 +38,35 @@ export async function createTask(formData: FormData) {
   }
 
   const title = String(formData.get("title") || "").trim();
-  const description = String(formData.get("description") || "").trim();
+
+  const description = String(
+    formData.get("description") || ""
+  ).trim();
 
   const priorityValue = String(
     formData.get("priority") || "MEDIUM"
   );
 
-  const dueDateValue = String(formData.get("dueDate") || "").trim();
+  const dueDateValue = String(
+    formData.get("dueDate") || ""
+  ).trim();
 
-  const selectedTag = String(formData.get("tag") || "").trim();
-  const customTag = String(formData.get("customTag") || "").trim();
+  const selectedTag = String(
+    formData.get("tag") || ""
+  ).trim();
+
+  const customTag = String(
+    formData.get("customTag") || ""
+  ).trim();
 
   if (!title) {
     throw new Error("El título es obligatorio");
   }
 
   if (!isPriority(priorityValue)) {
-    throw new Error("La prioridad seleccionada no es válida");
+    throw new Error(
+      "La prioridad seleccionada no es válida"
+    );
   }
 
   const tag =
@@ -58,29 +76,30 @@ export async function createTask(formData: FormData) {
 
   const dueDate = parseDueDate(dueDateValue);
 
-  
-  await prisma.$transaction(async (tx) => {
-    const pendingTaskCount = await tx.task.count({
-      where: {
-        userId: session.user.id,
-        status: "PENDING",
-      },
-    });
+  await prisma.$transaction(
+    async (tx: Prisma.TransactionClient) => {
+      const pendingTaskCount = await tx.task.count({
+        where: {
+          userId: session.user.id,
+          status: "PENDING",
+        },
+      });
 
-    await tx.task.create({
-      data: {
-        title,
-        description: description || null,
-        priority: priorityValue,
-        dueDate,
-        userId: session.user.id,
-        tag,
-        status: "PENDING",
-        completed: false,
-        position: pendingTaskCount,
-      },
-    });
-  });
+      await tx.task.create({
+        data: {
+          title,
+          description: description || null,
+          priority: priorityValue,
+          dueDate,
+          userId: session.user.id,
+          tag,
+          status: "PENDING",
+          completed: false,
+          position: pendingTaskCount,
+        },
+      });
+    }
+  );
 
   revalidatePath("/");
   revalidatePath("/dashboard");

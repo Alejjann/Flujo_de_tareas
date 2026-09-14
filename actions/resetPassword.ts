@@ -35,10 +35,7 @@ export async function resetPassword(
     throw new Error(passwordErrors[0]);
   }
 
-  /*
-   * Del email llega el token original. Se convierte a SHA-256
-   * para buscar el hash guardado en PostgreSQL.
-   */
+
   const tokenHash = hashResetToken(token);
 
   const user = await prisma.user.findFirst({

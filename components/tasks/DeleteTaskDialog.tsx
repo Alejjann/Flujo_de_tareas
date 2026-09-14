@@ -41,10 +41,7 @@ export default function DeleteTaskDialog({
   const { t } = useLanguage();
   const router = useRouter();
 
-  /*
-   * En /guest contiene deleteTask().
-   * En /dashboard es null y no se usa porque guestMode es false.
-   */
+
   const guestTasks = useGuestTasks();
 
   const [isDeleting, setIsDeleting] = useState(false);
@@ -79,10 +76,7 @@ export default function DeleteTaskDialog({
         onDeleted?.();
         onOpenChange(false);
 
-        /*
-         * No se usa router.refresh() aquí:
-         * al actualizar el provider, React redibuja el dashboard invitado.
-         */
+      
         return;
       }
 

@@ -58,10 +58,7 @@ export default function Header({
 
   const pathname = usePathname();
 
-  /*
-   * El Header usa el mismo idioma global que Dashboard,
-   * ProfileContent y LanguageToggle.
-   */
+
   const { language } = useLanguage();
 
   const displayName = name?.trim() || "Usuario";

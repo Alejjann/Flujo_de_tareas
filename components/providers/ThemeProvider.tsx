@@ -23,10 +23,7 @@ const ThemeContext = createContext<ThemeContextValue | undefined>(
 const THEME_STORAGE_KEY = "flowdesk-theme";
 
 function getInitialTheme(): Theme {
-  /*
-   * El modo inicial de toda la app es claro.
-   * Si antes el usuario cambió a oscuro, se recupera su elección.
-   */
+  
   if (typeof window === "undefined") {
     return "light";
   }

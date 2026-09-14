@@ -44,10 +44,7 @@ export default function AddTaskButton({
   const router = useRouter();
   const { t } = useLanguage();
 
-  /*
-   * En /guest contiene la API local.
-   * En /dashboard devuelve null, por lo que no rompe el dashboard real.
-   */
+
   const guestTasks = useGuestTasks();
 
   const isFloating = variant === "floating";
@@ -113,10 +110,7 @@ export default function AddTaskButton({
           : selectedTag || null;
 
       if (guestMode) {
-        /*
-         * Si aparece este error en /guest, significa que falta envolver
-         * app/guest/page.tsx con <GuestTasksProvider>.
-         */
+       
         if (!guestTasks) {
           throw new Error(
             "GuestTasksProvider no está disponible en modo invitado."
@@ -138,10 +132,7 @@ export default function AddTaskButton({
         setOpen(false);
         setTag("Personal");
 
-        /*
-         * No uses router.refresh() aquí.
-         * El provider actualiza las tareas y React redibuja el dashboard.
-         */
+      
         return;
       }
 
