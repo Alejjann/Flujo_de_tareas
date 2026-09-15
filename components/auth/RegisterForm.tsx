@@ -3,6 +3,7 @@
 import type { ChangeEvent, FormEvent } from "react";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import {
   AlertCircle,
@@ -27,6 +28,7 @@ const PASSWORD_MIN_LENGTH = 8;
 
 export default function RegisterForm() {
   const { language } = useLanguage();
+  const router = useRouter();
 
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -76,6 +78,8 @@ export default function RegisterForm() {
             "La contraseña no cumple todos los requisitos.",
           passwordMismatch: "Las contraseñas no coinciden.",
           registerError: "No se pudo crear la cuenta.",
+          registerSuccess:
+            "Cuenta creada correctamente. Ahora inicia sesión.",
         }
       : {
           eyebrow: "Get started",
@@ -109,6 +113,8 @@ export default function RegisterForm() {
             "The password does not meet all requirements.",
           passwordMismatch: "Passwords do not match.",
           registerError: "Could not create the account.",
+          registerSuccess:
+            "Account created successfully. Please log in.",
         };
 
   const passwordRules = [
@@ -230,6 +236,11 @@ export default function RegisterForm() {
         toast.error(result.error);
         return;
       }
+
+      toast.success(copy.registerSuccess);
+
+      router.push("/login");
+      router.refresh();
     } catch (error) {
       console.error("ERROR REGISTRANDO USUARIO:", error);
 
