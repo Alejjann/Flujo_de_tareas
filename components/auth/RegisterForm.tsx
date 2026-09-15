@@ -1,6 +1,6 @@
 "use client";
 
-import type { ChangeEvent } from "react";
+import type { ChangeEvent, FormEvent } from "react";
 
 import Link from "next/link";
 import { useState } from "react";
@@ -59,8 +59,7 @@ export default function RegisterForm() {
           confirmPasswordPlaceholder: "Repite tu contraseña",
           showPassword: "Mostrar contraseña",
           hidePassword: "Ocultar contraseña",
-          passwordRequirements:
-            "Tu contraseña debe incluir:",
+          passwordRequirements: "Tu contraseña debe incluir:",
           minCharacters: `Mínimo ${PASSWORD_MIN_LENGTH} caracteres`,
           uppercase: "Una mayúscula",
           lowercase: "Una minúscula",
@@ -93,8 +92,7 @@ export default function RegisterForm() {
           confirmPasswordPlaceholder: "Repeat your password",
           showPassword: "Show password",
           hidePassword: "Hide password",
-          passwordRequirements:
-            "Your password must include:",
+          passwordRequirements: "Your password must include:",
           minCharacters: `At least ${PASSWORD_MIN_LENGTH} characters`,
           uppercase: "An uppercase letter",
           lowercase: "A lowercase letter",
@@ -170,7 +168,11 @@ export default function RegisterForm() {
     }
   }
 
-  async function handleSubmit(formData: FormData) {
+  async function handleSubmit(
+    event: FormEvent<HTMLFormElement>
+  ) {
+    event.preventDefault();
+
     if (loading) {
       return;
     }
@@ -212,6 +214,8 @@ export default function RegisterForm() {
     setLoading(true);
 
     try {
+      const formData = new FormData();
+
       formData.set("name", name);
       formData.set("email", email);
       formData.set("password", password);
@@ -224,7 +228,6 @@ export default function RegisterForm() {
         }
 
         toast.error(result.error);
-        setLoading(false);
         return;
       }
     } catch (error) {
@@ -235,13 +238,13 @@ export default function RegisterForm() {
           ? error.message
           : copy.registerError
       );
-
+    } finally {
       setLoading(false);
     }
   }
 
   return (
-    <form action={handleSubmit} className="w-full">
+    <form onSubmit={handleSubmit} className="w-full">
       <AuthControls />
 
       <div className="mb-7">
