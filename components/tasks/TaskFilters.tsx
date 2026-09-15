@@ -6,7 +6,7 @@ import {
   useSearchParams,
 } from "next/navigation";
 
-import { Check, ListFilter } from "lucide-react";
+import { Check } from "lucide-react";
 
 import { useLanguage } from "@/components/providers/LanguageProvider";
 
@@ -72,10 +72,6 @@ export default function TaskFilters() {
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <div className="hidden h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary sm:flex">
-        <ListFilter size={17} />
-      </div>
-
       <div className="flex flex-wrap gap-2">
         {filters.map((filter) => {
           const isActive =
