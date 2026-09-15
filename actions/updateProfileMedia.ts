@@ -2,13 +2,15 @@
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { createClient } from "@supabase/supabase-js";
 import { revalidatePath } from "next/cache";
-import fs from "fs/promises";
-import path from "path";
 
-export async function updateProfileMedia(
-  formData: FormData
-) {
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
+
+export async function updateProfileMedia(formData: FormData) {
   const session = await auth();
 
   if (!session?.user?.id) {
@@ -30,51 +32,42 @@ export async function updateProfileMedia(
     throw new Error("El archivo debe ser una imagen.");
   }
 
- if (file.size > 10 * 1024 * 1024) {
-  throw new Error("La imagen no puede superar los 10 MB.");
-}
+  if (file.size > 10 * 1024 * 1024) {
+    throw new Error("La imagen no puede superar los 10 MB.");
+  }
 
-  // Extensión segura según el tipo MIME
   let extension = "jpg";
 
   if (file.type === "image/png") {
     extension = "png";
   } else if (file.type === "image/webp") {
     extension = "webp";
-  } else if (
-    file.type === "image/jpeg"
-  ) {
+  } else if (file.type === "image/jpeg") {
     extension = "jpg";
   }
 
-  const fileName = `${session.user.id}-${type}.${extension}`;
-
-  const uploadDir = path.join(
-    process.cwd(),
-    "public",
-    "uploads",
-    "profiles"
-  );
-
-  await fs.mkdir(uploadDir, {
-    recursive: true,
-  });
-
-  const filePath = path.join(
-    uploadDir,
-    fileName
-  );
+  const filePath = `${type}s/${session.user.id}.${extension}`;
 
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
 
-  await fs.writeFile(
-    filePath,
-    buffer
-  );
+  const { error: uploadError } = await supabase.storage
+    .from("profiles")
+    .upload(filePath, buffer, {
+      contentType: file.type,
+      upsert: true,
+    });
 
-  const imageUrl =
-    `/uploads/profiles/${fileName}`;
+  if (uploadError) {
+    console.error("SUPABASE STORAGE ERROR:", uploadError);
+    throw new Error("No se pudo subir la imagen.");
+  }
+
+  const { data } = supabase.storage
+    .from("profiles")
+    .getPublicUrl(filePath);
+
+  const imageUrl = data.publicUrl;
 
   if (type === "avatar") {
     await prisma.user.update({
