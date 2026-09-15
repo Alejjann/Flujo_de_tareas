@@ -2,9 +2,13 @@
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
+import { createClient } from "@supabase/supabase-js";
 import { revalidatePath } from "next/cache";
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
 
 export async function updateBanner(formData: FormData) {
   const session = await auth();
@@ -27,29 +31,38 @@ export async function updateBanner(formData: FormData) {
     throw new Error("La imagen no puede superar los 10 MB.");
   }
 
+  let extension = "jpg";
+
+  if (file.type === "image/png") {
+    extension = "png";
+  } else if (file.type === "image/webp") {
+    extension = "webp";
+  } else if (file.type === "image/jpeg") {
+    extension = "jpg";
+  }
+
+  const filePath = `banners/${session.user.id}.${extension}`;
+
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
 
-  const extension = file.name.split(".").pop() || "jpg";
+  const { error: uploadError } = await supabase.storage
+    .from("profiles")
+    .upload(filePath, buffer, {
+      contentType: file.type,
+      upsert: true,
+    });
 
-  const fileName = `banner-${session.user.id}-${Date.now()}.${extension}`;
+  if (uploadError) {
+    console.error("SUPABASE STORAGE ERROR:", uploadError);
+    throw new Error("No se pudo subir el banner.");
+  }
 
-  const uploadDir = path.join(
-    process.cwd(),
-    "public",
-    "uploads",
-    "banners"
-  );
+  const { data } = supabase.storage
+    .from("profiles")
+    .getPublicUrl(filePath);
 
-  await mkdir(uploadDir, {
-    recursive: true,
-  });
-
-  const filePath = path.join(uploadDir, fileName);
-
-  await writeFile(filePath, buffer);
-
-  const bannerUrl = `/uploads/banners/${fileName}`;
+  const bannerUrl = data.publicUrl;
 
   await prisma.user.update({
     where: {
@@ -63,4 +76,10 @@ export async function updateBanner(formData: FormData) {
   revalidatePath("/profile");
   revalidatePath("/profile/edit");
   revalidatePath("/dashboard");
+  revalidatePath("/");
+
+  return {
+    success: true,
+    url: bannerUrl,
+  };
 }

@@ -71,21 +71,13 @@ export async function updateProfileMedia(formData: FormData) {
 
   if (type === "avatar") {
     await prisma.user.update({
-      where: {
-        id: session.user.id,
-      },
-      data: {
-        avatarUrl: imageUrl,
-      },
+      where: { id: session.user.id },
+      data: { avatarUrl: imageUrl },
     });
   } else {
     await prisma.user.update({
-      where: {
-        id: session.user.id,
-      },
-      data: {
-        bannerUrl: imageUrl,
-      },
+      where: { id: session.user.id },
+      data: { bannerUrl: imageUrl },
     });
   }
 
