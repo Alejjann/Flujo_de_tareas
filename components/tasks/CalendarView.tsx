@@ -5,50 +5,66 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { DayPicker } from "react-day-picker";
 import { es, enUS } from "react-day-picker/locale";
 import "react-day-picker/dist/style.css";
+
 import { useLanguage } from "@/components/providers/LanguageProvider";
 
 interface Task {
-  dueDate: Date | null;
+  dueDate: Date | string | null;
 }
 
 interface CalendarViewProps {
   tasks: Task[];
 }
 
+function parseTaskDate(value: Date | string) {
+  const rawDate = value instanceof Date ? value.toISOString() : value;
+
+  const [year, month, day] = rawDate
+    .slice(0, 10)
+    .split("-")
+    .map(Number);
+
+  // Mediodía local: evita que UTC cambie el día mostrado en España.
+  return new Date(year, month - 1, day, 12, 0, 0, 0);
+}
+
 export default function CalendarView({
   tasks,
 }: CalendarViewProps) {
   const { t, language } = useLanguage();
-  const [month, setMonth] = useState(new Date());
 
-  const dates = useMemo(
-    () =>
-      tasks
-        .filter((task) => task.dueDate)
-        .map((task) => new Date(task.dueDate!)),
-    [tasks]
-  );
+  const [month, setMonth] = useState(() => new Date());
+
+  const taskDates = useMemo(() => {
+    return tasks
+      .filter(
+        (
+          task
+        ): task is Task & {
+          dueDate: Date | string;
+        } => task.dueDate !== null
+      )
+      .map((task) => parseTaskDate(task.dueDate));
+  }, [tasks]);
 
   function previousMonth() {
-    setMonth(
-      (currentMonth) =>
-        new Date(
-          currentMonth.getFullYear(),
-          currentMonth.getMonth() - 1,
-          1
-        )
-    );
+    setMonth((currentMonth) => {
+      return new Date(
+        currentMonth.getFullYear(),
+        currentMonth.getMonth() - 1,
+        1
+      );
+    });
   }
 
   function nextMonth() {
-    setMonth(
-      (currentMonth) =>
-        new Date(
-          currentMonth.getFullYear(),
-          currentMonth.getMonth() + 1,
-          1
-        )
-    );
+    setMonth((currentMonth) => {
+      return new Date(
+        currentMonth.getFullYear(),
+        currentMonth.getMonth() + 1,
+        1
+      );
+    });
   }
 
   return (
@@ -63,7 +79,6 @@ export default function CalendarView({
         </p>
       </div>
 
-      {/* CABECERA DEL MES Y CONTROLES */}
       <div className="mb-3 flex items-center justify-between">
         <button
           type="button"
@@ -100,12 +115,21 @@ export default function CalendarView({
         <DayPicker
           month={month}
           onMonthChange={setMonth}
-          mode="multiple"
-          selected={dates}
           showOutsideDays
           fixedWeeks
           locale={language === "es" ? es : enUS}
           hideNavigation
+          modifiers={{
+            hasTask: taskDates,
+          }}
+          modifiersStyles={{
+            hasTask: {
+              backgroundColor: "var(--primary)",
+              color: "var(--primary-foreground)",
+              borderRadius: "9999px",
+              fontWeight: 700,
+            },
+          }}
         />
       </div>
 
@@ -116,120 +140,91 @@ export default function CalendarView({
           </span>
 
           <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
-            {dates.length}
+            {taskDates.length}
           </span>
         </div>
       </div>
 
       <style jsx global>{`
+        .calendar-wrapper {
+          width: 100%;
+          min-width: 0;
+        }
+
         .calendar-wrapper .rdp {
-          --rdp-accent-color: var(--primary);
-          --rdp-accent-background-color: color-mix(
-            in srgb,
-            var(--primary) 15%,
-            transparent
-          );
-          --rdp-day-height: 31px;
-          --rdp-day-width: 31px;
-          --rdp-day_button-height: 31px;
-          --rdp-day_button-width: 31px;
+          --rdp-day-height: 28px;
+          --rdp-day-width: 28px;
+          --rdp-day_button-height: 28px;
+          --rdp-day_button-width: 28px;
           --rdp-selected-border: 0;
 
           width: 100%;
-          max-width: 270px;
+          max-width: none;
+          min-width: 0;
           margin: 0;
           color: var(--foreground);
         }
 
-        .calendar-wrapper {
-  width: 100%;
-  min-width: 0;
-}
+        .calendar-wrapper .rdp-months,
+        .calendar-wrapper .rdp-month,
+        .calendar-wrapper .rdp-month_grid {
+          width: 100%;
+          min-width: 0;
+        }
 
-.calendar-wrapper .rdp {
-  --rdp-accent-color: var(--primary);
-  --rdp-accent-background-color: color-mix(
-    in srgb,
-    var(--primary) 15%,
-    transparent
-  );
-  --rdp-day-height: 28px;
-  --rdp-day-width: 28px;
-  --rdp-day_button-height: 28px;
-  --rdp-day_button-width: 28px;
-  --rdp-selected-border: 0;
+        .calendar-wrapper .rdp-month_caption,
+        .calendar-wrapper .rdp-nav {
+          display: none;
+        }
 
-  width: 100%;
-  max-width: none;
-  min-width: 0;
-  margin: 0;
-  color: var(--foreground);
-}
+        .calendar-wrapper .rdp-month_grid {
+          table-layout: fixed;
+          border-collapse: separate;
+          border-spacing: 0;
+        }
 
-.calendar-wrapper .rdp-months,
-.calendar-wrapper .rdp-month,
-.calendar-wrapper .rdp-month_grid {
-  width: 100%;
-  min-width: 0;
-}
+        .calendar-wrapper .rdp-weekday,
+        .calendar-wrapper .rdp-day {
+          width: 14.285714%;
+          padding: 0;
+          text-align: center;
+        }
 
-.calendar-wrapper .rdp-month_caption,
-.calendar-wrapper .rdp-nav {
-  display: none;
-}
+        .calendar-wrapper .rdp-weekday {
+          height: 27px;
+          color: var(--muted-foreground);
+          font-size: 0.62rem;
+          font-weight: 600;
+        }
 
-.calendar-wrapper .rdp-month_grid {
-  table-layout: fixed;
-  border-collapse: separate;
-  border-spacing: 0;
-}
+        .calendar-wrapper .rdp-day {
+          height: 28px;
+        }
 
-.calendar-wrapper .rdp-weekday,
-.calendar-wrapper .rdp-day {
-  width: 14.285714%;
-  padding: 0;
-  text-align: center;
-}
+        .calendar-wrapper .rdp-day_button {
+          width: 28px;
+          height: 28px;
+          min-width: 0;
+          margin: 0 auto;
+          padding: 0;
+          color: var(--foreground);
+          font-size: 0.75rem;
+          font-weight: 500;
+          border-radius: 9999px;
+        }
 
-.calendar-wrapper .rdp-weekday {
-  height: 27px;
-  color: var(--muted-foreground);
-  font-size: 0.62rem;
-  font-weight: 600;
-}
+        .calendar-wrapper .rdp-day_button:hover {
+          background: var(--accent);
+        }
 
-.calendar-wrapper .rdp-day {
-  height: 28px;
-}
+        .calendar-wrapper .rdp-outside {
+          color: var(--muted-foreground);
+          opacity: 0.4;
+        }
 
-.calendar-wrapper .rdp-day_button {
-  width: 28px;
-  height: 28px;
-  min-width: 0;
-  margin: 0 auto;
-  padding: 0;
-  color: var(--foreground);
-  font-size: 0.75rem;
-  font-weight: 500;
-}
-
-.calendar-wrapper .rdp-day_button:hover {
-  background: var(--accent);
-}
-
-.calendar-wrapper .rdp-selected .rdp-day_button {
-  background: var(--primary);
-  color: var(--primary-foreground);
-}
-
-.calendar-wrapper .rdp-outside {
-  color: var(--muted-foreground);
-  opacity: 0.4;
-}
-
-.calendar-wrapper .rdp-today:not(.rdp-selected) .rdp-day_button {
-  border: 1px solid var(--primary);
-}
+        .calendar-wrapper .rdp-today .rdp-day_button {
+          border: 1px solid var(--primary);
+        }
       `}</style>
     </div>
   );
